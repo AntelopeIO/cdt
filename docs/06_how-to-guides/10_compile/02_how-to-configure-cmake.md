@@ -19,11 +19,11 @@ The following steps show:
 
 ### Automatic generation of CMake configuration
 
-To compile an EOSIO smart contract with CMake, you'll need a CMake file. To use the new `eosio-init` tool to generate the directory structure stub `.hpp/.cpp` files and the CMake configuration files follow these steps:
+To compile a smart contract project with CMake, you'll need a CMake file. To use the new `eosio-init` tool to generate the directory structure stub `.hpp/.cpp` files and the CMake configuration files follow these steps:
 
    ```sh
    cd ~
-   eosio-init --path=. --project=test_contract
+   cdt-init --path=. --project=test_contract
    cd test_contract
    cd build
    cmake ..
@@ -43,7 +43,7 @@ To create manually the CMake configuration, the template `CMakeLists.txt` in the
    cmake_minimum_required(VERSION 3.5)
    project(test_example VERSION 1.0.0)
 
-   find_package(eosio.cdt)
+   find_package(cdt)
 
    add_contract( test test test.cpp )
    ```
@@ -61,8 +61,6 @@ To create manually the CMake configuration, the template `CMakeLists.txt` in the
       [[eosio::action]] void testact( name test ) {
       }
    };
-
-   EOSIO_DISPATCH( test, (testact) )
    ```
 
 3. The following CMake macros are provided:

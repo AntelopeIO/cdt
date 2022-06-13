@@ -2,7 +2,7 @@
 content_title: Native Tester And Compilation
 ---
 
-As of v1.5.0 native compilation can be performed and a new set of libraries to facilitate native testing and native "scratch pad" compilation. [`eosio-cc`](../03_command-reference/eosio-cc.md), [`eosio-cpp`](../03_command-reference/eosio-cpp.md) and [`eosio-ld`](../03_command-reference/eosio-ld.md) now support building "smart contracts" and unit tests natively for quick tests to help facilitate faster development \(note the default implementations of eosio `intrinsics` are currently asserts that state they are unavailable, these are user definable.\)
+As of v1.5.0 native compilation can be performed and a new set of libraries to facilitate native testing and native "scratch pad" compilation. [`cdt-cc`](../03_command-reference/cdt-cc.md), [`cdt-cpp`](../03_command-reference/cdt-cpp.md) and [`cdt-ld`](../03_command-reference/cdt-ld.md) now support building "smart contracts" and unit tests natively for quick tests to help facilitate faster development \(note the default implementations of a lot of the mandel `intrinsics` are currently asserts that state they are unavailable, these are user definable.\)
 
 ## Getting Started
 Once you have your smart contract written then a test source file can be written.
@@ -98,7 +98,7 @@ Every `intrinsic` that is defined for eosio (prints, require_auth, etc.) is re-d
 - Via CMake
     - `add_native_library` and `add_native_executable` CMake macros have been added (these are a drop in replacement for add_library and add_executable).
 
-## Eosio.CDT Native Tester API
+## CDT Native Tester API
 - CHECK_ASSERT(...) : This macro will check whether a particular assert has occured and flag the tests as failed but allow the rest of the tests to run.  
     - This is called either by 
         - `CHECK_ASSERT("<assert message>", [](<args>){ whatever_function(<args>); })`
