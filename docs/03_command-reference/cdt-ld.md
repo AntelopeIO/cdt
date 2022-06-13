@@ -1,12 +1,12 @@
 ---
-content_title: eosio-ld tool
+content_title: cdt-ld tool
 ---
 
-The eosio-ld tool is a the custom web assembly linker for EOSIO platform smart contracts.
+The cdt-ld tool is a the custom web assembly linker for EOSIO platform smart contracts.
 
 
 ```
-USAGE: eosio-ld [options] <input file> ...
+USAGE: cdt-ld [options] <input file> ...
 
 OPTIONS:
 
