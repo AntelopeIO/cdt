@@ -9,7 +9,6 @@ This guide provides instructions to compile a smart contract with CMake.
 ## Before you begin
 
 * You have the source of the contract saved in a local folder, e.g. `./examples/hello/`
-For details on how to create your first contract follow the [Hello World Contract](https://developers.eos.io/welcome/latest/smart-contract-guides/hello-world) guide.
 
 ## Procedure
 

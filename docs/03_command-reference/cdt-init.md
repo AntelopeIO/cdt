@@ -1,5 +1,5 @@
 ---
-content_title: eosio-init tool
+content_title: cdt-init tool
 ---
 
 This tool is used to generate a skeleton smart contract and directory structure.
@@ -7,13 +7,13 @@ To generate a new smart contract project you can either generate a "bare" projec
 
 Example:
 ```bash
-$ eosio-init --path=\destination\path\where\to\generate\project\ --project=hello_contract_folder
+$ cdt-init --path=\destination\path\where\to\generate\project\ --project=hello_contract_folder
 ```
 
 This will generate a project folder `hello_contract_folder` in the path `\destination\path\where\to\generate\project\` containing the skeleton smart contract and directory structure.
 
 ```
-USAGE: eosio-init [options]
+USAGE: cdt-init [options]
 
 OPTIONS:
 
@@ -23,8 +23,8 @@ Generic Options:
   -help-list        - Display list of available options (-help-list-hidden for more)
   -version          - Display the version of this program
 
-eosio-init:
-generates an eosio smart contract project
+cdt-init:
+generates a smart contract project
 
   -bare             - produces only a skeleton smart contract without CMake support
   -path=<string>    - directory to place the project
