@@ -70,6 +70,7 @@ struct abi {
    std::set<abi_typedef>                  typedefs;
    std::set<abi_action>                   actions;
    std::set<abi_table>                    tables;
+   std::set<abi_variant>                  variants;
    std::vector<abi_ricardian_clause_pair> ricardian_clauses;
    std::vector<abi_error_message>         error_messages;
    std::set<abi_action_result>            action_results;
