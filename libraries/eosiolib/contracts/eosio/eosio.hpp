@@ -5,7 +5,6 @@
 #pragma once
 #include "action.hpp"
 #include "../../core/eosio/print.hpp"
-#include "map.hpp"
 #include "multi_index.hpp"
 #include "dispatcher.hpp"
 #include "contract.hpp"
