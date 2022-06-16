@@ -16,7 +16,31 @@ sudo apt install ./cdt_3.0.0_amd64.deb
 sudo apt remove cdt
 ```
 
-## Guided Installation or Building from Scratch
+## Building
+
+### Ubuntu 20.04 dependencies
+```sh
+apt-get update && apt-get install   \
+        build-essential             \
+        clang                       \
+        cmake                       \
+        git                         \
+        libxml2-dev                 \
+        opam ocaml-interp           \
+        python3                     \
+        python3-pip                 \
+        time
+```
+```sh
+python3 -m pip install pygments
+```
+
+If issues persist with ccache
+```sh
+export CCACHE_DISABLE=1
+```
+
+### Guided Installation or Building from Scratch
 ```sh
 git clone --recursive https://github.com/eosnetworkfoundation/mandel.cdt
 cd mandel.cdt
