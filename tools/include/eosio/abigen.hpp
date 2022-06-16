@@ -265,8 +265,6 @@ namespace eosio { namespace cdt {
             else if (is_template_specialization(type, {"vector", "set", "deque", "list", "optional", "binary_extension", "ignore"})) {
                add_type(std::get<clang::QualType>(get_template_argument(type)));
             }
-            else if (is_template_specialization(type, {"map"}))
-               add_map(type);
             else if (is_template_specialization(type, {"pair"}))
                add_pair(type);
             else if (is_template_specialization(type, {"tuple"}))
