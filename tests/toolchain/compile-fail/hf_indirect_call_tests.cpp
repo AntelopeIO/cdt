@@ -1,5 +1,4 @@
 #include <eosio/eosio.hpp>
-#include <eosio/table.hpp>
 #include <eosio/contract.hpp>
 #include <eosio/action.hpp>
 #include <eosio/crypto.hpp>
