@@ -40,6 +40,16 @@ If issues persist with ccache
 export CCACHE_DISABLE=1
 ```
 
+#### For building integration tests with mandel built from source (not installed)
+
+Need to provide some environment variables to find necessary test dependencies
+Currently need both while mandel repo is undergoing evolution in naming.
+
+```sh
+export mandel_DIR=${mandel_root}/build/lib/cmake/eosio
+export eosio_DIR=${mandel_root}/build/lib/cmake/eosio
+```
+
 ### Guided Installation or Building from Scratch
 ```sh
 git clone --recursive https://github.com/eosnetworkfoundation/mandel.cdt
