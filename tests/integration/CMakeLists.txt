@@ -6,6 +6,9 @@ set(EOSIO_VERSION_SOFT_MAX "3.0")
 
 find_package(eosio)
 
+find_path(GMP_INCLUDE_DIR NAMES gmp.h)
+find_library(GMP_LIBRARY gmp)
+
 ### Check the version of eosio
 set(VERSION_MATCH_ERROR_MSG "")
 EOSIO_CHECK_VERSION(VERSION_OUTPUT "${EOSIO_VERSION}"
@@ -31,6 +34,8 @@ include_directories(${CMAKE_BINARY_DIR})
 file(GLOB INT_TESTS "*.cpp" "*.hpp")
 
 add_eosio_test_executable( integration_tests ${INT_TESTS} )
+
+target_link_libraries( integration_tests ${GMP_LIBRARY} )
 
 foreach(TEST_SUITE ${INT_TESTS}) # create an independent target for each test suite
   execute_process(COMMAND bash -c "grep -E 'BOOST_AUTO_TEST_SUITE\\s*[(]' ${TEST_SUITE} | grep -vE '//.*BOOST_AUTO_TEST_SUITE\\s*[(]' | cut -d ')' -f 1 | cut -d '(' -f 2" OUTPUT_VARIABLE SUITE_NAME OUTPUT_STRIP_TRAILING_WHITESPACE) # get the test suite name from the *.cpp file
