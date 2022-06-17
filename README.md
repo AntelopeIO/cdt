@@ -67,6 +67,22 @@ Or you can install globally by running this command:
 sudo make install
 ```
 
+### Running Tests
+
+#### Unit Tests
+```sh
+cd build
+
+ctest
+```
+
+#### Running Integration Tests (if built)
+```sh
+cd build/tests/integration
+
+ctest
+```
+
 ### Uninstall after manual installation
 
 ```sh
