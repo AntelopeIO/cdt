@@ -5,6 +5,8 @@
 #include "core/eosio/crypto.hpp"
 #include "core/eosio/datastream.hpp"
 
+#include <cstring>
+
 extern "C" {
    struct __attribute__((aligned (16))) capi_checksum160 { uint8_t hash[20]; };
    struct __attribute__((aligned (16))) capi_checksum256 { uint8_t hash[32]; };
@@ -38,9 +40,26 @@ extern "C" {
                     size_t siglen, char* pub, size_t publen );
 
    __attribute__((eosio_wasm_import))
+   int32_t k1_recover( const char* sig, uint32_t sig_len, const char* dig, uint32_t dig_len, char* pub, uint32_t pub_len);
+
+   __attribute__((eosio_wasm_import))
    void assert_recover_key( const capi_checksum256* digest, const char* sig,
                             size_t siglen, const char* pub, size_t publen );
 
+   __attribute__((eosio_wasm_import))
+   void sha3( const char* data, uint32_t data_len, char* hash, uint32_t hash_len, unsigned char keccak );
+
+   __attribute__((eosio_wasm_import))
+   int32_t alt_bn128_add( const char* op1, uint32_t op1_len, const char* op2, uint32_t op2_len, char* result, uint32_t result_len);
+
+   __attribute__((eosio_wasm_import))
+   int32_t alt_bn128_mul( const char* g1, uint32_t g1_len, const char* scalar, uint32_t scalar_len, char* result, uint32_t result_len);
+
+   __attribute__((eosio_wasm_import))
+   int32_t alt_bn128_pair( const char* pairs, uint32_t pairs_len);
+
+   __attribute__((eosio_wasm_import))
+   int32_t mod_exp( const char* base, uint32_t base_len, const char* exp, uint32_t exp_len, const char* mod, uint32_t mod_len, char* result, uint32_t result_len);
 }
 
 namespace eosio {
@@ -65,6 +84,29 @@ namespace eosio {
       ::assert_ripemd160( data, length, reinterpret_cast<const ::capi_checksum160*>(hash_data.data()) );
    }
 
+   static inline std::array<char, sizeof(capi_checksum256)> sha3_helper(const char* data, uint32_t length, bool keccak) {
+      std::array<char, sizeof(capi_checksum256)> res;
+      ::sha3( data, length, res.data(), res.size(), keccak);
+   }
+
+   eosio::checksum256 keccak(const char* data, uint32_t length) {
+      return {sha3_helper(data, length, true)};
+   }
+
+   eosio::checksum256 sha3(const char* data, uint32_t length) {
+      return {sha3_helper(data, length, false)};
+   }
+
+   void assert_sha3(const char* data, uint32_t length, const eosio::checksum256& hash) {
+      const auto& res = sha3_helper(data, length, false);
+      check( std::memcmp( res.data(), (char*)hash.data(), hash.size() * sizeof(eosio::checksum256::word_t) ) == 0, "SHA3 hash of `data` does not match given `hash`");
+   }
+
+   void assert_keccak(const char* data, uint32_t length, const eosio::checksum256& hash) {
+      const auto& res = sha3_helper(data, length, true);
+      check( std::memcmp( res.data(), (char*)hash.data(), hash.size() * sizeof(eosio::checksum256::word_t) ) == 0, "Keccak hash of `data` does not match given `hash`");
+   }
+
    eosio::checksum256 sha256( const char* data, uint32_t length ) {
       ::capi_checksum256 hash;
       ::sha256( data, length, &hash );
@@ -87,6 +129,13 @@ namespace eosio {
       ::capi_checksum160 hash;
       ::ripemd160( data, length, &hash );
       return {hash.hash};
+   }
+
+   eosio::public_key k1_recover( const eosio::signature& sig, const eosio::checksum256& digest) {
+      check(sig.index() == 0, "k1_recover only takes k1 signatures");
+      eosio::public_key epk = {eosio::ecc_public_key{}};
+      ::k1_recover(std::get<0>(sig).data(), std::get<0>(sig).size(), digest.data(), digest.size() * sizeof(eosio::checksum256::word_t), epk.data(), epk.size());
+      return epk;
    }
 
    eosio::public_key recover_key( const eosio::checksum256& digest, const eosio::signature& sig ) {
@@ -131,4 +180,28 @@ namespace eosio {
                             pubkey_data.data(), pubkey_data.size() );
    }
 
+   std::vector<char> alt_bn128_add( const std::vector<char> op1, const std::vector<char> op2) {
+      std::vector<char> result(64);
+      check(::alt_bn128_add(op1.data(), op1.size(), op2.data(), op2.size(), result.data(), result.size()) == 0, "alt_bn128_add failure");
+      return result;
+   }
+
+   std::vector<char> alt_bn128_mul( const std::vector<char> g1, const std::vector<char> scalar) {
+      std::vector<char> result(64);
+      check(::alt_bn128_mul(g1.data(), g1.size(), scalar.data(), scalar.size(), result.data(), result.size()) == 0, "alt_bn128_mul failure");
+      return result;
+   }
+
+   bool alt_bn128_pair( const std::vector<char> pair) {
+      int32_t result = ::alt_bn128_pair(pair.data(), pair.size());
+      check(result == 0 || result == 1, "alt_bn128_pair failure");
+      return static_cast<bool>(result);
+   }
+
+   
+   std::vector<char> mod_exp( const std::vector<char> base, const std::vector<char> exp, const std::vector<char> mod) {
+      std::vector<char> result(exp.size());
+      check(::mod_exp(base.data(), base.size(), exp.data(), exp.size(), mod.data(), mod.size(), result.data(), result.size()) == 0, "mod_exp failure");
+      return result;
+   }
 }

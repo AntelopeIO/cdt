@@ -77,6 +77,14 @@ __attribute__((eosio_wasm_import))
 uint64_t  current_time( void );
 
 /**
+ *  Returns the current block number
+ *
+ *  @return current block number 
+ */
+__attribute__((eosio_wasm_import))
+uint32_t  get_block_num( void );
+
+/**
  * Check if specified protocol feature has been activated
  *
  * @param feature_digest - digest of the protocol feature
