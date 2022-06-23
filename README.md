@@ -42,9 +42,9 @@ export CCACHE_DISABLE=1
 
 ### Building Integration Tests
 
-Integration tests require access to a mandel build.  Instructions below provide additional steps for using a mandel built from source or installed.  For development purposes it is generally advised to use mandel built from source instead of installed.
+Integration tests require access to a mandel build.  Instructions below provide additional steps for using a mandel built from source.  For development purposes it is generally advised to use mandel built from source.
 
-#### For building integration tests with mandel built from source (not installed)
+#### For building integration tests with mandel built from source
 
 Need to provide some environment variables to find necessary test dependencies
 Currently need both while mandel repo is undergoing evolution in naming.
@@ -52,16 +52,6 @@ Currently need both while mandel repo is undergoing evolution in naming.
 ```sh
 export mandel_DIR=${mandel_root}/build/lib/cmake/eosio
 export eosio_DIR=${mandel_root}/build/lib/cmake/eosio
-```
-
-#### For building integration tests with mandel dev install
-
-Need to provide direction on `PATH` to find necessary dev/test dependencies and mandel package.
-
-Update `PATH` to include the location mandel dev was installed to. Example from mandel dev install instructions uses `$HOME/mandeldev`, which will be used here as well.
-
-```sh
-export export PATH="$HOME/mandeldev:$PATH"
 ```
 
 ### Guided Installation or Building from Scratch
