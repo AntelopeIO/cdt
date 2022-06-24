@@ -40,7 +40,11 @@ If issues persist with ccache
 export CCACHE_DISABLE=1
 ```
 
-#### For building integration tests with mandel built from source (not installed)
+### Building Integration Tests
+
+Integration tests require access to a mandel build.  Instructions below provide additional steps for using a mandel built from source.  For development purposes it is generally advised to use mandel built from source.
+
+#### For building integration tests with mandel built from source
 
 Need to provide some environment variables to find necessary test dependencies
 Currently need both while mandel repo is undergoing evolution in naming.
