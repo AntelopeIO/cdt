@@ -84,27 +84,31 @@ namespace eosio {
       ::assert_ripemd160( data, length, reinterpret_cast<const ::capi_checksum160*>(hash_data.data()) );
    }
 
-   static inline std::array<char, sizeof(capi_checksum256)> sha3_helper(const char* data, uint32_t length, bool keccak) {
-      std::array<char, sizeof(capi_checksum256)> res;
-      ::sha3( data, length, res.data(), res.size(), keccak);
+   static inline auto sha3_helper(const char* data, uint32_t length, bool keccak) {
+      ::capi_checksum256 hash;
+      ::sha3( data, length, (char*)&hash, sizeof(hash), keccak);
+      eosio::checksum256 dg;
+      eosio::datastream<uint8_t*> ds = {&hash.hash[0], sizeof(hash)};
+      ds >> dg;
+      return dg;
    }
 
    eosio::checksum256 keccak(const char* data, uint32_t length) {
-      return {sha3_helper(data, length, true)};
+      return sha3_helper(data, length, true);
    }
 
    eosio::checksum256 sha3(const char* data, uint32_t length) {
-      return {sha3_helper(data, length, false)};
+      return sha3_helper(data, length, false);
    }
 
    void assert_sha3(const char* data, uint32_t length, const eosio::checksum256& hash) {
       const auto& res = sha3_helper(data, length, false);
-      check( std::memcmp( res.data(), (char*)hash.data(), hash.size() * sizeof(eosio::checksum256::word_t) ) == 0, "SHA3 hash of `data` does not match given `hash`");
+      check( hash == res, "SHA3 hash of `data` does not match given `hash`");
    }
 
    void assert_keccak(const char* data, uint32_t length, const eosio::checksum256& hash) {
       const auto& res = sha3_helper(data, length, true);
-      check( std::memcmp( res.data(), (char*)hash.data(), hash.size() * sizeof(eosio::checksum256::word_t) ) == 0, "Keccak hash of `data` does not match given `hash`");
+      check( hash == res, "Keccak hash of `data` does not match given `hash`");
    }
 
    eosio::checksum256 sha256( const char* data, uint32_t length ) {
@@ -133,8 +137,8 @@ namespace eosio {
 
    eosio::public_key k1_recover( const eosio::signature& sig, const eosio::checksum256& digest) {
       check(sig.index() == 0, "k1_recover only takes k1 signatures");
-      eosio::public_key epk = {eosio::ecc_public_key{}};
-      ::k1_recover(std::get<0>(sig).data(), std::get<0>(sig).size(), digest.data(), digest.size() * sizeof(eosio::checksum256::word_t), epk.data(), epk.size());
+      eosio::public_key epk(std::in_place_index<0>, eosio::ecc_public_key{});
+      ::k1_recover(std::get<0>(sig).data(), std::get<0>(sig).size(), (const char*)digest.data(), digest.size() * sizeof(eosio::checksum256::word_t), std::get<0>(epk).data(), std::get<0>(epk).size());
       return epk;
    }
 

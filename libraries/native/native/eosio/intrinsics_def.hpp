@@ -163,7 +163,15 @@ intrinsic_macro(set_action_return_value) \
 intrinsic_macro(add_security_group_participants) \
 intrinsic_macro(remove_security_group_participants) \
 intrinsic_macro(in_active_security_group) \
-intrinsic_macro(get_active_security_group)
+intrinsic_macro(get_active_security_group) \
+intrinsic_macro(blake2_f) \
+intrinsic_macro(sha3) \
+intrinsic_macro(k1_recover) \
+intrinsic_macro(alt_bn128_add) \
+intrinsic_macro(alt_bn128_mul) \
+intrinsic_macro(alt_bn128_pair) \
+intrinsic_macro(mod_exp)
+
 
 
 #define CREATE_ENUM(name) \

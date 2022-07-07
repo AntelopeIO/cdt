@@ -316,7 +316,7 @@ namespace eosio {
     *  @param hash - digest to compare to
     *  @note This method is optimized to a NO-OP when in fast evaluation mode.
     */
-   void assert_keccak( const char* data, uint32_t length, const eosio::checksum512& hash );
+   void assert_keccak( const char* data, uint32_t length, const eosio::checksum256& hash );
 
 
    /**
