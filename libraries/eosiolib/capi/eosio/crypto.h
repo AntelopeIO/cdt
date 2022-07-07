@@ -175,7 +175,7 @@ void sha512( const char* data, uint32_t length, struct capi_checksum512* hash );
  *  @param data_len - size of data
  *  @param hash - hash result
  *  @param hash_len - size of hash result
- *  @param keccak - whether to use `keccak` or NIST variant
+ *  @param keccak - whether to use `keccak` or NIST variant; keccak = 1 and NIST == 0
  *
  */
 __attribute__((eosio_wasm_import))
@@ -202,7 +202,6 @@ void ripemd160( const char* data, uint32_t length, struct capi_checksum160* hash
 /**
  *  BLAKE2 compression function "F"
  *  https://eips.ethereum.org/EIPS/eip-152
- *  returns an output ( BASE^EXP ) % MOD
  *
  *  @param rounds - the number of rounds
  *  @param state - state vector

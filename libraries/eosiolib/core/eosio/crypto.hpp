@@ -293,7 +293,7 @@ namespace eosio {
     *  @param data - Data you want to hash
     *  @param length - Data length
     *  @param hash - digest to compare to
-    *  @note This method is optimized to a NO-OP when in fast evaluation mode.
+    *  @note !This method is not optimized away during replay
     */
    void assert_sha3( const char* data, uint32_t length, const eosio::checksum256& hash );
 
@@ -314,7 +314,7 @@ namespace eosio {
     *  @param data - Data you want to hash
     *  @param length - Data length
     *  @param hash - digest to compare to
-    *  @note This method is optimized to a NO-OP when in fast evaluation mode.
+    *  @note !This method is not optimized away during replay
     */
    void assert_keccak( const char* data, uint32_t length, const eosio::checksum256& hash );
 
