@@ -277,6 +277,49 @@ namespace eosio {
    void assert_ripemd160( const char* data, uint32_t length, const eosio::checksum160& hash );
 
    /**
+    *  Hashes `data` using SHA3 NIST.
+    *
+    *  @ingroup crypto
+    *  @param data - Data you want to hash
+    *  @param length - Data length
+    *  @return eosio::checksum256 - Computed digest
+    */
+   eosio::checksum256 sha3( const char* data, uint32_t length );
+
+   /**
+    *  Tests if the SHA3 hash generated from data matches the provided digest.
+    *
+    *  @ingroup crypto
+    *  @param data - Data you want to hash
+    *  @param length - Data length
+    *  @param hash - digest to compare to
+    *  @note !This method is not optimized away during replay
+    */
+   void assert_sha3( const char* data, uint32_t length, const eosio::checksum256& hash );
+
+   /**
+    *  Hashes `data` using SHA3 Keccak.
+    *
+    *  @ingroup crypto
+    *  @param data - Data you want to hash
+    *  @param length - Data length
+    *  @return eosio::checksum256 - Computed digest
+    */
+   eosio::checksum256 keccak( const char* data, uint32_t length );
+
+   /**
+    *  Tests if the SHA3 keccak hash generated from data matches the provided digest.
+    *
+    *  @ingroup crypto
+    *  @param data - Data you want to hash
+    *  @param length - Data length
+    *  @param hash - digest to compare to
+    *  @note !This method is not optimized away during replay
+    */
+   void assert_keccak( const char* data, uint32_t length, const eosio::checksum256& hash );
+
+
+   /**
     *  Hashes `data` using SHA256.
     *
     *  @ingroup crypto

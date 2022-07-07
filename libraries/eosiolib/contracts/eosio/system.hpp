@@ -23,6 +23,10 @@ namespace eosio {
 
       __attribute__((eosio_wasm_import))
       uint64_t get_sender();
+      
+      __attribute__((eosio_wasm_import))
+      uint32_t get_block_num();
+
     }
   }
 
@@ -75,6 +79,17 @@ namespace eosio {
    */
    block_timestamp current_block_time();
 
+   using block_num_t = uint32_t;
+
+   /**
+   *  Returns the current block number 
+   *
+   *  @ingroup system
+   *  @return the current block number 
+   */
+   inline block_num_t current_block_number() {
+      return internal_use_do_not_use::get_block_num();
+   }
 
    /**
     * Check if specified protocol feature has been activated

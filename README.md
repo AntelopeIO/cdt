@@ -46,12 +46,10 @@ Integration tests require access to a mandel build.  Instructions below provide 
 
 #### For building integration tests with mandel built from source
 
-Need to provide some environment variables to find necessary test dependencies
-Currently need both while mandel repo is undergoing evolution in naming.
+Set an environment variable to tell CDT where to find the Mandel build directory:
 
 ```sh
-export mandel_DIR=${mandel_root}/build/lib/cmake/eosio
-export eosio_DIR=${mandel_root}/build/lib/cmake/eosio
+export eosio_DIR=/path/to/mandel/build/lib/cmake/eosio
 ```
 
 ### Guided Installation or Building from Scratch
