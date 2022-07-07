@@ -1,7 +1,6 @@
 project(singleton_example)
 
-set(EOSIO_WASM_OLD_BEHAVIOR "Off")
-find_package(eosio.cdt)
+find_package(cdt)
 
 add_contract( singleton_example singleton_example singleton_example.cpp )
 target_include_directories( singleton_example PUBLIC ${CMAKE_SOURCE_DIR}/../include )

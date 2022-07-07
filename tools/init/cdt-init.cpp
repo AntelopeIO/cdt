@@ -66,7 +66,6 @@ struct project {
                                  "Stub for hi action's ricardian contract";
 
    const std::string cmake = "project(@)\n\n"
-                             "set(EOSIO_WASM_OLD_BEHAVIOR \"Off\")\n"
                              "find_package(cdt)\n\n"
                              "add_contract( @ @ @.cpp )\n"
                              "target_include_directories( @ PUBLIC ${CMAKE_SOURCE_DIR}/../include )\n"

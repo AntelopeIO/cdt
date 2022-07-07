@@ -2,14 +2,11 @@ if(CDT_ROOT STREQUAL "" OR NOT CDT_ROOT)
    set(CDT_ROOT "@CDT_ROOT_DIR@")
 endif()
 
+set(CDT_VERSION "@VERSION_FULL@")
+
 list(APPEND CMAKE_MODULE_PATH ${CDT_ROOT}/lib/cmake/cdt)
-if (NOT EOSIO_WASM_OLD_BEHAVIOR STREQUAL "Off")
-    set(EOSIO_WASM_OLD_BEHAVIOR "On")
-    include(CDTWasmToolchain)
-endif()
 
 include(CDTMacros)
-  
 
 function(EXTRACT_MAJOR_MINOR_FROM_VERSION version success major minor)
    string(REGEX REPLACE "^([0-9]+)\\..+$" "\\1" _major "${version}")
@@ -29,7 +26,7 @@ function(EXTRACT_MAJOR_MINOR_FROM_VERSION version success major minor)
    set(${success} TRUE      PARENT_SCOPE)
 endfunction(EXTRACT_MAJOR_MINOR_FROM_VERSION)
 
-function(EOSIO_CHECK_VERSION output version hard_min soft_max hard_max) # optional 6th argument for error message
+function(CDT_CHECK_VERSION output version hard_min soft_max hard_max) # optional 6th argument for error message
    set(${output} "INVALID" PARENT_SCOPE)
 
    EXTRACT_MAJOR_MINOR_FROM_VERSION("${version}" success major minor)
@@ -100,8 +97,4 @@ function(EOSIO_CHECK_VERSION output version hard_min soft_max hard_max) # option
    endif()
 
    set(${output} "MATCH" PARENT_SCOPE)
-endfunction(EOSIO_CHECK_VERSION)
-
-function(CDT_CHECK_VERSION output version hard_min soft_max hard_max)
-   EOSIO_CHECK_VERSION(${output} ${version} ${hard_min} ${soft_max} ${hard_max} ${ARGV})
-endfunction()
+endfunction(CDT_CHECK_VERSION)
