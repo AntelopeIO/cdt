@@ -36,8 +36,8 @@ BOOST_FIXTURE_TEST_CASE( sha3_tests, tester ) try {
       ("sha3_dg", "a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a"));
 
    push_action("eosio"_n, "sha3test"_n, "test"_n, mvo()
-      ("val", "mandelmandelmandel")
-      ("sha3_dg", "0397431c4c41f7b349e053bda6822521a32dde36e2f7522c0cd6aab1a97ed0dc"));
+      ("val", "mandymandymandy")
+      ("sha3_dg", "38cf98e66aaa9f1d93e5192f79a0f6da79be794914812cf29eec8409f670155d"));
 
 } FC_LOG_AND_RETHROW()
 
@@ -59,8 +59,8 @@ BOOST_FIXTURE_TEST_CASE( keccak_tests, tester ) try {
       ("sha3_dg", "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470"));
 
    push_action("eosio"_n, "keccaktest"_n, "test"_n, mvo()
-      ("val", "mandelmandelmandel")
-      ("sha3_dg", "75d45d9bdb758f80743e0e6d90b3fcd786bbab5089af37797e18223cf5f6eb0c"));
+      ("val", "mandymandymandy")
+      ("sha3_dg", "b2fe07df24acbc89ebd3e4ed16d5348b6d5cbbcb22855e2af7a2945088dd94d5"));
 
 } FC_LOG_AND_RETHROW()
 
