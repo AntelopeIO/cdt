@@ -135,13 +135,6 @@ namespace eosio {
       return {hash.hash};
    }
 
-   eosio::public_key k1_recover( const eosio::signature& sig, const eosio::checksum256& digest) {
-      check(sig.index() == 0, "k1_recover only takes k1 signatures");
-      eosio::public_key epk(std::in_place_index<0>, eosio::ecc_public_key{});
-      ::k1_recover(std::get<0>(sig).data(), std::get<0>(sig).size(), (const char*)digest.data(), digest.size() * sizeof(eosio::checksum256::word_t), std::get<0>(epk).data(), std::get<0>(epk).size());
-      return epk;
-   }
-
    eosio::public_key recover_key( const eosio::checksum256& digest, const eosio::signature& sig ) {
       auto digest_data = digest.extract_as_byte_array();
 
@@ -182,30 +175,5 @@ namespace eosio {
       ::assert_recover_key( reinterpret_cast<const capi_checksum256*>(digest_data.data()),
                             sig_data.data(), sig_data.size(),
                             pubkey_data.data(), pubkey_data.size() );
-   }
-
-   std::vector<char> alt_bn128_add( const std::vector<char> op1, const std::vector<char> op2) {
-      std::vector<char> result(64);
-      check(::alt_bn128_add(op1.data(), op1.size(), op2.data(), op2.size(), result.data(), result.size()) == 0, "alt_bn128_add failure");
-      return result;
-   }
-
-   std::vector<char> alt_bn128_mul( const std::vector<char> g1, const std::vector<char> scalar) {
-      std::vector<char> result(64);
-      check(::alt_bn128_mul(g1.data(), g1.size(), scalar.data(), scalar.size(), result.data(), result.size()) == 0, "alt_bn128_mul failure");
-      return result;
-   }
-
-   bool alt_bn128_pair( const std::vector<char> pair) {
-      int32_t result = ::alt_bn128_pair(pair.data(), pair.size());
-      check(result == 0 || result == 1, "alt_bn128_pair failure");
-      return static_cast<bool>(result);
-   }
-
-   
-   std::vector<char> mod_exp( const std::vector<char> base, const std::vector<char> exp, const std::vector<char> mod) {
-      std::vector<char> result(exp.size());
-      check(::mod_exp(base.data(), base.size(), exp.data(), exp.size(), mod.data(), mod.size(), result.data(), result.size()) == 0, "mod_exp failure");
-      return result;
    }
 }
