@@ -47,7 +47,7 @@ extern "C" {
                             size_t siglen, const char* pub, size_t publen );
 
    __attribute__((eosio_wasm_import))
-   void sha3( const char* data, uint32_t data_len, char* hash, uint32_t hash_len, unsigned char keccak );
+   void sha3( const char* data, uint32_t data_len, char* hash, uint32_t hash_len, int32_t keccak );
 
    __attribute__((eosio_wasm_import))
    int32_t alt_bn128_add( const char* op1, uint32_t op1_len, const char* op2, uint32_t op2_len, char* result, uint32_t result_len);
