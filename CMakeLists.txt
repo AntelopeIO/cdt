@@ -28,21 +28,6 @@ set(CDT_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}/cdt)
 
 option(ENABLE_NATIVE_COMPILER "enable native builds with the CDT toolchain" ON)
 option(ENABLE_TESTS "enable building tests" ON)
-option(CDT_USE_CCACHE "enable using ccache and sccache for cached building" OFF)
-
-if (CDT_USE_CCACHE)
-   find_program(SCCACHE_FOUND sccache)
-   if (SCCACHE_FOUND)
-      message(STATUS "Using sccache")
-      set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE sccache)
-   else()
-      find_program(CCACHE_FOUND ccache)
-      if (CCACHE_FOUND)
-         message(STATUS "Using ccache")
-         set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
-      endif()
-   endif()
-endif()
 
 include(GNUInstallDirs)
 
