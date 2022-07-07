@@ -46,8 +46,7 @@ Need to provide some environment variables to find necessary test dependencies
 Currently need both while mandel repo is undergoing evolution in naming.
 
 ```sh
-export mandel_DIR=${mandel_root}/build/lib/cmake/eosio
-export eosio_DIR=${mandel_root}/build/lib/cmake/eosio
+export PATH=${mandel_root}/build/bin
 ```
 
 ### Guided Installation or Building from Scratch
