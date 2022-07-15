@@ -1,6 +1,6 @@
 #include <eosio/eosio.hpp>
 #include <eosio/transaction.hpp>
-#include <eosio/table.hpp>
+#include <eosio/name.hpp>
 
 using namespace eosio;
 
@@ -30,45 +30,6 @@ class [[eosio::contract]] array_tests : public contract {
                 aastr == b.aastr;
       }
    };
-
-   struct [[eosio::table]] my_table_array : eosio::kv::table<my_struct, "arraykv"_n> {
-      KV_NAMED_INDEX("id"_n, id)
-
-      my_table_array(eosio::name contract_name) {
-         init(contract_name, id);
-      }
-   };
-   my_struct s1;
-   my_struct s2;
-    // test nested std::array used in kv talbe
-   [[eosio::action]]
-   void testkv() {
-      my_table_array tarr{get_self()};
-
-      s1.id = 1;
-      s1.aastr[0] = {"abc","bcd","cde", "def"};
-      s1.aastr[1] = {"hij","ijk","jkl", "klm"};
-      s2.id = 2,
-      s2.aastr[0] = {"opq","pqr","qrs", "rst"};
-      s2.aastr[1] = {"uvw","vwx","wxy", "xyz"};
-
-      tarr.put(s1, get_self());
-      tarr.put(s2, get_self());
-      auto itarr = tarr.id.begin();
-      auto itarr_e = tarr.id.end();
-      eosio::cout << "print table:: \n";
-      while(itarr != itarr_e){
-         auto row = itarr.value();
-         eosio::cout << "id=" << row.id << "\n";
-         for(int i = 0; i < row.aastr.size(); ++i) {
-             for(int j = 0; j < row.aastr[i].size(); ++j){
-                 eosio::cout << row.aastr[i][j] << " ";
-             }
-             eosio::cout << "\n";
-         }
-         ++itarr;
-      }
-   }
 
    // test inside using std::array
    [[eosio::action]]
