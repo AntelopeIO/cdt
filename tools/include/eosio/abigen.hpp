@@ -163,6 +163,28 @@ namespace eosio { namespace cdt {
          _abi.structs.insert(pair);
       }
 
+      void add_map(const clang::QualType& type) {
+         for (int i = 0; i < 2; ++i) {
+            add_type(std::get<clang::QualType>(get_template_argument(type, i)));
+         }
+         abi_struct kv;
+         std::string name = get_type(type);
+         kv.name = name.substr(0, name.length() - 2);
+         auto remove_ending_brackets = [&]( std::string name ) {
+            int i = name.length()-1;
+            for (; i >= 0; i--)
+               if ( name[i] != '[' && name[i] != ']' )
+                  break;
+            return name.substr(0,i+1);
+         };
+         kv.name = remove_ending_brackets(name);
+         kv.fields.push_back( {"key", get_template_argument_as_string(type)} );
+         kv.fields.push_back( {"value", get_template_argument_as_string(type, 1)} );
+         add_type(std::get<clang::QualType>(get_template_argument(type)));
+         add_type(std::get<clang::QualType>(get_template_argument(type, 1)));
+         _abi.structs.insert(kv);
+      }
+
       void add_struct( const clang::CXXRecordDecl* decl, const std::string& rname="" ) {
          abi_struct ret;
          if ( decl->getNumBases() == 1 ) {
@@ -468,6 +490,8 @@ namespace eosio { namespace cdt {
             else if (is_template_specialization(type, {"vector", "set", "deque", "list", "optional", "binary_extension", "ignore"})) {
                add_type(std::get<clang::QualType>(get_template_argument(type)));
             }
+            else if (is_template_specialization(type, {"map"}))
+               add_map(type);
             else if (is_template_specialization(type, {"pair"}))
                add_pair(type);
             else if (is_template_specialization(type, {"tuple"}))
