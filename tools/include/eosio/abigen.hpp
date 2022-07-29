@@ -167,9 +167,9 @@ namespace eosio { namespace cdt {
          for (int i = 0; i < 2; ++i) {
             add_type(std::get<clang::QualType>(get_template_argument(type, i)));
          }
-         abi_struct kv;
+         abi_struct map_info;
          std::string name = get_type(type);
-         kv.name = name.substr(0, name.length() - 2);
+         map_info.name = name.substr(0, name.length() - 2);
          auto remove_ending_brackets = [&]( std::string name ) {
             int i = name.length()-1;
             for (; i >= 0; i--)
@@ -177,12 +177,12 @@ namespace eosio { namespace cdt {
                   break;
             return name.substr(0,i+1);
          };
-         kv.name = remove_ending_brackets(name);
-         kv.fields.push_back( {"key", get_template_argument_as_string(type)} );
-         kv.fields.push_back( {"value", get_template_argument_as_string(type, 1)} );
+         map_info.name = remove_ending_brackets(name);
+         map_info.fields.push_back( {"key", get_template_argument_as_string(type)} );
+         map_info.fields.push_back( {"value", get_template_argument_as_string(type, 1)} );
          add_type(std::get<clang::QualType>(get_template_argument(type)));
          add_type(std::get<clang::QualType>(get_template_argument(type, 1)));
-         _abi.structs.insert(kv);
+         _abi.structs.insert(map_info);
       }
 
       void add_struct( const clang::CXXRecordDecl* decl, const std::string& rname="" ) {
