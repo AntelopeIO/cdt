@@ -1,0 +1,90 @@
+name: "Build & Test"
+
+on:
+  push:
+    branches:
+      - main
+      - "release/*"
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  packages: write
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  d:
+    name: Discover Platforms
+    runs-on: ubuntu-latest
+    outputs:
+      missing-platforms: ${{steps.discover.outputs.missing-platforms}}
+      p: ${{steps.discover.outputs.platforms}}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Discover Platforms
+        id: discover
+        uses: ./.cicd/actions/discover-platforms-action
+        with:
+          platform-file: .cicd/platforms.json
+          password: ${{secrets.GITHUB_TOKEN}}
+          package-name: builders
+  build-platforms:
+    name: Build Platforms
+    needs: d
+    if: needs.d.outputs.missing-platforms != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: ${{fromJSON(needs.d.outputs.missing-platforms)}}
+    runs-on: ["self-hosted", "enf-x86-beefy"]
+    steps:
+      - name: Login to Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{github.repository_owner}}
+          password: ${{secrets.GITHUB_TOKEN}}
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          tags: ${{fromJSON(needs.d.outputs.p)[matrix.platform].image}}
+          file: ${{fromJSON(needs.d.outputs.p)[matrix.platform].dockerfile}}
+  Build:
+    name: Build & Test
+    needs: [d, build-platforms]
+    if: always() && needs.d.result == 'success' && (needs.build-platforms.result == 'success' || needs.build-platforms.result == 'skipped')
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ubuntu18, ubuntu20, ubuntu22]
+    runs-on: ["self-hosted", "enf-x86-beefy"]
+    container: ${{fromJSON(needs.d.outputs.p)[matrix.platform].image}}
+    steps:
+        - uses: actions/checkout@v3
+          with:
+            submodules: recursive
+            token: ${{secrets.GH_PRIVATE_REPO_TOKEN}}
+        - name: Build & Test
+          run: |
+            mkdir build
+            cd build
+            cmake -DCMAKE_BUILD_TYPE=Release -GNinja ..
+            ninja
+            cd tests
+            ctest -j $(nproc) --output-on-failure
+        - name: Package (Ubuntu 18 only)
+          if: matrix.platform == 'ubuntu18'
+          run: |
+            cd build/packages
+            bash generate_package.sh deb ubuntu amd64
+        - name: Upload (Ubuntu 18 only)
+          if: matrix.platform == 'ubuntu18'
+          uses: actions/upload-artifact@v3
+          with:
+            name: cdt_ubuntu_package_amd64
+            path: build/packages/cdt*amd64.deb
