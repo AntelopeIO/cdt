@@ -15352,7 +15352,7 @@ try {
 
    for(const [platform, {dockerfile}] of Object.entries(platforms)) {
       queryPromises.push(hexhashOfURL(`${urlBase}/${dockerfile}`).then((hexhash) => {
-         platforms[platform].image = `ghcr.io/${_actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo.owner}/${packageName}:${hexhash}`;
+         platforms[platform].image = `ghcr.io/${_actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo.owner.toLowerCase()}/${packageName}:${hexhash}`;
          return imageLabelExists(hexhash).then((exists) => {
             if(!exists)
             missingPlatforms.push(platform);

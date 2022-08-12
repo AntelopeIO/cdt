@@ -42,7 +42,7 @@ try {
 
    for(const [platform, {dockerfile}] of Object.entries(platforms)) {
       queryPromises.push(hexhashOfURL(`${urlBase}/${dockerfile}`).then((hexhash) => {
-         platforms[platform].image = `ghcr.io/${github.context.repo.owner}/${packageName}:${hexhash}`;
+         platforms[platform].image = `ghcr.io/${github.context.repo.owner.toLowerCase()}/${packageName}:${hexhash}`;
          return imageLabelExists(hexhash).then((exists) => {
             if(!exists)
             missingPlatforms.push(platform);
