@@ -2,7 +2,7 @@
 content_title: Native Tester And Compilation
 ---
 
-As of v1.5.0 native compilation can be performed and a new set of libraries to facilitate native testing and native "scratch pad" compilation. [`cdt-cc`](../03_command-reference/cdt-cc.md), [`cdt-cpp`](../03_command-reference/cdt-cpp.md) and [`cdt-ld`](../03_command-reference/cdt-ld.md) now support building "smart contracts" and unit tests natively for quick tests to help facilitate faster development \(note the default implementations of a lot of the mandel `intrinsics` are currently asserts that state they are unavailable, these are user definable.\)
+As of v1.5.0 native compilation can be performed and a new set of libraries to facilitate native testing and native "scratch pad" compilation. [`cdt-cc`](../03_command-reference/cdt-cc.md), [`cdt-cpp`](../03_command-reference/cdt-cpp.md) and [`cdt-ld`](../03_command-reference/cdt-ld.md) now support building "smart contracts" and unit tests natively for quick tests to help facilitate faster development \(note the default implementations of a lot of the Leap `intrinsics` are currently asserts that state they are unavailable, these are user definable.\)
 
 ## Getting Started
 Once you have your smart contract written then a test source file can be written.

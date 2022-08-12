@@ -1,14 +1,14 @@
 # EOSIO.CDT (Contract Development Toolkit)
 
-EOSIO.CDT is a toolchain for WebAssembly (WASM) and set of tools to facilitate smart contract development for the EOSIO platform. In addition to being a general purpose WebAssembly toolchain, [Mandel](https://github.com/eosnetworkfoundation/mandel) specific optimizations are available to support building EOSIO smart contracts.  This new toolchain is built around [Clang 9](https://github.com/eosnetworkfoundation/cdt-llvm), which means that EOSIO.CDT has the most currently available optimizations and analyses from LLVM, but as the WASM target is still considered experimental, some optimizations are incomplete or not available.
+EOSIO.CDT is a toolchain for WebAssembly (WASM) and set of tools to facilitate smart contract development for the EOSIO platform. In addition to being a general purpose WebAssembly toolchain, [Leap](https://github.com/AntelopeIO/leap) specific optimizations are available to support building EOSIO smart contracts.  This new toolchain is built around [Clang 9](https://github.com/AntelopeIO/cdt-llvm), which means that EOSIO.CDT has the most currently available optimizations and analyses from LLVM, but as the WASM target is still considered experimental, some optimizations are incomplete or not available.
 
 ## Upgrading
 
-There's been a round of braking changes, if you are upgrading from an older version please read [Upgrading CDT to Mandel](./04_upgrading/eosio.cdt-to-mandel.cdt.md).
+There's been a round of breaking changes, if you are upgrading from an older version please read [Upgrading CDT to Leap](./04_upgrading/eosio.cdt-to-leap.cdt.md).
 
 ## Contributing
 
-See the [Contributing Guide](https://github.com/eosnetworkfoundation/mandel/blob/main/CONTRIBUTING.md)
+See the [Contributing Guide](https://github.com/eosnetworkAntelopeIO/leap/blob/main/CONTRIBUTING.md)
 
 ## License
 

@@ -1,5 +1,5 @@
 ---
-content_title: EOSIO.CDT To Mandel.CDT
+content_title: EOSIO.CDT To Leap.CDT
 ---
 
 For this release all of the naming of namespaces and file paths will remain as `eosio`, so no need to migrate away from that with this release.

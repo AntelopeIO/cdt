@@ -1,13 +1,13 @@
 # CDT (Contract Development Toolkit)
 ## Version : 3.0.0
 
-CDT is a toolchain for WebAssembly (WASM) and a set of tools to facilitate smart contract development for the Mandel platform. In addition to being a general purpose WebAssembly toolchain, [Mandel](https://github.com/eosnetworkfoundation/mandel) specific optimizations are available to support building smart contracts.  This new toolchain is built around [Clang 9](https://github.com/eosnetworkfoundation/cdt-llvm), which means that CDT has the most currently available optimizations and analyses from LLVM, but as the WASM target is still considered experimental, some optimizations are incomplete or not available.
+CDT is a toolchain for WebAssembly (WASM) and a set of tools to facilitate smart contract development for the Leap platform, a C++ implementation of the Antelope protocol. In addition to being a general purpose WebAssembly toolchain, [Leap](https://github.com/AntelopeIO/leap) specific optimizations are available to support building smart contracts.  This new toolchain is built around [Clang 9](https://github.com/AntelopeIO/cdt-llvm), which means that CDT has the most currently available optimizations and analyses from LLVM, but as the WASM target is still considered experimental, some optimizations are incomplete or not available.
 
 ## Binary Releases
 CDT currently supports Linux x86_64 Debian packages.
 ### Debian Package Install
 ```sh
-wget https://github.com/eosnetworkfoundation/mandel.cdt/releases/download/v3.0.0-rc1/cdt_3.0.0-rc1_amd64.deb
+wget https://github.com/AntelopeIO/cdt/releases/download/v3.0.0-rc1/cdt_3.0.0-rc1_amd64.deb
 sudo apt install ./cdt_3.0.0-rc1_amd64.deb
 ```
 ### Debian Package Uninstall
@@ -41,20 +41,21 @@ export CCACHE_DISABLE=1
 
 ### Building Integration Tests
 
-Integration tests require access to a mandel build.  Instructions below provide additional steps for using a mandel built from source.  For development purposes it is generally advised to use mandel built from source.
+Integration tests require access to a Leap build.  Instructions below provide additional steps for using a Leap built from source.  For development purposes it is generally advised to use Leap built from source.
 
-#### For building integration tests with mandel built from source
+#### For building integration tests with Leap built from source
 
-Set an environment variable to tell CDT where to find the Mandel build directory:
+Set an environment variable to tell CDT where to find the Leap build directory:
 
 ```sh
-export eosio_DIR=/path/to/mandel/build/lib/cmake/eosio
+export eosio_DIR=/path/to/leap/build/lib/cmake/eosio
+export leap_DIR=/path/to/leap/build/lib/cmake/leap
 ```
 
 ### Guided Installation or Building from Scratch
 ```sh
-git clone --recursive https://github.com/eosnetworkfoundation/mandel.cdt
-cd mandel.cdt
+git clone --recursive https://github.com/AntelopeIO/cdt
+cd cdt
 mkdir build
 cd build
 cmake ..

@@ -20,7 +20,7 @@ sudo apt remove cdt
 # Guided Installation or Building from Scratch
 
 ```sh
-git clone --recursive https://github.com/eosnetworkfoundation/mandel.cdt
+git clone --recursive https://github.com/AntelopeIO/cdt
 cd eosio.cdt
 mkdir build
 cd build

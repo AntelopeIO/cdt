@@ -75,8 +75,8 @@ install(FILES ${CMAKE_BINARY_DIR}/scripts/ricardeos.py DESTINATION ${CDT_INSTALL
 # section for package construction
 set(VENDOR "EOSNetworkFoundation")
 set(PROJECT_NAME "cdt")
-set(DESC "Toolchain and supporting tools for the Mandel platform")
-set(URL "https://github.com/eosnetworkfoundation/mandel.cdt")
+set(DESC "Toolchain and supporting tools for the Leap platform")
+set(URL "https://github.com/AntelopeIO/cdt")
 set(EMAIL "support@block.one")
 configure_file(${CMAKE_SOURCE_DIR}/scripts/generate_package.sh.in ${CMAKE_BINARY_DIR}/packages/generate_package.sh @ONLY)
 configure_file(${CMAKE_SOURCE_DIR}/scripts/generate_deb.sh ${CMAKE_BINARY_DIR}/packages/generate_deb.sh COPYONLY)
