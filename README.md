@@ -7,10 +7,9 @@ CDT is a toolchain for WebAssembly (WASM) and a set of tools to facilitate smart
 CDT currently supports Linux x86_64 Debian packages.
 ### Debian Package Install
 ```sh
-wget https://github.com/eosnetworkfoundation/mandel.cdt/releases/download/v3.0.0/cdt_3.0.0_amd64.deb
-sudo apt install ./cdt_3.0.0_amd64.deb
+wget https://github.com/eosnetworkfoundation/mandel.cdt/releases/download/v3.0.0-rc1/cdt_3.0.0-rc1_amd64.deb
+sudo apt install ./cdt_3.0.0-rc1_amd64.deb
 ```
-
 ### Debian Package Uninstall
 ```sh
 sudo apt remove cdt
