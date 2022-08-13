@@ -19,7 +19,7 @@ The following steps show:
 
 ### Automatic generation of CMake configuration
 
-To compile a smart contract project with CMake, you'll need a CMake file. To use the new `eosio-init` tool to generate the directory structure stub `.hpp/.cpp` files and the CMake configuration files follow these steps:
+To compile a smart contract project with CMake, you'll need a CMake file. To use the new `cdt-init` tool to generate the directory structure stub `.hpp/.cpp` files and the CMake configuration files follow these steps:
 
    ```sh
    cd ~

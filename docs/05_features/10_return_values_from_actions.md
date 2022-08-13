@@ -4,7 +4,7 @@ content_title: Return Values From Actions
 
 ## Overview
 
-`Leap` version 3.1 enables you to return any value from any action. This new feature facilitates easier smart contract implementation debugging, and better messaging between a smart contract and its clients. From now on the clients of a smart contract are able to use the value returned by an action, no more string parsing on the client side and no more print statements in the smart contract implementation.
+An Antelope blockchain with the `ACTION_RETURN_VALUE` protocol feature activated enables you to return any value from any action. This new feature facilitates easier smart contract implementation debugging, and better messaging between a smart contract and its clients. From now on the clients of a smart contract are able to use the value returned by an action, no more string parsing on the client side and no more print statements in the smart contract implementation.
 
 ## Concept
 

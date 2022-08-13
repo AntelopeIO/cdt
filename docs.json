@@ -1,5 +1,5 @@
 {
-	"name": "eosio.cdt",
+	"name": "cdt",
 	"generators": [
     	{
 			"name": "collate_markdown",

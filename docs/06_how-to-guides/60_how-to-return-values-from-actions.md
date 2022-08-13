@@ -64,7 +64,7 @@ action_response smrtcontract::checkwithrv( name nm ) {
 }
 ```
 
-For a complete example of a smart contract that implements an action which returns a value see the [hello example smart contract](https://github.com/EOSIO/eosio.cdt/blob/develop/examples/hello/src/hello.cpp#L16).
+For a complete example of a smart contract that implements an action which returns a value see the [hello example contract](https://github.com/AntelopeIO/cdt/blob/main/examples/hello).
 
 ## Next Steps
 
