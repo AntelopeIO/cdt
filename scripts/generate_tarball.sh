@@ -49,7 +49,7 @@ fi
 # make symlinks
 pushd ${PREFIX}/lib/cmake/${PROJECT} &> /dev/null
 ln -sf ../../../${SUBPREFIX}/lib/cmake/${PROJECT}/${PROJECT}-config.cmake ${PROJECT}-config.cmake || exit 1
-ln -sf ../../../${SUBPREFIX}/lib/cmake/${PROJECT}/CDTToolchain.cmake CDTWasmToolchain.cmake || exit 1
+ln -sf ../../../${SUBPREFIX}/lib/cmake/${PROJECT}/CDTWasmToolchain.cmake CDTWasmToolchain.cmake || exit 1
 ln -sf ../../../${SUBPREFIX}/lib/cmake/${PROJECT}/CDTMacros.cmake CDTMacros.cmake || exit 1
 popd &> /dev/null
 

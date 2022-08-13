@@ -16,7 +16,7 @@ VERSION_SUFFIX="@VERSION_SUFFIX@"
 VERSION="@VERSION_FULL@"
 
 # Using CMAKE_BINARY_DIR uses an absolute path and will break cross-vm building/download/make functionality
-BUILD_DIR="../../build"
+BUILD_DIR="../"
 
 VENDOR="@VENDOR@"
 PROJECT="@PROJECT_NAME@"
