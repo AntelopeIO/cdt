@@ -54,6 +54,7 @@ jobs:
           push: true
           tags: ${{fromJSON(needs.d.outputs.p)[matrix.platform].image}}
           file: ${{fromJSON(needs.d.outputs.p)[matrix.platform].dockerfile}}
+          github-token: ${{secrets.GH_PRIVATE_REPO_TOKEN}}
   Build:
     name: Build & Test
     needs: [d, build-platforms]
