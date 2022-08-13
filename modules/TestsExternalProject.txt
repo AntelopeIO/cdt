@@ -16,9 +16,9 @@ ExternalProject_Add(
 )
 
 
-find_package(eosio QUIET)
+find_package(leap QUIET)
 
-if (eosio_FOUND)
+if (leap_FOUND)
    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
       set(TEST_BUILD_TYPE "Debug")
       set(CMAKE_BUILD_TYPE "Release")
@@ -41,5 +41,5 @@ if (eosio_FOUND)
      BUILD_ALWAYS 1
    )
 else()
-   message(STATUS "Leap package not found, skipping building integration tests")
+   message(STATUS "leap package not found, skipping building integration tests")
 endif()
