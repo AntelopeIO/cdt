@@ -89,9 +89,9 @@ Couldn't parse type_name
 
 __Possible solution__: It is possible that you changed the type of the fields for the table struct definition? If you need to change the table structure definition there are some limitations and a couple of ways to do it which are explained in the [Data Design and Migration](./07_best-practices/04_data-design-and-migration.md) section.
 
-## eosio-cpp process never completes
+## cdt-cpp process never completes
 
-__Possible solution__: make sure you have at least 2 cores on the host that executes the eosio-cpp (e.g. docker container, VM, local sub-system)
+__Possible solution__: make sure you have at least 2 cores on the host that executes the cdt-cpp (e.g. docker container, VM, local sub-system)
 
 ## You can not find the `now()` time function, or the result of the `current_time_point` functions are not what you expected them to be
 

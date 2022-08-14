@@ -81,7 +81,7 @@ void some_function(...) {
 }
 ```
 
-The code above will mark an arbitrary function as an entry point, which will then wrap the function with global constructors (ctors) and global destructors (dtors).  This will allow for the eosio.cdt toolchain to produce WASM binaries for other ecosystems.
+The code above will mark an arbitrary function as an entry point, which will then wrap the function with global constructors (ctors) and global destructors (dtors).  This will allow for the CDT toolchain to produce WASM binaries for other ecosystems.
 
 ## [[eosio::wasm_import]]
 ```cpp
@@ -113,4 +113,4 @@ Contract actions tagged read-only:
 * Cannot call `inline actions`.
 * The amount of data returned by read-only queries is limited by the action return value size. By default these are set to 256 bytes by `default_max_action_return_value_size`.
 
-The `eosio-cpp` and `eosio-cc` tools will generate an error and terminate compilation if an action tagged read-only attempts to call insert/update (write) functions, `deferred transactions` or `inline actions`. However, if the command-line override option `--warn-action-read-only` is used, the `eosio-cpp` and `eosio-cc` tools will issue a warning and continue compilation.
+The `cdt-cpp` and `cdt-cc` tools will generate an error and terminate compilation if an action tagged read-only attempts to call insert/update (write) functions, `deferred transactions` or `inline actions`. However, if the command-line override option `--warn-action-read-only` is used, the `cdt-cpp` and `cdt-cc` tools will issue a warning and continue compilation.

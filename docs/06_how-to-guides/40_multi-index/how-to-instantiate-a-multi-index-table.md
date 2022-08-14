@@ -54,7 +54,7 @@ Add the data structure data members. Each data member corresponds to a field of 
 
 ### 3. Define The Primary Index
 
-Add the definition of the primary index for the multi-index table. The primary index type must be uint64_t, it must be unique and must be named `primary_key()`, otherwise the compiler (eosio-cpp) will generate an error saying it can not find the field to use as the primary key:
+Add the definition of the primary index for the multi-index table. The primary index type must be uint64_t, it must be unique and must be named `primary_key()`, otherwise the compiler (cdt-cpp) will generate an error saying it can not find the field to use as the primary key:
 
 ```diff
   // the data structure which defines each row of the table
@@ -173,7 +173,7 @@ class [[eosio::contract]] multi_index_example : public contract {
 ```
 
 [[info | Full example location]]
-| A full example project demonstrating the instantiation and usage of multi-index table can be found [here](https://github.com/EOSIO/eosio.cdt/tree/master/examples/multi_index_example).
+| A full example project demonstrating the instantiation and usage of multi-index table can be found [here](https://github.com/AntelopeIO/cdt/blob/main/examples/multi_index_example).
 
 ## Summary
 
