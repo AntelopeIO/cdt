@@ -1,7 +1,7 @@
 #!/bin/bash
 set -eo pipefail
 # The purpose of this test is to ensure that the output of the "cdt-cpp --version" command matches the version string defined by our CMake files
-echo '##### Eosio-cpp Version Label Test #####'
+echo '##### cdt-cpp Version Label Test #####'
 # orient ourselves
 [[ -z "$BUILD_ROOT" ]] && export BUILD_ROOT="$(pwd)"
 echo "Using BUILD_ROOT=\"$BUILD_ROOT\"."
@@ -24,7 +24,7 @@ ACTUAL=$($BUILD_ROOT/bin/cdt-cpp --version)
 EXIT_CODE=$?
 # verify 0 exit code explicitly
 if [[ $EXIT_CODE -ne 0 ]]; then
-    echo "Eosio-cpp produced non-zero exit code \"$EXIT_CODE\"."
+    echo "cdt-cpp produced non-zero exit code \"$EXIT_CODE\"."
     exit $EXIT_CODE
 fi
 # test version
