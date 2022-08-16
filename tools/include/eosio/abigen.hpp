@@ -768,8 +768,8 @@ namespace eosio { namespace cdt {
 
          virtual bool VisitCXXMethodDecl(clang::CXXMethodDecl* decl) {
             if (!has_added_clauses) {
-               ag.add_clauses(parse_clauses());
-               ag.add_contracts(parse_contracts());
+               ag.add_clauses(ag.parse_clauses());
+               ag.add_contracts(ag.parse_contracts());
                has_added_clauses = true;
             }
 
@@ -784,8 +784,8 @@ namespace eosio { namespace cdt {
          }
          virtual bool VisitCXXRecordDecl(clang::CXXRecordDecl* decl) {
             if (!has_added_clauses) {
-               ag.add_clauses(parse_clauses());
-               ag.add_contracts(parse_contracts());
+               ag.add_clauses(ag.parse_clauses());
+               ag.add_contracts(ag.parse_contracts());
                has_added_clauses = true;
             }
             if ((decl->isEosioAction() || decl->isEosioTable()) && ag.is_eosio_contract(decl, ag.get_contract_name())) {
