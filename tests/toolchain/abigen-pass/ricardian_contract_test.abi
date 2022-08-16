@@ -17,7 +17,6 @@
         }
     ],
     "tables": [],
-    "kv_tables": {},
     "ricardian_clauses": [
         {
             "id": "Disclaimer",
