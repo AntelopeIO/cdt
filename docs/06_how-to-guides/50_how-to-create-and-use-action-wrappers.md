@@ -87,7 +87,7 @@ multi_index_example::mod_action modaction("multiindexex"_n, {get_self(), 1});
 +modaction.send("eostutorial"_n, 1);
 ```
 
-For a full example see the [`multi_index` contract implementation](https://github.com/EOSIO/eosio.cdt/tree/master/examples/multi_index_example).
+For a full example see the [multi_index example contract](https://github.com/AntelopeIO/cdt/blob/main/examples/multi_index_example).
 
 ## Summary
 

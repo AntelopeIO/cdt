@@ -1,12 +1,12 @@
 [submodule "cdt-llvm"]
 	path = cdt-llvm
-	url = https://github.com/eosnetworkfoundation/cdt-llvm
+	url = https://github.com/AntelopeIO/cdt-llvm
 [submodule "libraries/libc/cdt-musl"]
 	path = libraries/libc/cdt-musl
-	url = https://github.com/eosnetworkfoundation/cdt-musl
+	url = https://github.com/AntelopeIO/cdt-musl
 [submodule "libraries/libc++/cdt-libcxx"]
 	path = libraries/libc++/cdt-libcxx
-	url = https://github.com/eosnetworkfoundation/cdt-libcxx
+	url = https://github.com/AntelopeIO/cdt-libcxx
 [submodule "libraries/native/softfloat"]
 	path = libraries/native/softfloat
-	url = https://github.com/eosnetworkfoundation/mandel-berkeley-softfloat-3
+	url = https://github.com/AntelopeIO/berkeley-softfloat-3

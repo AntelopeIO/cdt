@@ -116,7 +116,7 @@ __multi_index_example.hpp__
 Now you have instantiated the `testtab` as a multi-index table which has a primary index defined for its `test_primary` data member and a secondary index for its `secondary` data member.
 
 [[info | Full example location]]
-| A full example project demonstrating the instantiation and usage of multi-index table can be found [here](https://github.com/EOSIO/eosio.cdt/tree/master/examples/multi_index_example).
+| A full example project demonstrating the instantiation and usage of multi-index table can be found [here](https://github.com/AntelopeIO/cdt/blob/main/examples/multi_index_example).
 
 [[warning | Do not add a secondary index to an existing table]]
 | Adding a secondary index to an existing multi-index table it will have unpredictable outcome. Consult the [Data design and migration](../best-practices/data-design-and-migration) documentation for more details.

@@ -4,10 +4,7 @@ content_title: Create an ABI File
 
 ## Overview
 
-This tutorial provides instructions to create an ABI file.
-
-[[warning]]
-| As of v1.2.0, the eosio.wasmsdk was decoupled from the core repository. This change has introduced an eosio-cpp regression where the legacy eosio-abigen is no longer bundled with eosio-cpp. Until a new ABI generator is introduced, you will need to hand-write your ABI files.
+This tutorial provides instructions to how to hand-write an ABI file. This should normally not be necessary since `cdt-cpp` can automatically generate an ABI file from your source code if it is properly annotated.
 
 ## Introduction
 
@@ -38,7 +35,7 @@ An ABI enables any client or interface to interpret and even generate an GUI for
 [[info]]
 |Built-in Types
 
-EOSIO implements a number of custom built-ins. Built-in types don't need to be described in an ABI file. If you would like to familiarize yourself with EOSIO's built-ins, they are defined [here](https://github.com/EOSIO/eos/blob/master/libraries/chain/abi_serializer.cpp#L65-L103).
+EOSIO implements a number of custom built-ins. Built-in types don't need to be described in an ABI file. If you would like to familiarize yourself with EOSIO's built-ins, they are defined [here](https://github.com/AntelopeIO/leap/blob/6817911900a088c60f91563995cf482d6b380b2d/libraries/chain/abi_serializer.cpp#L88-L129).
 
 Using **eosio.token** as an example, the only type that requires a description in the ABI file is `account_name`. The ABI uses "new_type_name" to describe explicit types, in this case `account_name`, and `account_name` is an alias of `name` type.
 

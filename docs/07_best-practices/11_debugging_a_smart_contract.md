@@ -100,7 +100,7 @@ extern "C" {
 Deploy it and push an action to it. It is assumed you have a `debug` account created and have its key in your wallet.
 
 ```bash
-$ eosio-cpp -abigen debug.cpp -o debug.wasm
+$ cdt-cpp -abigen debug.cpp -o debug.wasm
 $ cleos set contract debug CONTRACT_DIR/debug -p youraccount@active
 $ cleos push action debug foo '{"from":"inita", "to":"initb", "amount":10}' --scope debug
 ```
