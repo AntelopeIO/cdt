@@ -44,6 +44,7 @@ class Test(ABC):
     def run(self):
         cf = self.test_json.get("compile_flags")
         args = cf if cf else []
+        args = [arg.replace("{cwd}", self.test_suite.directory) for arg in args]
 
         cdt_cpp = os.path.join(self.test_suite.cdt_path, "cdt-cpp")
         self._run(cdt_cpp, args)
@@ -202,5 +203,5 @@ class AbigenFailTest(Test):
         command.extend(args)
         res = subprocess.run(command, capture_output=True)
         self.handle_test_result(res, expected_pass=False)
-        
+
         return res

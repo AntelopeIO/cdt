@@ -1,20 +1,13 @@
-# EOSIO.CDT (Contract Development Toolkit)
+# CDT (Contract Development Toolkit)
 
-EOSIO.CDT is a toolchain for WebAssembly (WASM) and set of tools to facilitate smart contract development for the EOSIO platform. In addition to being a general purpose WebAssembly toolchain, [Mandel](https://github.com/eosnetworkfoundation/mandel) specific optimizations are available to support building EOSIO smart contracts.  This new toolchain is built around [Clang 9](https://github.com/eosnetworkfoundation/cdt-llvm), which means that EOSIO.CDT has the most currently available optimizations and analyses from LLVM, but as the WASM target is still considered experimental, some optimizations are incomplete or not available.
+Contract Development Toolkit (CDT) is a C/C++ toolchain targeting WebAssembly (WASM) and a set of tools to facilitate development of smart contracts written in C/C++ that are meant to be deployed to an [Antelope](https://github.com/AntelopeIO/) blockchain.
+
+In addition to being a general purpose WebAssembly toolchain, specific features and optimizations are available to support building Antelope-based smart contracts. This new toolchain is built around [Clang 9](https://github.com/AntelopeIO/cdt-llvm), which means that CDT inherits the optimizations and analyses from that version of LLVM, but as the WASM target is still considered experimental, some optimizations are incomplete or not available.
 
 ## Upgrading
 
-There's been a round of braking changes, if you are upgrading from an older version please read [Upgrading CDT to Mandel](./04_upgrading/eosio.cdt-to-mandel.cdt.md).
-
-## Contributing
-
-See the [Contributing Guide](https://github.com/eosnetworkfoundation/mandel/blob/main/CONTRIBUTING.md)
+If you are upgrading to CDT version 3.0 or later from version 1.8.1 (or earlier) of [EOSIO.CDT](https://github.com/EOSIO/eosio.cdt), then please read [EOSIO.CDT to CDT](./04_upgrading/eosio.cdt-to-cdt.md).
 
 ## License
 
-[MIT](./../LICENSE)
-
-## Important
-
-See LICENSE for copyright and license terms.  Block.one makes its contribution on a voluntary basis as a member of the EOSIO community and is not responsible for ensuring the overall performance of the software or any related applications.  We make no representation, warranty, guarantee or undertaking in respect of the software or any related documentation, whether expressed or implied, including but not limited to the warranties or merchantability, fitness for a particular purpose and noninfringement. In no event shall we be liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in connection with the software or documentation or the use or other dealings in the software or documentation.  Any test results or performance figures are indicative and will not reflect performance under all conditions.  Any reference to any third party or third-party product, service or other resource is not an endorsement or recommendation by Block.one.  We are not responsible, and disclaim any and all responsibility and liability, for your use of or reliance on any of these resources. Third-party resources may be updated, changed or terminated at any time, so the information here may be out of date or inaccurate.
-
+[MIT](../LICENSE)

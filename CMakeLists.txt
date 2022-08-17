@@ -75,9 +75,9 @@ install(FILES ${CMAKE_BINARY_DIR}/scripts/ricardeos.py DESTINATION ${CDT_INSTALL
 # section for package construction
 set(VENDOR "EOSNetworkFoundation")
 set(PROJECT_NAME "cdt")
-set(DESC "Toolchain and supporting tools for the Mandel platform")
-set(URL "https://github.com/eosnetworkfoundation/mandel.cdt")
-set(EMAIL "support@block.one")
+set(DESC "Toolchain and supporting tools to facilitate C/C++ development of contracts for Antelope blockchains")
+set(URL "https://github.com/AntelopeIO/cdt")
+set(EMAIL "support@eosnetwork.com")
 configure_file(${CMAKE_SOURCE_DIR}/scripts/generate_package.sh.in ${CMAKE_BINARY_DIR}/packages/generate_package.sh @ONLY)
 configure_file(${CMAKE_SOURCE_DIR}/scripts/generate_deb.sh ${CMAKE_BINARY_DIR}/packages/generate_deb.sh COPYONLY)
 configure_file(${CMAKE_SOURCE_DIR}/scripts/generate_bottle.sh ${CMAKE_BINARY_DIR}/packages/generate_bottle.sh COPYONLY)
