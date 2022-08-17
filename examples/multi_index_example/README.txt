@@ -11,9 +11,9 @@
 
  - Additions to CMake should be done to the CMakeLists.txt in the './src' directory and not in the top level CMakeLists.txt
 
- -- How to build with eosio-cpp --
+ -- How to build with cdt-cpp --
    - cd into the 'build' directory
-   - run the command 'eosio-cpp -abigen ../src/multi_index_example.cpp -o multi_index_example.wasm -I ../include/'
+   - run the command 'cdt-cpp -abigen ../src/multi_index_example.cpp -o multi_index_example.wasm -I ../include/'
 
  - After build -
    - The built smart contract is in the 'build' directory

@@ -6,7 +6,7 @@ ExternalProject_Add(
   CDTWasmTests
   SOURCE_DIR "${CMAKE_SOURCE_DIR}/tests/unit"
   BINARY_DIR "${CMAKE_BINARY_DIR}/tests/unit"
-  CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${CMAKE_BINARY_DIR}/lib/cmake/cdt/CDTWasmToolchain.cmake -DCMAKE_BUILD_TYPE=Release -DCDT_BIN=${CMAKE_BINARY_DIR}/lib/cmake/cdt/ -DBASE_BINARY_DIR=${CMAKE_BINARY_DIR} -D__APPLE=${APPLE} -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH} -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH} -Dmandel_DIR=${mandel_DIR}
+  CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${CMAKE_BINARY_DIR}/lib/cmake/cdt/CDTWasmToolchain.cmake -DCMAKE_BUILD_TYPE=Release -DCDT_BIN=${CMAKE_BINARY_DIR}/lib/cmake/cdt/ -DBASE_BINARY_DIR=${CMAKE_BINARY_DIR} -D__APPLE=${APPLE} -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH} -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}
   UPDATE_COMMAND ""
   PATCH_COMMAND  ""
   TEST_COMMAND   ""
@@ -16,9 +16,9 @@ ExternalProject_Add(
 )
 
 
-find_package(eosio QUIET)
+find_package(leap QUIET)
 
-if (eosio_FOUND)
+if (leap_FOUND)
    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
       set(TEST_BUILD_TYPE "Debug")
       set(CMAKE_BUILD_TYPE "Release")
@@ -41,5 +41,5 @@ if (eosio_FOUND)
      BUILD_ALWAYS 1
    )
 else()
-   message(STATUS "mandel package not found, skipping building integration tests")
+   message(STATUS "leap package not found, skipping building integration tests")
 endif()

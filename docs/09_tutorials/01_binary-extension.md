@@ -2,7 +2,7 @@
 content_title: eosio::binary_extension
 ---
 
-You can find the implementation of `eosio::binary_extension` in the `eosio.cdt` repository in [binary_extension.hpp](https://github.com/EOSIO/eosio.cdt/blob/master/libraries/eosiolib/binary_extension.hpp).
+You can find the implementation of `eosio::binary_extension` within the CDT repository in the file [binary_extension.hpp](https://github.com/AntelopeIO/cdt/blob/main/libraries/eosiolib/core/eosio/binary_extension.hpp).
 
 The primary concern when using this type is when you are adding a new field to a smart contract's data structure that is currently utilized in an `eosio::multi_index` type (AKA a _table_), or when adding a new parameter to an action declaration.
 
@@ -360,7 +360,7 @@ Find below their corresponding sections in the `.abi` files:
 <hr>Start up a blockchain instance, compile this smart contract, and test it out.
 
 ```
-~/binary_extension_contract $ eosio-cpp binary_extension_contract.cpp -o binary_extension_contract.wasm
+~/binary_extension_contract $ cdt-cpp binary_extension_contract.cpp -o binary_extension_contract.wasm
 ```
 
 ```
@@ -503,7 +503,7 @@ struct [[eosio::table]] structure {
 Next, upgrade the contract and try to read from table and write to table the original way:
 
 ```
-~/binary_extension_contract $ eosio-cpp binary_extension_contract.cpp -o binary_extension_contract.wasm
+~/binary_extension_contract $ cdt-cpp binary_extension_contract.cpp -o binary_extension_contract.wasm
 ```
 
 ```

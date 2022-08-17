@@ -4,7 +4,7 @@ link_text: "Understanding ABI Files"
 ---
 ## Introduction
 
-ABI files can be generated using the `eosio-cpp` utility provided by `eosio.cdt`. However, there are several situations that may cause ABI's generation to malfunction or fail altogether. Advanced C++ patterns can trip it up and custom types can sometimes cause issues for ABI generation. For this reason, it's **imperative** you understand how ABI files work, so you can debug and fix if and when necessary.
+ABI files can be generated using the `cdt-cpp` utility provided by CDT. However, there are several situations that may cause ABI's generation to malfunction or fail altogether. Advanced C++ patterns can trip it up and custom types can sometimes cause issues for ABI generation. For this reason, it's **imperative** you understand how ABI files work, so you can debug and fix if and when necessary.
 
 ## What is an ABI
 
@@ -35,7 +35,7 @@ Start with an empty ABI, for exemplification we will work based on the `eosio.to
 An ABI enables any client or interface to interpret and even generate a GUI for your contract. For this to work consistently, describe the custom types that are used as a parameter in any public action or struct that needs to be described in the ABI.
 
 [[info | Built-in Types]]
-| EOSIO implements a number of custom built-ins. Built-in types don't need to be described in an ABI file. If you would like to familiarize yourself with EOSIO's built-ins, they are defined [here](https://github.com/EOSIO/eos/blob/76565937064d5acccb089b50aa8ea797cd92dc82/libraries/chain/abi_serializer.cpp#L90)
+| EOSIO implements a number of custom built-ins. Built-in types don't need to be described in an ABI file. If you would like to familiarize yourself with EOSIO's built-ins, they are defined [here](https://github.com/AntelopeIO/leap/blob/6817911900a088c60f91563995cf482d6b380b2d/libraries/chain/abi_serializer.cpp#L88-L129)
 
 
 ```json

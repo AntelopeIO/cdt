@@ -11,5 +11,5 @@ link_text: Manually write/edit an ABI file
 - The Ricardian contracts should be housed in a file with the name `<contract name>.contracts.md` and the clauses should be in a file named `<contract name>.clauses.md`.
  - For each Ricardian contract the header `<h1 class="contract">ActionName</h1>` should be used, as this directs the ABI generator to attach this Ricardian contract to the specified action.
  - For each Ricardian clause, the header `<h1 class="clause">ClauseID</h1>` should be used, as this directs the ABI generator to the clause id and the subsequent body.
- - The option `-R` has been added to [`eosio-cpp`](../../03_command-reference/eosio-cpp.md) and [`eosio-abigen`](../../03_command-reference/eosio-abigen.md) to add "resource" paths to search from, so you can place these files in any directory structure you like and use `-R<path to file>` in the same vein as `-I` for include paths.
- - For exemplification see [hello.contracts.md](https://github.com/EOSIO/eosio.cdt/blob/master/examples/hello/ricardian/hello.contracts.md).
+ - The option `-R` has been added to [`cdt-cpp`](../../03_command-reference/cdt-cpp.md) to add "resource" paths to search from, so you can place these files in any directory structure you like and use `-R<path to file>` in the same vein as `-I` for include paths.
+ - For exemplification see [hello.contracts.md](https://github.com/AntelopeIO/cdt/blob/main/examples/hello/ricardian/hello.contracts.md).

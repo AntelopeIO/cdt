@@ -2,7 +2,7 @@
 content_title: Native Tester And Compilation
 ---
 
-As of v1.5.0 native compilation can be performed and a new set of libraries to facilitate native testing and native "scratch pad" compilation. [`cdt-cc`](../03_command-reference/cdt-cc.md), [`cdt-cpp`](../03_command-reference/cdt-cpp.md) and [`cdt-ld`](../03_command-reference/cdt-ld.md) now support building "smart contracts" and unit tests natively for quick tests to help facilitate faster development \(note the default implementations of a lot of the mandel `intrinsics` are currently asserts that state they are unavailable, these are user definable.\)
+As of v1.5.0 native compilation can be performed and a new set of libraries to facilitate native testing and native "scratch pad" compilation. [`cdt-cc`](../03_command-reference/cdt-cc.md), [`cdt-cpp`](../03_command-reference/cdt-cpp.md) and [`cdt-ld`](../03_command-reference/cdt-ld.md) now support building "smart contracts" and unit tests natively for quick tests to help facilitate faster development (note the default implementations of a lot of the Antelope intrinsics (aka host functions) are currently asserts that state they are unavailable, these are user definable.)
 
 ## Getting Started
 Once you have your smart contract written then a test source file can be written.
@@ -91,10 +91,10 @@ int main(int argc, char** argv) {
 }
 ```
 
-Every `intrinsic` that is defined for eosio (prints, require_auth, etc.) is re-definable given the `intrinsics::set_intrinsics<intrinsics::the_intrinsic_name>()` functions.  These take a lambda whose arguments and return type should match that of the intrinsic you are trying to define.  This gives the contract writer the flexibility to modify behavior to suit the unit test being written. A sister function `intrinsics::get_intrinsics<intrinsics::the_intrinsic_name>()` will return the function object that currently defines the behavior for said intrinsic.  This pattern can be used to mock functionality and allow for easier testing of smart contracts.  For more information see, either the [tests](https://github.com/EOSIO/eosio.cdt/blob/master/examples/hello/tests/) directory or [hello_test.cpp](https://github.com/EOSIO/eosio.cdt/blob/master/examples/hello/tests/hello_test.cpp) for working examples.
+Every `intrinsic` that is defined for eosio (prints, require_auth, etc.) is re-definable given the `intrinsics::set_intrinsics<intrinsics::the_intrinsic_name>()` functions.  These take a lambda whose arguments and return type should match that of the intrinsic you are trying to define.  This gives the contract writer the flexibility to modify behavior to suit the unit test being written. A sister function `intrinsics::get_intrinsics<intrinsics::the_intrinsic_name>()` will return the function object that currently defines the behavior for said intrinsic.  This pattern can be used to mock functionality and allow for easier testing of smart contracts.  For more information see, either the [tests](https://github.com/AntelopeIO/cdt/tree/main/examples/hello/tests/) directory or [hello_test.cpp](https://github.com/AntelopeIO/cdt/blob/main/examples/hello/tests/hello_test.cpp) for working examples.
 
 ## Compiling Native Code
-- Raw `eosio-cpp` to compile the test or program the only addition needed to the command line is to add the flag `-fnative` this will then generate native code instead of `wasm` code.
+- Raw `cdt-cpp` to compile the test or program the only addition needed to the command line is to add the flag `-fnative` this will then generate native code instead of `wasm` code.
 - Via CMake
     - `add_native_library` and `add_native_executable` CMake macros have been added (these are a drop in replacement for add_library and add_executable).
 
