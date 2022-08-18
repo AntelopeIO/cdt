@@ -25,7 +25,7 @@ namespace eosio {
         *
         * @param v - Source
         */
-       unsigned_int( uint32_t v = 0 ):value(v){}
+       constexpr unsigned_int( uint32_t v = 0 ):value(v){}
 
        /**
         * Construct a new unsigned int object from a type that is convertible to uint32_t
@@ -35,7 +35,7 @@ namespace eosio {
         * @pre T must be convertible to uint32_t
         */
        template<typename T>
-       unsigned_int( T v ):value(v){}
+       constexpr unsigned_int( T v ):value(v){}
 
        //operator uint32_t()const { return value; }
        //operator uint64_t()const { return value; }
@@ -47,7 +47,7 @@ namespace eosio {
         * @return T - Converted target
         */
        template<typename T>
-       operator T()const { return static_cast<T>(value); }
+       constexpr operator T()const { return static_cast<T>(value); }
 
        /// @cond OPERATORS
 
@@ -57,7 +57,7 @@ namespace eosio {
         * @param v - Soruce
         * @return unsigned_int& - Reference to this object
         */
-       unsigned_int& operator=( uint32_t v ) { value = v; return *this; }
+       constexpr unsigned_int& operator=( uint32_t v ) { value = v; return *this; }
 
        /// @endcond
 
@@ -76,7 +76,7 @@ namespace eosio {
         * @return true - if equal
         * @return false - otherwise
         */
-       friend bool operator==( const unsigned_int& i, const uint32_t& v )     { return i.value == v; }
+       constexpr friend bool operator==( const unsigned_int& i, const uint32_t& v )     { return i.value == v; }
 
        /**
         * Check equality between 32-bit unsigned integer and  a unsigned_int object
@@ -86,7 +86,7 @@ namespace eosio {
         * @return true - if equal
         * @return false - otherwise
         */
-       friend bool operator==( const uint32_t& i, const unsigned_int& v )     { return i       == v.value; }
+       constexpr friend bool operator==( const uint32_t& i, const unsigned_int& v )     { return i       == v.value; }
 
        /**
         * Check equality between two unsigned_int objects
@@ -96,7 +96,7 @@ namespace eosio {
         * @return true - if equal
         * @return false - otherwise
         */
-       friend bool operator==( const unsigned_int& i, const unsigned_int& v ) { return i.value == v.value; }
+       constexpr friend bool operator==( const unsigned_int& i, const unsigned_int& v ) { return i.value == v.value; }
 
        /**
         * Check inequality between a unsigned_int object and 32-bit unsigned integer
@@ -106,7 +106,7 @@ namespace eosio {
         * @return true - if inequal
         * @return false - otherwise
         */
-       friend bool operator!=( const unsigned_int& i, const uint32_t& v )     { return i.value != v; }
+       constexpr friend bool operator!=( const unsigned_int& i, const uint32_t& v )     { return i.value != v; }
 
        /**
         * Check inequality between 32-bit unsigned integer and  a unsigned_int object
@@ -116,7 +116,7 @@ namespace eosio {
         * @return true - if unequal
         * @return false - otherwise
         */
-       friend bool operator!=( const uint32_t& i, const unsigned_int& v )     { return i       != v.value; }
+       constexpr friend bool operator!=( const uint32_t& i, const unsigned_int& v )     { return i       != v.value; }
 
        /**
         * Check inequality between two unsigned_int objects
@@ -126,7 +126,7 @@ namespace eosio {
         * @return true - if inequal
         * @return false - otherwise
         */
-       friend bool operator!=( const unsigned_int& i, const unsigned_int& v ) { return i.value != v.value; }
+       constexpr friend bool operator!=( const unsigned_int& i, const unsigned_int& v ) { return i.value != v.value; }
 
        /**
         * Check if the given unsigned_int object is less than the given 32-bit unsigned integer
@@ -146,7 +146,7 @@ namespace eosio {
         * @return true -  if i less than v
         * @return false - otherwise
         */
-       friend bool operator<( const uint32_t& i, const unsigned_int& v )      { return i       < v.value; }
+       constexpr friend bool operator<( const uint32_t& i, const unsigned_int& v )      { return i       < v.value; }
 
        /**
         * Check if the first given unsigned_int is less than the second given unsigned_int object
@@ -156,7 +156,7 @@ namespace eosio {
         * @return true -  if i less than v
         * @return false - otherwise
         */
-       friend bool operator<( const unsigned_int& i, const unsigned_int& v )  { return i.value < v.value; }
+       constexpr friend bool operator<( const unsigned_int& i, const unsigned_int& v )  { return i.value < v.value; }
 
        /**
         * Check if the given unsigned_int object is greater or equal to the given 32-bit unsigned integer
@@ -166,7 +166,7 @@ namespace eosio {
         * @return true - if i is greater or equal to v
         * @return false - otherwise
         */
-       friend bool operator>=( const unsigned_int& i, const uint32_t& v )     { return i.value >= v; }
+       constexpr friend bool operator>=( const unsigned_int& i, const uint32_t& v )     { return i.value >= v; }
 
        /**
         * Check if the given 32-bit unsigned integer is greater or equal to the given unsigned_int object
@@ -176,7 +176,7 @@ namespace eosio {
         * @return true -  if i is greater or equal to v
         * @return false - otherwise
         */
-       friend bool operator>=( const uint32_t& i, const unsigned_int& v )     { return i       >= v.value; }
+       constexpr friend bool operator>=( const uint32_t& i, const unsigned_int& v )     { return i       >= v.value; }
 
        /**
         * Check if the first given unsigned_int is greater or equal to the second given unsigned_int object
@@ -186,7 +186,7 @@ namespace eosio {
         * @return true -  if i is greater or equal to v
         * @return false - otherwise
         */
-       friend bool operator>=( const unsigned_int& i, const unsigned_int& v ) { return i.value >= v.value; }
+       constexpr friend bool operator>=( const unsigned_int& i, const unsigned_int& v ) { return i.value >= v.value; }
 
 
        /// @endcond
@@ -249,7 +249,7 @@ namespace eosio {
         *
         * @param v - Source
         */
-       signed_int( int32_t v = 0 ):value(v){}
+       constexpr signed_int( int32_t v = 0 ):value(v){}
 
        /// @cond OPERATORS
 
@@ -258,7 +258,7 @@ namespace eosio {
         *
         * @return int32_t - The converted result
         */
-       operator int32_t()const { return value; }
+       constexpr operator int32_t()const { return value; }
 
 
        /**
@@ -269,21 +269,21 @@ namespace eosio {
         * @return unsigned_int& - Reference to this object
         */
        template<typename T>
-       signed_int& operator=( const T& v ) { value = v; return *this; }
+       constexpr signed_int& operator=( const T& v ) { value = v; return *this; }
 
        /**
         * Increment operator
         *
         * @return signed_int - New signed_int with value incremented from the current object's value
         */
-       signed_int operator++(int) { return value++; }
+       constexpr signed_int operator++(int) { return value++; }
 
        /**
         * Increment operator
         *
         * @return signed_int - Reference to current object
         */
-       signed_int& operator++(){ ++value; return *this; }
+       constexpr signed_int& operator++(){ ++value; return *this; }
 
        /// @endcond
 
@@ -302,7 +302,7 @@ namespace eosio {
         * @return true - if equal
         * @return false - otherwise
         */
-       friend bool operator==( const signed_int& i, const int32_t& v )    { return i.value == v; }
+       constexpr friend bool operator==( const signed_int& i, const int32_t& v )    { return i.value == v; }
 
        /**
         * Check equality between 32-bit integer and  a signed_int object
@@ -312,7 +312,7 @@ namespace eosio {
         * @return true - if equal
         * @return false - otherwise
         */
-       friend bool operator==( const int32_t& i, const signed_int& v )    { return i       == v.value; }
+       constexpr friend bool operator==( const int32_t& i, const signed_int& v )    { return i       == v.value; }
 
        /**
         * Check equality between two signed_int objects
@@ -322,7 +322,7 @@ namespace eosio {
         * @return true - if equal
         * @return false - otherwise
         */
-       friend bool operator==( const signed_int& i, const signed_int& v ) { return i.value == v.value; }
+       constexpr friend bool operator==( const signed_int& i, const signed_int& v ) { return i.value == v.value; }
 
 
        /**
@@ -333,7 +333,7 @@ namespace eosio {
         * @return true - if inequal
         * @return false - otherwise
         */
-       friend bool operator!=( const signed_int& i, const int32_t& v )    { return i.value != v; }
+       constexpr friend bool operator!=( const signed_int& i, const int32_t& v )    { return i.value != v; }
 
        /**
         * Check inequality between 32-bit integer and  a signed_int object
@@ -343,7 +343,7 @@ namespace eosio {
         * @return true - if unequal
         * @return false - otherwise
         */
-       friend bool operator!=( const int32_t& i, const signed_int& v )    { return i       != v.value; }
+       constexpr friend bool operator!=( const int32_t& i, const signed_int& v )    { return i       != v.value; }
 
        /**
         * Check inequality between two signed_int objects
@@ -353,7 +353,7 @@ namespace eosio {
         * @return true - if inequal
         * @return false - otherwise
         */
-       friend bool operator!=( const signed_int& i, const signed_int& v ) { return i.value != v.value; }
+       constexpr friend bool operator!=( const signed_int& i, const signed_int& v ) { return i.value != v.value; }
 
        /**
         * Check if the given signed_int object is less than the given 32-bit integer
@@ -363,7 +363,7 @@ namespace eosio {
         * @return true - if i less than v
         * @return false - otherwise
         */
-       friend bool operator<( const signed_int& i, const int32_t& v )     { return i.value < v; }
+       constexpr friend bool operator<( const signed_int& i, const int32_t& v )     { return i.value < v; }
 
        /**
         * Check if the given 32-bit integer is less than the given signed_int object
@@ -373,7 +373,7 @@ namespace eosio {
         * @return true -  if i less than v
         * @return false - otherwise
         */
-       friend bool operator<( const int32_t& i, const signed_int& v )     { return i       < v.value; }
+       constexpr friend bool operator<( const int32_t& i, const signed_int& v )     { return i       < v.value; }
 
        /**
         * Check if the first given signed_int is less than the second given signed_int object
@@ -383,7 +383,7 @@ namespace eosio {
         * @return true -  if i less than v
         * @return false - otherwise
         */
-       friend bool operator<( const signed_int& i, const signed_int& v )  { return i.value < v.value; }
+       constexpr friend bool operator<( const signed_int& i, const signed_int& v )  { return i.value < v.value; }
 
 
        /**
@@ -394,7 +394,7 @@ namespace eosio {
         * @return true - if i is greater or equal to v
         * @return false - otherwise
         */
-       friend bool operator>=( const signed_int& i, const int32_t& v )    { return i.value >= v; }
+       constexpr friend bool operator>=( const signed_int& i, const int32_t& v )    { return i.value >= v; }
 
        /**
         * Check if the given 32-bit integer is greater or equal to the given signed_int object
@@ -404,7 +404,7 @@ namespace eosio {
         * @return true -  if i is greater or equal to v
         * @return false - otherwise
         */
-       friend bool operator>=( const int32_t& i, const signed_int& v )    { return i       >= v.value; }
+       constexpr friend bool operator>=( const int32_t& i, const signed_int& v )    { return i       >= v.value; }
 
        /**
         * Check if the first given signed_int is greater or equal to the second given signed_int object
@@ -414,7 +414,7 @@ namespace eosio {
         * @return true -  if i is greater or equal to v
         * @return false - otherwise
         */
-       friend bool operator>=( const signed_int& i, const signed_int& v ) { return i.value >= v.value; }
+       constexpr friend bool operator>=( const signed_int& i, const signed_int& v ) { return i.value >= v.value; }
 
        /// @endcond
 
