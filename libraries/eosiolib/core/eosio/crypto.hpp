@@ -32,6 +32,9 @@ namespace eosio {
 
          __attribute__((eosio_wasm_import))
          int32_t mod_exp( const char* base, uint32_t base_len, const char* exp, uint32_t exp_len, const char* mod, uint32_t mod_len, char* result, uint32_t result_len);
+
+         __attribute__((eosio_wasm_import))
+         void sha3( const char* data, uint32_t data_len, char* hash, uint32_t hash_len, int32_t keccak);
       }
    };
 
@@ -427,5 +430,9 @@ namespace eosio {
 
    inline int32_t mod_exp( const char* base, uint32_t base_len, const char* exp, uint32_t exp_len, const char* mod, uint32_t mod_len, char* result, uint32_t result_len) {
       return internal_use_do_not_use::mod_exp( base, base_len, exp, exp_len, mod, mod_len, result, result_len );
+   };
+
+   inline void sha3( const char* data, uint32_t data_len, char* hash, uint32_t hash_len, int32_t keccak) {
+      return internal_use_do_not_use::sha3( data, data_len, hash, hash_len, keccak );
    };
 }

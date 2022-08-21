@@ -365,6 +365,9 @@ extern "C" {
    int32_t mod_exp( const char* base, uint32_t base_len, const char* exp, uint32_t exp_len, const char* mod, uint32_t mod_len, char* result, uint32_t result_len) {
       return intrinsics::get().call<intrinsics::mod_exp>(base, base_len, exp, exp_len, mod, mod_len, result, result_len);
    }
+   void sha3( const char* data, uint32_t data_len, char* hash, uint32_t hash_len, int32_t keccak ) {
+      intrinsics::get().call<intrinsics::sha3>(data, data_len, hash, hash_len, keccak);
+   }
 
    // softfloat
    static constexpr uint32_t inv_float_eps = 0x4B000000;
@@ -925,8 +928,4 @@ extern "C" {
       return intrinsics::get().call<intrinsics::get_active_security_group>(data, datalen);
    }
 
-}
-
-void sha3( const char* data, uint32_t data_len, char* hash, uint32_t hash_len, int32_t keccak ) {
-   intrinsics::get().call<intrinsics::sha3>(data, data_len, hash, hash_len, keccak);
 }
