@@ -279,6 +279,7 @@ void assert_recover_key( const struct capi_checksum256* digest, const char* sig,
  *
  * @return -1 if there was an error 0 otherwise.
 */
+__attribute__((eosio_wasm_import))
 int32_t k1_recover( const char* sig, uint32_t sig_len, const char* dig, uint32_t dig_len, char* pub, uint32_t pub_len);
 
 /**

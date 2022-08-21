@@ -346,6 +346,25 @@ extern "C" {
    capi_name get_sender() {
       return intrinsics::get().call<intrinsics::get_sender>();
    }
+   int32_t blake2_f( uint32_t rounds, const char* state, uint32_t state_len, const char* msg, uint32_t msg_len, 
+                     const char* t0_offset, uint32_t t0_len, const char* t1_offset, uint32_t t1_len, int32_t final, char* result, uint32_t result_len) {
+      return intrinsics::get().call<intrinsics::blake2_f>(rounds, state, state_len, msg, msg_len, t0_offset, t0_len, t1_offset, t1_len, final, result, result_len);
+   }
+   int32_t k1_recover( const char* sig, uint32_t sig_len, const char* dig, uint32_t dig_len, char* pub, uint32_t pub_len) {
+      return intrinsics::get().call<intrinsics::k1_recover>(sig, sig_len, dig, dig_len, pub, pub_len);
+   }
+   int32_t alt_bn128_add( const char* op1, uint32_t op1_len, const char* op2, uint32_t op2_len, char* result, uint32_t result_len) {
+      return intrinsics::get().call<intrinsics::alt_bn128_add>(op1, op1_len, op2, op2_len, result, result_len);
+   }
+   int32_t alt_bn128_mul( const char* g1, uint32_t g1_len, const char* scalar, uint32_t scalar_len, char* result, uint32_t result_len) {
+      return intrinsics::get().call<intrinsics::alt_bn128_mul>(g1, g1_len, scalar, scalar_len, result, result_len);
+   }
+   int32_t alt_bn128_pair( const char* pairs, uint32_t pairs_len) {
+      return intrinsics::get().call<intrinsics::alt_bn128_pair>(pairs, pairs_len);
+   }
+   int32_t mod_exp( const char* base, uint32_t base_len, const char* exp, uint32_t exp_len, const char* mod, uint32_t mod_len, char* result, uint32_t result_len) {
+      return intrinsics::get().call<intrinsics::mod_exp>(base, base_len, exp, exp_len, mod, mod_len, result, result_len);
+   }
 
    // softfloat
    static constexpr uint32_t inv_float_eps = 0x4B000000;
@@ -906,31 +925,6 @@ extern "C" {
       return intrinsics::get().call<intrinsics::get_active_security_group>(data, datalen);
    }
 
-}
-
-int32_t blake2_f( uint32_t rounds, const char* state, uint32_t state_len, const char* msg, uint32_t msg_len, 
-                  const char* t0_offset, uint32_t t0_len, const char* t1_offset, uint32_t t1_len, int32_t final, char* result, uint32_t result_len) {
-   return intrinsics::get().call<intrinsics::blake2_f>(rounds, state, state_len, msg, msg_len, t0_offset, t0_len, t1_offset, t1_len, final, result, result_len);
-}
-
-int32_t k1_recover( const char* sig, uint32_t sig_len, const char* dig, uint32_t dig_len, char* pub, uint32_t pub_len) {
-   return intrinsics::get().call<intrinsics::k1_recover>(sig, sig_len, dig, dig_len, pub, pub_len);
-}
-
-int32_t alt_bn128_add( const char* op1, uint32_t op1_len, const char* op2, uint32_t op2_len, char* result, uint32_t result_len) {
-   return intrinsics::get().call<intrinsics::alt_bn128_add>(op1, op1_len, op2, op2_len, result, result_len);
-}
-
-int32_t alt_bn128_mul( const char* g1, uint32_t g1_len, const char* scalar, uint32_t scalar_len, char* result, uint32_t result_len) {
-   return intrinsics::get().call<intrinsics::alt_bn128_mul>(g1, g1_len, scalar, scalar_len, result, result_len);
-}
-
-int32_t alt_bn128_pair( const char* pairs, uint32_t pairs_len) {
-   return intrinsics::get().call<intrinsics::alt_bn128_pair>(pairs, pairs_len);
-}
-
-int32_t mod_exp( const char* base, uint32_t base_len, const char* exp, uint32_t exp_len, const char* mod, uint32_t mod_len, char* result, uint32_t result_len) {
-   return intrinsics::get().call<intrinsics::mod_exp>(base, base_len, exp, exp_len, mod, mod_len, result, result_len);
 }
 
 void sha3( const char* data, uint32_t data_len, char* hash, uint32_t hash_len, int32_t keccak ) {
