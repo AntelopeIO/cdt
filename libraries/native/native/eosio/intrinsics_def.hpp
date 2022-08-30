@@ -3,6 +3,7 @@
 #include <eosio/action.h>
 #include <eosio/chain.h>
 #include <eosio/crypto.h>
+#include <eosio/crypto_ext.h>
 #include <eosio/db.h>
 #include <eosio/permission.h>
 #include <eosio/print.h>
