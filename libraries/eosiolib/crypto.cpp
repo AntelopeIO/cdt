@@ -40,26 +40,8 @@ extern "C" {
                     size_t siglen, char* pub, size_t publen );
 
    __attribute__((eosio_wasm_import))
-   int32_t k1_recover( const char* sig, uint32_t sig_len, const char* dig, uint32_t dig_len, char* pub, uint32_t pub_len);
-
-   __attribute__((eosio_wasm_import))
    void assert_recover_key( const capi_checksum256* digest, const char* sig,
                             size_t siglen, const char* pub, size_t publen );
-
-   __attribute__((eosio_wasm_import))
-   void sha3( const char* data, uint32_t data_len, char* hash, uint32_t hash_len, int32_t keccak );
-
-   __attribute__((eosio_wasm_import))
-   int32_t alt_bn128_add( const char* op1, uint32_t op1_len, const char* op2, uint32_t op2_len, char* result, uint32_t result_len);
-
-   __attribute__((eosio_wasm_import))
-   int32_t alt_bn128_mul( const char* g1, uint32_t g1_len, const char* scalar, uint32_t scalar_len, char* result, uint32_t result_len);
-
-   __attribute__((eosio_wasm_import))
-   int32_t alt_bn128_pair( const char* pairs, uint32_t pairs_len);
-
-   __attribute__((eosio_wasm_import))
-   int32_t mod_exp( const char* base, uint32_t base_len, const char* exp, uint32_t exp_len, const char* mod, uint32_t mod_len, char* result, uint32_t result_len);
 }
 
 namespace eosio {
@@ -82,33 +64,6 @@ namespace eosio {
    void assert_ripemd160( const char* data, uint32_t length, const eosio::checksum160& hash ) {
       auto hash_data = hash.extract_as_byte_array();
       ::assert_ripemd160( data, length, reinterpret_cast<const ::capi_checksum160*>(hash_data.data()) );
-   }
-
-   static inline auto sha3_helper(const char* data, uint32_t length, bool keccak) {
-      ::capi_checksum256 hash;
-      ::sha3( data, length, (char*)&hash, sizeof(hash), keccak);
-      eosio::checksum256 dg;
-      eosio::datastream<uint8_t*> ds = {&hash.hash[0], sizeof(hash)};
-      ds >> dg;
-      return dg;
-   }
-
-   eosio::checksum256 keccak(const char* data, uint32_t length) {
-      return sha3_helper(data, length, true);
-   }
-
-   eosio::checksum256 sha3(const char* data, uint32_t length) {
-      return sha3_helper(data, length, false);
-   }
-
-   void assert_sha3(const char* data, uint32_t length, const eosio::checksum256& hash) {
-      const auto& res = sha3_helper(data, length, false);
-      check( hash == res, "SHA3 hash of `data` does not match given `hash`");
-   }
-
-   void assert_keccak(const char* data, uint32_t length, const eosio::checksum256& hash) {
-      const auto& res = sha3_helper(data, length, true);
-      check( hash == res, "Keccak hash of `data` does not match given `hash`");
    }
 
    eosio::checksum256 sha256( const char* data, uint32_t length ) {
