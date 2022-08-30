@@ -807,11 +807,37 @@ struct generation_utils {
       return get_base_type_name(t).compare(get_type_alias_string(t)) != 0;
    }
 
+   inline bool is_primitive_eventually(const clang::QualType& type ){
+      if (is_template_specialization( type, {"map", "pair","tuple", "array", "variant", "optional"} )) {
+         return false;
+      } else if (is_template_specialization( type, {"vector", "set","deque", "list"} )) {
+         auto t = get_template_argument_as_string( type );
+         if ( t=="int8" || t=="uint8" ) {
+            // vector<int8>, vector<uint8>, set<int8>, ...  will be converted to "bytes", so they are primitive
+            return true;
+         } else {
+            return false;
+         }
+      } else {
+         return true;
+      }
+   }
+
    inline bool is_explicit_nested(const clang::QualType& t ){
       std::string tstr = t.getAsString();
       if(tstr.find("decay_t") != std::string::npos || tstr.find("decltype") != std::string::npos || tstr.find("ignore") != std::string::npos ||
          tstr.find("invoke") != std::string::npos || tstr.find("index") != std::string::npos || tstr.find("declval") != std::string::npos ) return false;
-      return std::count (tstr.begin(), tstr.end(), '<') >= 2;
+      if(std::count (tstr.begin(), tstr.end(), '<') < 2) return false;
+
+      if (is_template_specialization( t, {"vector", "set", "deque", "list", "map", "pair","tuple", "array","variant", "optional"} )) {
+         auto pt = llvm::dyn_cast<clang::ElaboratedType>(t.getTypePtr());
+         auto tst = llvm::dyn_cast<clang::TemplateSpecializationType>(pt ? pt->desugar().getTypePtr() : t.getTypePtr());
+         for(int i = 0; i < tst->getNumArgs(); ++i){
+            // a type is nested only when one of the next level template arguments is eventually not primitive
+            if (!is_primitive_eventually( std::get<clang::QualType>(get_template_argument(t, i)) )) return true;
+         }
+      }
+      return false;
    }
 
    inline bool is_explicit_container(const clang::QualType& t ){
