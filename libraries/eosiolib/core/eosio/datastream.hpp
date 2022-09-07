@@ -699,17 +699,18 @@ datastream<Stream>& operator >> ( datastream<Stream>& ds, T (&v)[N] ) {
 }
 
 /**
- *  Serialize a vector of char
+ *  Serialize a vector of T, where T is a primitive data type
  *
  *  @param ds - The stream to write
  *  @param v - The value to serialize
  *  @tparam Stream - Type of datastream buffer
  *  @return datastream<Stream>& - Reference to the datastream
  */
-template<typename Stream>
-datastream<Stream>& operator << ( datastream<Stream>& ds, const std::vector<char>& v ) {
+template<typename Stream, typename T, 
+	std::enable_if_t<_datastream_detail::is_primitive<T>()>* = nullptr>
+datastream<Stream>& operator << ( datastream<Stream>& ds, const std::vector<T>& v ) {
    ds << unsigned_int( v.size() );
-   ds.write( v.data(), v.size() );
+   ds.write( (const void*)v.data(), v.size()*sizeof(T) );
    return ds;
 }
 
@@ -722,7 +723,8 @@ datastream<Stream>& operator << ( datastream<Stream>& ds, const std::vector<char
  *  @tparam T - Type of the object contained in the vector
  *  @return datastream<Stream>& - Reference to the datastream
  */
-template<typename Stream, typename T>
+template<typename Stream, typename T,
+	std::enable_if_t<!_datastream_detail::is_primitive<T>()>* = nullptr>
 datastream<Stream>& operator << ( datastream<Stream>& ds, const std::vector<T>& v ) {
    ds << unsigned_int( v.size() );
    for( const auto& i : v )
@@ -731,19 +733,20 @@ datastream<Stream>& operator << ( datastream<Stream>& ds, const std::vector<T>& 
 }
 
 /**
- *  Deserialize a vector of char
+ *  Deserialize a vector of T, where T is a primitive data type
  *
  *  @param ds - The stream to read
  *  @param v - The destination for deserialized value
  *  @tparam Stream - Type of datastream buffer
  *  @return datastream<Stream>& - Reference to the datastream
  */
-template<typename Stream>
-datastream<Stream>& operator >> ( datastream<Stream>& ds, std::vector<char>& v ) {
+template<typename Stream, typename T,
+	std::enable_if_t<_datastream_detail::is_primitive<T>()>* = nullptr>
+datastream<Stream>& operator >> ( datastream<Stream>& ds, std::vector<T>& v ) {
    unsigned_int s;
    ds >> s;
    v.resize( s.value );
-   ds.read( v.data(), v.size() );
+   ds.read( (char*)v.data(), v.size()*sizeof(T) );
    return ds;
 }
 
@@ -756,7 +759,8 @@ datastream<Stream>& operator >> ( datastream<Stream>& ds, std::vector<char>& v )
  *  @tparam T - Type of the object contained in the vector
  *  @return datastream<Stream>& - Reference to the datastream
  */
-template<typename Stream, typename T>
+template<typename Stream, typename T,
+	std::enable_if_t<!_datastream_detail::is_primitive<T>()>* = nullptr>
 datastream<Stream>& operator >> ( datastream<Stream>& ds, std::vector<T>& v ) {
    unsigned_int s;
    ds >> s;
