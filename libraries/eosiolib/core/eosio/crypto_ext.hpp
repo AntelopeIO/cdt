@@ -15,7 +15,7 @@ namespace eosio {
    namespace internal_use_do_not_use {
       extern "C" {
 
-         struct __attribute__((aligned (16))) capi_checksum256 { uint8_t hash[32]; };
+         struct __attribute__((aligned (16))) capi_checksum256_ext { uint8_t hash[32]; };
 
          __attribute__((eosio_wasm_import))
          int32_t alt_bn128_add( const char* op1, uint32_t op1_len, const char* op2, uint32_t op2_len, char* result, uint32_t result_len);
@@ -40,7 +40,7 @@ namespace eosio {
       }
 
       static inline auto sha3_helper(const char* data, uint32_t length, bool keccak) {
-         internal_use_do_not_use::capi_checksum256 hash;
+         internal_use_do_not_use::capi_checksum256_ext hash;
          internal_use_do_not_use::sha3( data, length, (char*)&hash, sizeof(hash), keccak);
          eosio::checksum256 dg;
          eosio::datastream<uint8_t*> ds = {&hash.hash[0], sizeof(hash)};
