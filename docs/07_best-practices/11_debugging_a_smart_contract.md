@@ -8,12 +8,14 @@ When you are creating your smart contract for the first time, it is recommended 
 
 The concept is the same, so for the following guide, debugging on the private testnet will be covered.
 
-If you haven't set up your own local nodeos, follow the [setup guide](https://developers.eos.io/eosio-home/docs/getting-the-software). By default, your local nodeos will just run in a private testnet unless you modify the config.ini file to connect with public testnet (or official testnet) nodes. 
+If you haven't set up your own local nodeos, follow the [DUNE setup guide](https://github.com/AntelopeIO/DUNE#readme). By default, your local nodeos will just run in a private testnet unless you modify the config.ini file to connect with public testnet (or official testnet) nodes.
 
 # Method
+
 The main method used to debug smart contract is **Caveman Debugging**. Printing is utilized to inspect the value of a variable and check the flow of the contract. Printing in smart contracts can be done through the Print API. The C++ API is a wrapper for C API and is the recommended API.
 
 # Print
+
 Print C API supports the following data type that you can print:
 - prints - a null terminated char array (string)
 - prints_l - any char array (string) with given size

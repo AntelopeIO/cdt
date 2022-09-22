@@ -8,13 +8,13 @@ An Antelope blockchain with the `ACTION_RETURN_VALUE` protocol feature activated
 
 ## Concept
 
-When you implement an action within a smart contract use the `return` statement and pass any value to the action sender. The returned value can be of any C++ primitive type, any C++ standard library type, or any user defined type. The `EOSIO` framework does all the work necessary to serialize the value returned and send it back to the client. On the client side you deserialize the received value and access it the same way you access any other function’s return value.
+When you implement an action within a smart contract use the `return` statement and pass any value to the action sender. The returned value can be of any C++ primitive type, any C++ standard library type, or any user defined type. The `Antelope` framework does all the work necessary to serialize the value returned and send it back to the client. On the client side you deserialize the received value and access it the same way you access any other function’s return value.
 
 ## Details
 
 The following list provides important details for when you return a value from an action:
 
-* As mentioned above, the `EOSIO` framework does all the heavy lifting for the return value to convey it to the client. The `EOSIO` framework defines and uses a new intrinsic, namely `set_action_return_value`. To learn more about `EOSIO` returned values functionality, refer to its documentation and [implementation](https://github.com/AntelopeIO/cdt/blob/develop/libraries/native/intrinsics.cpp#L295).
+* As mentioned above, the `Antelope` framework does all the heavy lifting for the return value to convey it to the client. The `Antelope` framework defines and uses a new intrinsic, namely `set_action_return_value`. To learn more about `Antelope` returned values functionality, refer to its documentation and [implementation](https://github.com/AntelopeIO/cdt/blob/develop/libraries/native/intrinsics.cpp#L295).
 * The CPU time and memory limit of your contract (maximum size of wasm), not RAM or NET, defines the limits of the returned value..
 * The action receipt includes a hash of the serialized returned value.
 * The action trace includes the serialized returned value.
