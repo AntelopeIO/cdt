@@ -16,7 +16,7 @@ See the following code reference:
 
 Make sure you have the following prerequisites in place:
 
-* An EOSIO development environment, for details consult the [Get Started Guide](https://developers.eos.io/welcome/latest/getting-started-guide/index),
+* An Antelope development environment, for details consult the [Get Started Guide](https://docs.eosnetwork.com/welcome/latest/getting-started/),
 * A multi-index table `testtab` along with its `test_table` data structure, its mandatory primary index, and the type alias definition `test_table_t`. Please see [How To Define A Primary Index](./how-to-define-a-primary-index) to set up these prerequisites.
 
 ## Procedure

@@ -17,7 +17,7 @@ See the following code reference:
 
 Make sure you have the following prerequisites in place:
 
-* An EOSIO development environment, for details consult the [Get Started Guide](https://developers.eos.io/welcome/latest/getting-started-guide/index),
+* An Antelope development environment, for details consult the [Get Started Guide](https://docs.eosnetwork.com/welcome/latest/getting-started/),
 * A multi-index `testab` table instance which stores `user` objects indexed by the primary key which is of type `eosio::name` and a secondary index for data member `secondary` of type `eosio::name` accessible through `by_secondary()` method. Consult the section [How to define a secondary index](./how-to-define-a-secondary-index) to learn how to set it up.
 
 ## Procedure
