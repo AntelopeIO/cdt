@@ -10,7 +10,7 @@ This tutorial provides instructions to how to hand-write an ABI file. This shoul
 
 The Application Binary Interface (ABI) is a JSON-based description to convert user actions between their JSON and Binary representations. The ABI also describes how to convert the database state to/from JSON. Once you have described your contract via an ABI then developers and users will be able to interact with your contract seamlessly via JSON.
 
-This tutorial will use the [eosio.token](https://github.com/EOSIO/eosio.contracts/tree/master/eosio.token) contract as an example. *eosio.token contract does not cover every possible permutation of an ABI definition.  
+This tutorial will use the [eosio.token](https://github.com/AntelopeIO/reference-contracts/tree/main/contracts/eosio.token) contract as an example. *eosio.token contract does not cover every possible permutation of an ABI definition.  
 
 To make things easy, we will start with an empty ABI.
 
@@ -35,7 +35,7 @@ An ABI enables any client or interface to interpret and even generate an GUI for
 [[info]]
 |Built-in Types
 
-EOSIO implements a number of custom built-ins. Built-in types don't need to be described in an ABI file. If you would like to familiarize yourself with EOSIO's built-ins, they are defined [here](https://github.com/AntelopeIO/leap/blob/6817911900a088c60f91563995cf482d6b380b2d/libraries/chain/abi_serializer.cpp#L88-L129).
+Antelope implements a number of custom built-ins. Built-in types don't need to be described in an ABI file. If you would like to familiarize yourself with Antelope's built-ins, they are defined [here](https://github.com/AntelopeIO/leap/blob/6817911900a088c60f91563995cf482d6b380b2d/libraries/chain/abi_serializer.cpp#L88-L129).
 
 Using **eosio.token** as an example, the only type that requires a description in the ABI file is `account_name`. The ABI uses "new_type_name" to describe explicit types, in this case `account_name`, and `account_name` is an alias of `name` type.
 
@@ -90,9 +90,9 @@ Looking through the `eosio.token` contract, we see a number of structs that requ
 
 ## Implicit Structs
 
-The following structs are implicit in that a struct was never explicitly defined in the contract. Looking at the [create](https://github.com/EOSIO/eosio.contracts/blob/master/eosio.token/include/eosio.token/eosio.token.hpp#L24) action, you'll find two parameters, `issuer` of type `account_name ` and `maximum_supply` of type `asset`. For brevity this tutorial won't break down every struct, but applying the same logic, you will end up with the following:
+The following structs are implicit in that a struct was never explicitly defined in the contract. Looking at the [create](https://github.com/AntelopeIO/reference-contracts/blob/main/contracts/eosio.token/include/eosio.token/eosio.token.hpp#L24) action, you'll find two parameters, `issuer` of type `account_name ` and `maximum_supply` of type `asset`. For brevity this tutorial won't break down every struct, but applying the same logic, you will end up with the following:
 
-### [create](https://github.com/EOSIO/eosio.contracts/blob/master/eosio.token/include/eosio.token/eosio.token.hpp#L24)
+### [create](https://github.com/AntelopeIO/reference-contracts/blob/main/contracts/eosio.token/include/eosio.token/eosio.token.hpp#L24)
 
 ```json
 {
@@ -111,7 +111,7 @@ The following structs are implicit in that a struct was never explicitly defined
 }
 ```
 
-### [issue](https://github.com/EOSIO/eosio.contracts/blob/master/eosio.token/include/eosio.token/eosio.token.hpp#L27)
+### [issue](https://github.com/AntelopeIO/reference-contracts/blob/main/contracts/eosio.token/include/eosio.token/eosio.token.hpp#L27)
 
 ```json
 {
@@ -134,7 +134,7 @@ The following structs are implicit in that a struct was never explicitly defined
 }
 ```
 
-### [retire](https://github.com/EOSIO/eosio.contracts/blob/master/eosio.token/include/eosio.token/eosio.token.hpp#L29)
+### [retire](https://github.com/AntelopeIO/reference-contracts/blob/main/contracts/eosio.token/include/eosio.token/eosio.token.hpp#L29)
 
 ```json
 {
@@ -153,7 +153,7 @@ The following structs are implicit in that a struct was never explicitly defined
 }
 ```
 
-### [transfer](https://github.com/EOSIO/eosio.contracts/blob/master/eosio.token/include/eosio.token/eosio.token.hpp#L31-L34)
+### [transfer](https://github.com/AntelopeIO/reference-contracts/blob/main/contracts/eosio.token/include/eosio.token/eosio.token.hpp#L31-L34)
 
 ```json
 {
@@ -180,7 +180,7 @@ The following structs are implicit in that a struct was never explicitly defined
 }
 ```
 
-### [close](https://github.com/EOSIO/eosio.contracts/blob/master/eosio.token/include/eosio.token/eosio.token.hpp#L36)
+### [close](https://github.com/AntelopeIO/reference-contracts/blob/main/contracts/eosio.token/include/eosio.token/eosio.token.hpp#L36)
 
 ```json
 {
@@ -202,7 +202,7 @@ The following structs are implicit in that a struct was never explicitly defined
 ## Explicit Structs
 These structs are explicitly defined, as they are a requirement to instantiate a multi-index table. Describing them is no different than defining the implicit structs as demonstrated above.
 
-### [account](https://github.com/EOSIO/eosio.contracts/blob/master/eosio.token/include/eosio.token/eosio.token.hpp#L43-L47)
+### [account](https://github.com/AntelopeIO/reference-contracts/blob/main/contracts/eosio.token/include/eosio.token/eosio.token.hpp#L43-L47)
 
 ```json
 {
@@ -217,7 +217,7 @@ These structs are explicitly defined, as they are a requirement to instantiate a
 }
 ```
 
-### [currency_stats](https://github.com/EOSIO/eosio.contracts/blob/master/eosio.token/include/eosio.token/eosio.token.hpp#L49-L55)
+### [currency_stats](https://github.com/AntelopeIO/reference-contracts/blob/main/contracts/eosio.token/include/eosio.token/eosio.token.hpp#L49-L55)
 
 ```json
 {
@@ -252,11 +252,11 @@ An action's JSON object definition looks like the following:
 }
 ```
 
-Next, we'll describe the actions of the `eosio.token` contract by aggregating all the public functions describe in the `eosio.token` contract's [header file](https://github.com/EOSIO/eosio.contracts/blob/master/eosio.token/include/eosio.token/eosio.token.hpp#L24-L36). We'll then describe each action's *type* to their previously described struct. In most situations, the function name and the struct name will be equal, but are not required to be equal.
+Next, we'll describe the actions of the `eosio.token` contract by aggregating all the public functions describe in the `eosio.token` contract's [header file](https://github.com/AntelopeIO/reference-contracts/blob/main/contracts/eosio.token/include/eosio.token/eosio.token.hpp#L24-L36). We'll then describe each action's *type* to their previously described struct. In most situations, the function name and the struct name will be equal, but are not required to be equal.
 
 Below is a list of actions that link to their source code with example JSON provided for how each action would be described.
 
-## [create](https://github.com/EOSIO/eosio.contracts/blob/master/eosio.token/include/eosio.token/eosio.token.hpp#L24-L25)
+## [create](https://github.com/AntelopeIO/reference-contracts/blob/main/contracts/eosio.token/include/eosio.token/eosio.token.hpp#L24-L25)
 
 ```json
 {
@@ -266,7 +266,7 @@ Below is a list of actions that link to their source code with example JSON prov
 }
 ```
 
-## [issue](https://github.com/EOSIO/eosio.contracts/blob/master/eosio.token/include/eosio.token/eosio.token.hpp#L27)
+## [issue](https://github.com/AntelopeIO/reference-contracts/blob/main/contracts/eosio.token/include/eosio.token/eosio.token.hpp#L27)
 
 ```json
 {
@@ -276,7 +276,7 @@ Below is a list of actions that link to their source code with example JSON prov
 }
 ```
 
-## [retire](https://github.com/EOSIO/eosio.contracts/blob/master/eosio.token/include/eosio.token/eosio.token.hpp#L31-L34)
+## [retire](https://github.com/AntelopeIO/reference-contracts/blob/main/contracts/eosio.token/include/eosio.token/eosio.token.hpp#L31-L34)
 
 ```json
 {
@@ -286,7 +286,7 @@ Below is a list of actions that link to their source code with example JSON prov
 }
 ```
 
-## [transfer](https://github.com/EOSIO/eosio.contracts/blob/master/eosio.token/include/eosio.token/eosio.token.hpp#L31-L34)
+## [transfer](https://github.com/AntelopeIO/reference-contracts/blob/main/contracts/eosio.token/include/eosio.token/eosio.token.hpp#L31-L34)
 
 ```json
 {
@@ -296,7 +296,7 @@ Below is a list of actions that link to their source code with example JSON prov
 }
 ```
 
-## [close](https://github.com/EOSIO/eosio.contracts/blob/master/eosio.token/include/eosio.token/eosio.token.hpp#L36)
+## [close](https://github.com/AntelopeIO/reference-contracts/blob/main/contracts/eosio.token/include/eosio.token/eosio.token.hpp#L36)
 
 ```json
 {
@@ -322,9 +322,9 @@ Finally, we need to describe our tables. Here's a table's JSON object definition
 }
 ```
 
-The eosio.token contract instantiates two tables, [accounts](https://github.com/EOSIO/eosio.contracts/blob/master/eosio.token/include/eosio.token/eosio.token.hpp#L57) and [stat](https://github.com/EOSIO/eosio.contracts/blob/master/eosio.token/include/eosio.token/eosio.token.hpp#L58).
+The eosio.token contract instantiates two tables, [accounts](https://github.com/AntelopeIO/reference-contracts/blob/main/contracts/eosio.token/include/eosio.token/eosio.token.hpp#L57) and [stat](https://github.com/AntelopeIO/reference-contracts/blob/main/contracts/eosio.token/include/eosio.token/eosio.token.hpp#L58).
 
-The accounts table is an i64 index, based on the [`account` struct](https://github.com/EOSIO/eosio.contracts/blob/master/eosio.token/include/eosio.token/eosio.token.hpp#L43-L47), has a [`uint64` as it's primary key](https://github.com/EOSIO/eosio.contracts/blob/master/eosio.token/include/eosio.token/eosio.token.hpp#L46) and it's key been arbitrarily named "currency".
+The accounts table is an i64 index, based on the [`account` struct](https://github.com/AntelopeIO/reference-contracts/blob/main/contracts/eosio.token/include/eosio.token/eosio.token.hpp#L43-L47), has a [`uint64` as it's primary key](https://github.com/AntelopeIO/reference-contracts/blob/main/contracts/eosio.token/include/eosio.token/eosio.token.hpp#L46) and it's key been arbitrarily named "currency".
 
 Here's how the accounts table would be described in the ABI
 
@@ -338,7 +338,7 @@ Here's how the accounts table would be described in the ABI
 }
 ```
 
-The stat table is an i64 index, based on the [`currenct_stats` struct](https://github.com/EOSIO/eosio.contracts/blob/master/eosio.token/include/eosio.token/eosio.token.hpp#L49-L55), has a [`uint64` as it's primary key](https://github.com/EOSIO/eosio.contracts/blob/master/eosio.token/include/eosio.token/eosio.token.hpp#L54) and it's key been arbitrarily named "currency"
+The stat table is an i64 index, based on the [`currenct_stats` struct](https://github.com/AntelopeIO/reference-contracts/blob/main/contracts/eosio.token/include/eosio.token/eosio.token.hpp#L49-L55), has a [`uint64` as it's primary key](https://github.com/AntelopeIO/reference-contracts/blob/main/contracts/eosio.token/include/eosio.token/eosio.token.hpp#L54) and it's key been arbitrarily named "currency"
 
 Here's how the stat table would be described in the ABI
 
@@ -537,7 +537,21 @@ When describing a vector in your ABI file, simply append the type with `[]`, so 
 
 It's a rarely used property worth mentioning. You can use **base** ABI struct property to reference another struct for inheritance, as long as that struct is also described in the same ABI file. Base will do nothing or potentially throw an error if your smart contract logic does not support inheritance.
 
-You can see an example of base in use in the system contract [source code](https://github.com/EOSIO/eosio.contracts/blob/4e4a3ca86d5d3482dfac85182e69f33c49e62fa9/eosio.system/include/eosio.system/eosio.system.hpp#L46) and [ABI](https://github.com/EOSIO/eosio.contracts/blob/4e4a3ca86d5d3482dfac85182e69f33c49e62fa9/eosio.system/abi/eosio.system.abi#L262)
+You can see an example of base in use in the system contract [source code](https://github.com/AntelopeIO/reference-contracts/blob/9d9401e1bd937406b4e2c4f2fd234f22a2d6e3bc/contracts/eosio.system/include/eosio.system/eosio.system.hpp#L141).
+
+The corresponsing ABI definition would look like this:
+
+```json
+{
+      "name": "eosio_global_state",
+      "base": "blockchain_parameters",
+      "fields": [
+         {"name":"max_ram_size",                  "type":"uint64"},
+         {"name":"total_ram_bytes_reserved",      "type":"uint64"},
+         {"name":"total_ram_stake",               "type":"int64"},
+      ]
+}
+```
 
 ## ABI Properties Not Covered Here
 

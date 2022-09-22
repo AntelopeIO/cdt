@@ -32,7 +32,7 @@ struct __attribute__((eosio_action)) testa {
 };
 ```
 
-If your action name is not a valid [EOSIO name](../02_naming-conventions.md) you can explicitly specify the name in the attribute ```c++ [[eosio::action("<valid action name>")]]```
+If your action name is not a valid [Antelope name](../02_naming-conventions.md) you can explicitly specify the name in the attribute ```c++ [[eosio::action("<valid action name>")]]```
 
 ## [[eosio::table]]
 Example (two ways to declare a table for ABI generation):
@@ -58,7 +58,7 @@ class [[eosio::contract("ANY_NAME_YOU_LIKE")]] test_contract : public eosio::con
 };
 ```
 
-The code above will mark this `class` as being an `EOSIO` contract, this allows for namespacing of contracts, i.e. you can include headers like `eosio::token` and not have `eosio::token`'s actions/tables wind up in you ABI or generated dispatcher.
+The code above will mark this `class` as being an `Antelope` contract, this allows for namespacing of contracts, i.e. you can include headers like `eosio::token` and not have `eosio::token`'s actions/tables wind up in you ABI or generated dispatcher.
 
 ## [[eosio::on_notify("VALID_EOSIO_ACCOUNT_NAME::VALID_EOSIO_ACTION_NAME")]]
 ```cpp
