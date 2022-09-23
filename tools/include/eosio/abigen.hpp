@@ -178,8 +178,8 @@ namespace eosio { namespace cdt {
             return name.substr(0,i+1);
          };
          map_info.name = remove_ending_brackets(name);
-         map_info.fields.push_back( {"key", get_template_argument_as_string(type)} );
-         map_info.fields.push_back( {"value", get_template_argument_as_string(type, 1)} );
+         map_info.fields.push_back( {"first", get_template_argument_as_string(type)} );
+         map_info.fields.push_back( {"second", get_template_argument_as_string(type, 1)} );
          add_type(std::get<clang::QualType>(get_template_argument(type)));
          add_type(std::get<clang::QualType>(get_template_argument(type, 1)));
          _abi.structs.insert(map_info);
@@ -326,8 +326,8 @@ namespace eosio { namespace cdt {
 
             abi_struct kv;
             kv.name = "pair_" + inside_type_name[0] + "_" + inside_type_name[1];
-            kv.fields.push_back( {"key", inside_type_name[0]} );
-            kv.fields.push_back( {"value", inside_type_name[1]} );
+            kv.fields.push_back( {"first", inside_type_name[0]} );
+            kv.fields.push_back( {"second", inside_type_name[1]} );
             _abi.structs.insert(kv);
 
             gottype = true;
