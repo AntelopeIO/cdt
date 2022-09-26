@@ -8,7 +8,7 @@ The following are basic recommendations which can be the foundation for securing
 
 ### 1. Authorization Checks
 
-The following methods are available in the `EOSIO` library and they can be used to implemented authorization checks in your smart contracts:
+The following methods are available in the `Antelope` library and they can be used to implemented authorization checks in your smart contracts:
 
 - [`has_auth`](../group__action/#function-has_auth)
 - [`require_auth`](../group__action/#function-require_auth)

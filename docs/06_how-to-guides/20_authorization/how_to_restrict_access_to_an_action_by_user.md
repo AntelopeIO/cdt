@@ -16,10 +16,10 @@ This guide provides instructions how to perform authorization checks in a smart 
 
 See the following code reference guides for functions which can be used to implement authorization checks in a smart contract:
 
-* function [has_auth(name n)](https://developers.eos.io/manuals/eosio.cdt/latest/namespaceeosio#function-has_auth)
-* function [require_auth(name n)](https://developers.eos.io/manuals/eosio.cdt/latest/namespaceeosio/#function-require_auth-12)
-* function [require_auth2(capi_name name, capi_name permission)](https://developers.eos.io/manuals/eosio.cdt/v1.8/group__action__c#function-require_auth2)
-* function [check(bool pred, ...)](https://developers.eos.io/manuals/eosio.cdt/latest/group__system/#function-check)
+* function [has_auth(name n)](http://docs.eosnetwork.com/cdt/latest/reference/Namespaces/namespaceeosio#function-has_auth)
+* function [require_auth(name n)](http://docs.eosnetwork.com/cdt/latest/reference/Namespaces/namespaceeosio#function-require_auth)
+* function [require_auth2(capi_name name, capi_name permission)](http://docs.eosnetwork.com/cdt/latest/reference/Files/action_8h)
+* function [check(bool pred, ...)](http://docs.eosnetwork.com/cdt/latest/reference/Namespaces/namespaceeosio#function-check)
 
 ## Procedure
 
@@ -45,7 +45,7 @@ void hi( name user ) {
 }
 ```
 
-Another example can be found in the [Tic Tac Toe Tutorial](https://developers.eos.io/welcome/latest/tutorials/tic-tac-toe-game-contract/#action-handler---move).
+Another example can be found in the [Tic Tac Toe Tutorial](https://docs.eosnetwork.com/welcome/latest/tutorials/tic-tac-toe-game-contract#action-handler---move).
 
 ### 2. Use require_auth
 

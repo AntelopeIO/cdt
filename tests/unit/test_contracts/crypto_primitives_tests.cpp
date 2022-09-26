@@ -1,5 +1,6 @@
 #include <eosio/eosio.hpp>
 #include <eosio/crypto.hpp>
+#include <eosio/crypto_ext.hpp>
 
 using namespace eosio;
 

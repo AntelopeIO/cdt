@@ -2,7 +2,7 @@
 content_title: cdt-cpp tool
 ---
 
-To manually compile the source code, use `cdt-cpp` and `cdt-ld` as if it were __clang__ and __lld__. All the includes and options specific to EOSIO and CDT are baked in.
+To manually compile the source code, use `cdt-cpp` and `cdt-ld` as if it were __clang__ and __lld__. All the includes and options specific to Antelope and CDT are baked in.
 
 ```
 USAGE: cdt-cpp [options] <input file> ...
