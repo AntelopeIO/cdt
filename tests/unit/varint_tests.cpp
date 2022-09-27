@@ -252,6 +252,194 @@ EOSIO_TEST_BEGIN(signed_int_type_test)
    CHECK_EQUAL( d, dd )
 EOSIO_TEST_END
 
+EOSIO_TEST_BEGIN(unsigned_int_constexpr_test)
+   //// unsigned_int(uint32_t)
+   static_assert( unsigned_int{}.value == 0 );
+   static_assert( unsigned_int{u32min}.value == 0 );
+   static_assert( unsigned_int{u32max}.value == 4294967295);
+
+   //// unsigned_int(T)
+   static_assert( unsigned_int{uint8_t{0}}.value ==  0 );
+   static_assert( unsigned_int{uint16_t{1}}.value == 1 );
+   static_assert( unsigned_int{uint32_t{2}}.value == 2 );
+   static_assert( unsigned_int{uint64_t{3}}.value == 3 );
+
+   // -----------------
+   // operator T()const
+   static_assert( unsigned_int{0}.operator bool() == false );
+   static_assert( unsigned_int{1}.operator bool() == true );
+
+   // ---------------------------------
+   // unsigned_int& operator=(uint32_t)
+   constexpr unsigned_int ui0{42};
+   constexpr unsigned_int ui1 = ui0;
+   static_assert( ui0 == ui1 );
+
+   // ------------------------------------------------------------
+   // friend bool operator==(const unsigned_int&, const uint32_t&)
+   static_assert( unsigned_int{42} == uint32_t{42} );
+   static_assert( (unsigned_int{42} == uint32_t{43}) == false );
+
+   // ------------------------------------------------------------
+   // friend bool operator==(const uint32_t&, const unsigned_int&)
+   static_assert( uint32_t{42} == unsigned_int{42} );
+   static_assert( (uint32_t{43} == unsigned_int{42}) == false );
+
+   // ----------------------------------------------------------------
+   // friend bool operator==(const unsigned_int&, const unsigned_int&)
+   static_assert( unsigned_int{42} == unsigned_int{42} );
+   static_assert( (unsigned_int{42} == unsigned_int{43}) == false);
+
+   // ------------------------------------------------------------
+   // friend bool operator!=(const unsigned_int&, const uint32_t&)
+   static_assert( (unsigned_int{42} != uint32_t{42}) == false );
+   static_assert( unsigned_int{42} != uint32_t{43} );
+
+   // ------------------------------------------------------------
+   // friend bool operator!=(const uint32_t&, const unsigned_int&)
+   static_assert( (uint32_t{42} != unsigned_int{42}) == false );
+   static_assert( uint32_t{43} != unsigned_int{42} );
+
+   // ----------------------------------------------------------------
+   // friend bool operator!=(const unsigned_int&, const unsigned_int&)
+   static_assert( (unsigned_int{42} != unsigned_int{42}) == false );
+   static_assert( unsigned_int{42} != unsigned_int{43} );
+
+   // ------------------------------------------------------------
+   // friend bool operator< (const unsigned_int&, const uint32_t&)
+   static_assert( (unsigned_int{42} < uint32_t{42}) == false );
+   static_assert( unsigned_int{42} < uint32_t{43} );
+
+   // ------------------------------------------------------------
+   // friend bool operator< (const uint32_t&, const unsigned_int&)
+   static_assert( (uint32_t{42} < unsigned_int{42}) == false );
+   static_assert( uint32_t{42} < unsigned_int{43} );
+
+   // ----------------------------------------------------------------
+   // friend bool operator< (const unsigned_int&, const unsigned_int&)
+   static_assert( (unsigned_int{42} < unsigned_int{42}) == false );
+   static_assert( unsigned_int{42} < unsigned_int{43} );
+
+   // ------------------------------------------------------------
+   // friend bool operator>=(const unsigned_int&, const uint32_t&)
+   static_assert( unsigned_int{42} >= uint32_t{42} );
+   static_assert( (unsigned_int{42} >= uint32_t{43}) == false );
+
+   // ------------------------------------------------------------
+   // friend bool operator>=(const uint32_t&, const unsigned_int&)
+   static_assert( uint32_t{42} >= unsigned_int{42} );
+   static_assert( (uint32_t{42} >= unsigned_int{43}) == false  );
+
+   // ----------------------------------------------------------------
+   // friend bool operator>=(const unsigned_int&, const unsigned_int&)
+   static_assert( unsigned_int{42} >= unsigned_int{42} );
+   static_assert( (unsigned_int{42} >= unsigned_int{43}) == false  );
+EOSIO_TEST_END
+
+EOSIO_TEST_BEGIN(signed_int_constexpr_test)
+   //// signed_int(uint32_t)
+   static_assert( signed_int{}.value == 0 );
+   static_assert( signed_int{i32min}.value == -2147483648 );
+   static_assert( signed_int{i32max}.value ==  2147483647 );
+
+   // -----------------------
+   // operator int32_t()const
+   static_assert( signed_int{}.operator int32_t() == 0 );
+   static_assert( signed_int{i32min}.operator int32_t() == -2147483648 );
+   static_assert( signed_int{i32max}.operator int32_t() ==  2147483647 );
+
+   // --------------------------------
+   //  signed_int& operator=(const T&)
+   constexpr int8_t i8{0};
+   constexpr int16_t i16{1};
+   constexpr int32_t i32{2};
+   constexpr int64_t i64{3};
+
+   constexpr signed_int si0 = i8;
+   constexpr signed_int si1 = i16;
+   constexpr signed_int si2 = i32;
+   constexpr signed_int si3 = i64;
+
+   static_assert( si0.value == 0 );
+   static_assert( si1.value == 1 );
+   static_assert( si2.value == 2 );
+   static_assert( si3.value == 3 );
+
+   // --------------------------
+   // signed_int operator++(int)
+   constexpr signed_int si_post_inc0{ signed_int{0}++ };
+   constexpr signed_int si_post_inc1{ signed_int{1}++ };
+   static_assert( si_post_inc0.value == 0 );
+   static_assert( si_post_inc1.value == 1 );
+
+   // ------------------------
+   // signed_int& operator++()
+   constexpr signed_int si_pre_inc0{ ++signed_int{0} };
+   constexpr signed_int si_pre_inc1{ ++signed_int{1} };
+   static_assert( si_pre_inc0.value == 1 );
+   static_assert( si_pre_inc1.value == 2 );
+
+   // ------------------------------------------------------------
+   // friend bool operator==(const signed_int&, const uint32_t&)
+   static_assert( signed_int{42} == int32_t{42} );
+   static_assert( (signed_int{42} == int32_t{43}) == false );
+
+   // ----------------------------------------------------------
+   // friend bool operator==(const uint32_t&, const signed_int&)
+   static_assert( int32_t{42} == signed_int{42} );
+   static_assert( (int32_t{43} == signed_int{42}) == false );
+
+   // ------------------------------------------------------------
+   // friend bool operator==(const signed_int&, const signed_int&)
+   static_assert( signed_int{42} == signed_int{42} );
+   static_assert( (signed_int{42} == signed_int{43}) == false );
+
+   // ----------------------------------------------------------
+   // friend bool operator!=(const signed_int&, const uint32_t&)
+   static_assert( (signed_int{42} != int32_t{42}) == false );
+   static_assert( signed_int{42} != int32_t{43} );
+
+   // ----------------------------------------------------------
+   // friend bool operator!=(const uint32_t&, const signed_int&)
+   static_assert( (int32_t{42} != signed_int{42}) == false );
+   static_assert( int32_t{43} != signed_int{42} );
+
+   // ------------------------------------------------------------
+   // friend bool operator!=(const signed_int&, const signed_int&)
+   static_assert( (signed_int{42} != signed_int{42}) == false );
+   static_assert( signed_int{42} != signed_int{43} );
+
+   // ----------------------------------------------------------
+   // friend bool operator< (const signed_int&, const uint32_t&)
+   static_assert( (signed_int{42} < int32_t{42}) == false );
+   static_assert( signed_int{42} < int32_t{43} );
+
+   // ----------------------------------------------------------
+   // friend bool operator< (const uint32_t&, const signed_int&)
+   static_assert( (int32_t{42} < signed_int{42}) == false );
+   static_assert( int32_t{42} < signed_int{43} );
+
+   // ------------------------------------------------------------
+   // friend bool operator< (const signed_int&, const signed_int&)
+   static_assert( (signed_int{42} < signed_int{42}) == false );
+   static_assert( signed_int{42} < signed_int{43} );
+
+   // ----------------------------------------------------------
+   // friend bool operator>=(const signed_int&, const uint32_t&)
+   static_assert( signed_int{42} >= int32_t{42} );
+   static_assert( (signed_int{42} >= int32_t{43}) == false );
+
+   // ----------------------------------------------------------
+   // friend bool operator>=(const uint32_t&, const signed_int&)
+   static_assert( int32_t{42} >= signed_int{42} );
+   static_assert( (int32_t{42} >= signed_int{43}) == false );
+
+   // ------------------------------------------------------------
+   // friend bool operator>=(const signed_int&, const signed_int&)
+   static_assert( signed_int{42} >= signed_int{42} );
+   static_assert( (signed_int{42} >= signed_int{43}) == false );
+EOSIO_TEST_END
+
 int main(int argc, char* argv[]) {
    bool verbose = false;
    if( argc >= 2 && std::strcmp( argv[1], "-v" ) == 0 ) {
@@ -261,5 +449,7 @@ int main(int argc, char* argv[]) {
 
    EOSIO_TEST(unsigned_int_type_test)
    EOSIO_TEST(signed_int_type_test);
+   EOSIO_TEST(unsigned_int_constexpr_test);
+   EOSIO_TEST(signed_int_constexpr_test);
    return has_failed();
 }
