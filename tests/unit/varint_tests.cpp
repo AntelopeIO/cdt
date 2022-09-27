@@ -455,6 +455,7 @@ EOSIO_TEST_BEGIN(signed_int_constexpr_test)
    static_assert( signed_int{0xffffff}.value == 16777215 ); // 3 bytes
    static_assert( signed_int{0x7fffffff}.value == 2147483647 ); // 4 bytes
    static_assert( signed_int{-0x7fffffff}.value == -2147483647 ); // 4 bytes
+   static_assert( signed_int{-0x80000000l}.value == -2147483648 ); // 4 bytes
    static_assert( signed_int{100u}.value == 100 ); // cast from unsigned
    static_assert( sizeof(signed_int{0xf}) == 4 );
 EOSIO_TEST_END
