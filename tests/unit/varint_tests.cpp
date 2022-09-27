@@ -334,6 +334,15 @@ EOSIO_TEST_BEGIN(unsigned_int_constexpr_test)
    // friend bool operator>=(const unsigned_int&, const unsigned_int&)
    static_assert( unsigned_int{42} >= unsigned_int{42} );
    static_assert( (unsigned_int{42} >= unsigned_int{43}) == false  );
+
+   // ----------
+   // misc tests
+   static_assert( unsigned_int{0xff}.value == 255 );     // 1 byte
+   static_assert( unsigned_int{0xffff}.value == 65535 ); // 2 bytes
+   static_assert( unsigned_int{0xffffff}.value == 16777215 ); // 3 bytes
+   static_assert( unsigned_int{0xffffffff}.value == 4294967295 ); // 4 bytes
+   static_assert( unsigned_int{100l}.value == 100 );  // cast from long
+   static_assert( sizeof(unsigned_int{0xf}) == 4 );
 EOSIO_TEST_END
 
 EOSIO_TEST_BEGIN(signed_int_constexpr_test)
@@ -438,6 +447,16 @@ EOSIO_TEST_BEGIN(signed_int_constexpr_test)
    // friend bool operator>=(const signed_int&, const signed_int&)
    static_assert( signed_int{42} >= signed_int{42} );
    static_assert( (signed_int{42} >= signed_int{43}) == false );
+
+   // ----------
+   // misc tests
+   static_assert( signed_int{0xff}.value == 255 );     // 1 byte
+   static_assert( signed_int{0xffff}.value == 65535 ); // 2 bytes
+   static_assert( signed_int{0xffffff}.value == 16777215 ); // 3 bytes
+   static_assert( signed_int{0x7fffffff}.value == 2147483647 ); // 4 bytes
+   static_assert( signed_int{-0x7fffffff}.value == -2147483647 ); // 4 bytes
+   static_assert( signed_int{100u}.value == 100 ); // cast from unsigned
+   static_assert( sizeof(signed_int{0xf}) == 4 );
 EOSIO_TEST_END
 
 int main(int argc, char* argv[]) {
