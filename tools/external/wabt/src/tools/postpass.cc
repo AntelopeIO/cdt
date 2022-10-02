@@ -223,7 +223,6 @@ int ProgramMain(int argc, char** argv) {
       size_t fixup = 0;
       auto pre_memory =  FillFromSegments(module.data_segments);
       auto segments   = CreateSegments(pre_memory);
-      auto post_memory =  FillFromSegments(module.data_segments);
       if (pre_memory != FillFromSegments(segments)) {
         std::cerr << "Fractured Memory Failed, not applying optimizations" << std::endl;
         module.data_segments = StripZeroedData(std::move(module.data_segments), fixup);
