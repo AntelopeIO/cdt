@@ -92,7 +92,7 @@ uint32_t GetStackPtr( Module& mod, const std::vector<uint8_t>& buff ) {
 
 inline bool IsZeroed(const DataSegment* ds) {
    for ( auto d : ds->data ) {
-      if (d == 0)
+      if (d != 0)
          return false;
    }
    return true;
@@ -102,9 +102,9 @@ std::vector<DataSegment*> StripZeroedData( std::vector<DataSegment*>&& ds, size_
    for ( auto itr=ds.begin(); itr != ds.end();) {
       if (IsZeroed(*itr)) {
          fix_bytes += (*itr)->data.size();
-	        itr = ds.erase(itr); 
+	 itr = ds.erase(itr); 
       } else {
-	        ++itr;
+         ++itr;
       }
    }
    return ds;
