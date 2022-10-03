@@ -91,23 +91,22 @@ uint32_t GetStackPtr( Module& mod, const std::vector<uint8_t>& buff ) {
 }
 
 inline bool IsZeroed(const DataSegment* ds) {
-   bool is_zero = true;
    for ( auto d : ds->data ) {
-      is_zero &= d == 0;
+      if (d == 0)
+         return false;
    }
-   return is_zero;
+   return true;
 }
 
 std::vector<DataSegment*> StripZeroedData( std::vector<DataSegment*>&& ds, size_t& fix_bytes ) {
    for ( auto itr=ds.begin(); itr != ds.end();) {
       if (IsZeroed(*itr)) {
          fix_bytes += (*itr)->data.size();
-	 itr = ds.erase(itr); 
+	        itr = ds.erase(itr); 
       } else {
-	 ++itr;
+	        ++itr;
       }
    }
-
    return ds;
 }
 
@@ -142,14 +141,6 @@ inline DataSegment* CreateSegment(uint32_t offset, uint8_t* start, std::size_t s
 
 inline std::vector<DataSegment*> CreateSegments(std::vector<uint8_t> memory) {
    std::vector<DataSegment*> segments;
-
-   const auto& is_zeroed = [](const uint8_t* p, std::size_t sz) {
-      bool is_zero = true;
-      for (std::size_t i=0; i < sz; ++i) {
-         is_zero &= p[i] == 0; 
-      }
-      return is_zero;
-   };
 
    std::size_t f=0;
    // look for the first non-zero entry
