@@ -45,7 +45,7 @@ void hi( name user ) {
 }
 ```
 
-Another example can be found in the [Tic Tac Toe Tutorial](https://docs.eosnetwork.com/welcome/latest/tutorials/tic-tac-toe-game-contract#action-handler---move).
+Another example can be found in the [Tic Tac Toe Tutorial](https://docs.eosnetwork.com/docs/latest/tutorials/tic-tac-toe-game-contract#action-handler---move).
 
 ### 2. Use require_auth
 
