@@ -4,6 +4,7 @@
  */
 #pragma once
 
+#include "check.hpp"
 #include "fixed_bytes.hpp"
 #include "varint.hpp"
 #include "serialize.hpp"
@@ -48,13 +49,181 @@ namespace eosio {
          return dg;
       }
    }
-      
+
    /**
     *  @defgroup crypto Crypto
     *  @ingroup core
     *  @brief Defines API for calculating and checking hashes which
     *  require activating crypto protocol feature
     */
+
+   /**
+    * Abstracts G1 and G2 points. Ensures sizes of x and y are valid
+    *
+    *  @ingroup crypto
+    */
+   struct point_view {
+      /**
+       * Pointer to the x coordinate
+       */
+      char* x;
+
+      /**
+       * Pointer to the y coordinate
+       */
+      char* y;
+
+      /**
+       * Number of bytes in each of x and y
+       */
+      uint32_t size;
+
+      /**
+       * Construct a point given x and y
+       *
+       * @param x_ - The x coordinate, a vector of chars
+       * @param y_ - The y coordinate, a vector of chars
+       */
+      point_view(std::vector<char>& x_, std::vector<char>& y_)
+      :x(x_.data()), y(y_.data()), size(x_.size())
+      {
+         eosio::check( x_.size() == y_.size(), "x's size must be equal to y's" );
+      };
+
+      /**
+       * Construct a point given a serialized point
+       *
+       * @param p - The serialized point
+       */
+      point_view(std::vector<char>& p)
+      :x(p.data()), y(p.data() + p.size()/2), size(p.size()/2)
+      {
+      };
+
+      /**
+       *  Returns packed x and y
+       */
+      std::vector<char> packed() const {
+         std::vector<char> x_and_y( x, x + size );
+         x_and_y.insert( x_and_y.end(), y, y + size );
+         return x_and_y;
+      }
+
+      /**
+      * Unpacks a seralized point and populates current point
+      *
+      * @param packed - The source serialized point
+      */
+      void unpack(const std::vector<char>& packed) {
+         eosio::check( packed.size() == 2 * size, "size of packed point must be equal to x's size" );
+         std::memcpy(x, packed.data(), size);
+         std::memcpy(y, packed.data() + size, size);
+      }
+   };
+
+   static constexpr size_t g1_coordinate_size = 32;
+   static constexpr size_t g2_coordinate_size = 64;
+   static constexpr size_t blake2f_result_size = 64;
+
+   /**
+    * Abstracts G1 point. Ensures sizes of x and y are 32
+    *
+    *  @ingroup crypto
+    */
+   struct g1_view : public point_view {
+      /**
+       * Construct a G1 point given x and y
+       *
+       * @param x_ - The x coordinate, a vector of chars
+       * @param y_ - The y coordinate, a vector of chars
+       */
+      g1_view(std::vector<char>& x_, std::vector<char>& y_)
+      : point_view(x_, y_)
+      {
+         eosio::check( size == g1_coordinate_size, "G1 coordinate size must be 32" );
+      }
+
+      /**
+       * Construct a point given a serialized point
+       *
+       * @param p - The serialized point
+       */
+      g1_view(std::vector<char>& p)
+      : point_view(p)
+      {
+         eosio::check( p.size() == g1_coordinate_size * 2, "G1 serialized size must be 64" );
+      };
+   };
+
+   /**
+    * Abstracts G2 point. Ensures sizes of x and y are 64
+    *
+    *  @ingroup crypto
+    */
+   struct g2_view : public point_view {
+      /**
+       * Construct a G2 point given x and y
+       *
+       * @param x_ - The x coordinate, a vector of chars
+       * @param y_ - The y coordinate, a vector of chars
+       */
+      g2_view(std::vector<char>& x_, std::vector<char>& y_)
+      : point_view(x_, y_)
+      {
+         eosio::check( size == g2_coordinate_size, "G2 coordinate size must be 64" );
+      }
+
+      /**
+       * Construct a point given a serialized point
+       *
+       * @param p - The serialized point
+       */
+      g2_view(std::vector<char>& p)
+      : point_view(p)
+      {
+         eosio::check( p.size() == g2_coordinate_size * 2, "G2 serialized size must be 128" );
+      };
+   };
+
+   /**
+    * Abstracts big integer.
+    *
+    *  @ingroup crypto
+    */
+   struct bigint {
+      /**
+       * Construct a bigint given a vector of chars (bytes)
+       *
+       * @param s - The source bytes
+       */
+      bigint(std::vector<char>& s)
+      :data(s.data()), size(s.size())
+      {
+      };
+
+      char* data;
+      uint32_t size;
+   };
+
+   /**
+    *  Addition operation on the elliptic curve `alt_bn128`
+    *
+    *  @ingroup crypto
+    *  @param op1 - operand 1
+    *  @param op2 - operand 2
+    *  @param result - result of the addition operation
+    *  @return -1 if there is an error otherwise 0
+    */
+   inline int32_t alt_bn128_add( const g1_view& op1, const g1_view& op2, g1_view& result) {
+      auto op_1 = op1.packed();
+      auto op_2 = op2.packed();
+      std::vector<char> rslt(2*result.size); // buffer storing x and y
+      auto ret = internal_use_do_not_use::alt_bn128_add( op_1.data(), op_1.size(), op_2.data(), op_2.size(), rslt.data(), rslt.size());
+      if ( ret == 0 ) {
+         result.unpack(rslt); // unpack rslt into result
+      }
+      return ret;
+   }
 
    /**
     *  Addition operation on the elliptic curve `alt_bn128` 
@@ -73,6 +242,25 @@ namespace eosio {
    }
    
    /**
+    *  Scalar multiplication operation on the elliptic curve `alt_bn128`
+    *
+    *  @ingroup crypto
+    *  @param g1 - G1 point
+    *  @param scalar - scalar factor
+    *  @param result - result of the scalar multiplication operation
+    *  @return -1 if there is an error otherwise 0
+    */
+   inline int32_t alt_bn128_mul( const g1_view& g1, const bigint& scalar, g1_view& result) {
+      auto g1_bin = g1.packed();
+      std::vector<char> rslt(2*result.size);
+      auto ret = internal_use_do_not_use::alt_bn128_mul( g1_bin.data(), g1_bin.size(), scalar.data, scalar.size, rslt.data(), rslt.size());
+      if ( ret == 0 ) {
+         result.unpack(rslt);
+      }
+      return ret;
+   }
+
+   /**
     *  Scalar multiplication operation on the elliptic curve `alt_bn128` 
     *
     *  @ingroup crypto
@@ -89,18 +277,53 @@ namespace eosio {
    }
    
    /**
+    *  Optimal-Ate pairing check elliptic curve `alt_bn128`
+    *
+    *  @ingroup crypto
+    *  @param pairs - g1 and g2 pairs
+    *  @return -1 if there is an error, 1 if false and 0 if true and successful
+    */
+   inline int32_t alt_bn128_pair( const std::vector<std::pair<g1_view, g2_view>>& pairs ) {
+      std::vector<char> g1_g2_pairs;
+      for ( const auto& pair: pairs ) {
+         auto g1_bin = pair.first.packed();
+         auto g2_bin = pair.second.packed();
+         g1_g2_pairs.insert( g1_g2_pairs.end(), g1_bin.begin(), g1_bin.end() );
+         g1_g2_pairs.insert( g1_g2_pairs.end(), g2_bin.begin(), g2_bin.end() );
+      }
+      return internal_use_do_not_use::alt_bn128_pair( g1_g2_pairs.data(), g1_g2_pairs.size() );
+   }
+
+   /**
     *  Optimal-Ate pairing check elliptic curve `alt_bn128` 
     *
     *  @ingroup crypto
     *  @param pairs - g1 and g2 pairs
     *  @param pairs_len - size of pairs
-    *  @param result - result of the addition operation
     *  @return -1 if there is an error, 1 if false and 0 if true and successful
     */
    inline int32_t alt_bn128_pair( const char* pairs, uint32_t pairs_len ) {
       return internal_use_do_not_use::alt_bn128_pair( pairs, pairs_len );
    }
    
+   /**
+    *  Big integer modular exponentiation
+    *  returns an output ( BASE^EXP ) % MOD
+    *
+    *  @ingroup crypto
+    *  @param base - base of the exponentiation (BASE)
+    *  @param exp - exponent to raise to that power (EXP)
+    *  @param mod - modulus (MOD)
+    *  @param result - result of the modular exponentiation
+    *  @return -1 if there is an error otherwise 0
+    */
+
+   inline int32_t mod_exp( const bigint& base, const bigint& exp, const bigint& mod, bigint& result) {
+      eosio::check( result.size >= mod.size, "mod_exp result parameter's size must be >= mod's size" );
+      auto ret = internal_use_do_not_use::mod_exp( base.data, base.size, exp.data, exp.size, mod.data, mod.size, result.data, result.size);
+      return ret;
+   }
+
    /**
     *  Big integer modular exponentiation
     *  returns an output ( BASE^EXP ) % MOD
@@ -119,6 +342,25 @@ namespace eosio {
 
    inline int32_t mod_exp( const char* base, uint32_t base_len, const char* exp, uint32_t exp_len, const char* mod, uint32_t mod_len, char* result, uint32_t result_len ) {
       return internal_use_do_not_use::mod_exp( base, base_len, exp, exp_len, mod, mod_len, result, result_len);
+   }
+
+   /**
+    *  BLAKE2 compression function "F"
+    *  https://eips.ethereum.org/EIPS/eip-152
+    *
+    *  @ingroup crypto
+    *  @param rounds - the number of rounds
+    *  @param state - state vector
+    *  @param msg - message block vector
+    *  @param t0_offset - offset counters
+    *  @param t1_offset - offset counters
+    *  @param final - final block flag
+    *  @param result - the result of the compression
+    *  @return -1 if there is an error otherwise 0
+    */
+   int32_t blake2_f( uint32_t rounds, const std::vector<char>& state, const std::vector<char>& msg, const std::vector<char>& t0_offset, const std::vector<char>& t1_offset, bool final, std::vector<char>& result) {
+      eosio::check( result.size() >= blake2f_result_size, "blake2_f result parameter's size must be >= 64" );
+      return internal_use_do_not_use::blake2_f( rounds, state.data(), state.size(), msg.data(), msg.size(), t0_offset.data(), t0_offset.size(), t1_offset.data(), t1_offset.size(), final, result.data(), result.size());
    }
 
    /**
