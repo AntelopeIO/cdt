@@ -16,17 +16,21 @@ using namespace fc;
 
 using mvo = fc::mutable_variant_object;
 
+struct crypto_primitives_tester : tester {
+   crypto_primitives_tester() {
+      create_accounts( { "test"_n } );
+      produce_block();
+
+      set_code( "eosio"_n,  contracts::crypto_primitives_test_wasm() );
+      set_abi(  "eosio"_n,  contracts::crypto_primitives_test_abi().data() );
+
+      produce_blocks();
+   }
+};
+
 BOOST_AUTO_TEST_SUITE(crypto_primitives_tests)
 
-BOOST_FIXTURE_TEST_CASE( sha3_tests, tester ) try {
-   create_accounts( { "test"_n } );
-   produce_block();
-
-   set_code( "eosio"_n,  contracts::crypto_primitives_test_wasm() );
-   set_abi(  "eosio"_n,  contracts::crypto_primitives_test_abi().data() );
-
-   produce_blocks();
-
+BOOST_FIXTURE_TEST_CASE( sha3_tests, crypto_primitives_tester ) try {
    push_action("eosio"_n, "sha3test"_n, "test"_n, mvo()
       ("val", "hello")
       ("sha3_dg", "3338be694f50c5f338814986cdf0686453a888b84f424d792af4b9202398f392"));
@@ -41,15 +45,7 @@ BOOST_FIXTURE_TEST_CASE( sha3_tests, tester ) try {
 
 } FC_LOG_AND_RETHROW()
 
-BOOST_FIXTURE_TEST_CASE( keccak_tests, tester ) try {
-   create_accounts( { "test"_n } );
-   produce_block();
-
-   set_code( "eosio"_n,  contracts::crypto_primitives_test_wasm() );
-   set_abi(  "eosio"_n,  contracts::crypto_primitives_test_abi().data() );
-
-   produce_blocks();
-
+BOOST_FIXTURE_TEST_CASE( keccak_tests, crypto_primitives_tester ) try {
    push_action("eosio"_n, "keccaktest"_n, "test"_n, mvo()
       ("val", "hello")
       ("sha3_dg", "1c8aff950685c2ed4bc3174f3472287b56d9517b9c948127319a09a7a36deac8"));
@@ -64,15 +60,7 @@ BOOST_FIXTURE_TEST_CASE( keccak_tests, tester ) try {
 
 } FC_LOG_AND_RETHROW()
 
-BOOST_FIXTURE_TEST_CASE( bn128_add_tests, tester ) try {
-   create_accounts( { "test"_n } );
-   produce_block();
-
-   set_code( "eosio"_n,  contracts::crypto_primitives_test_wasm() );
-   set_abi(  "eosio"_n,  contracts::crypto_primitives_test_abi().data() );
-
-   produce_blocks();
-
+BOOST_FIXTURE_TEST_CASE( bn128_add_tests, crypto_primitives_tester ) try {
    push_action("eosio"_n, "addtest"_n, "test"_n, mvo()
       ("x1", "222480c9f95409bfa4ac6ae890b9c150bc88542b87b352e92950c340458b0c09")
       ("y1", "2976efd698cf23b414ea622b3f720dd9080d679042482ff3668cb2e32cad8ae2")
@@ -95,15 +83,7 @@ BOOST_FIXTURE_TEST_CASE( bn128_add_tests, tester ) try {
 } FC_LOG_AND_RETHROW()
 
 // Test G1 constructed from a serialized point
-BOOST_FIXTURE_TEST_CASE( bn128_add_serialized_tests, tester ) try {
-   create_accounts( { "test"_n } );
-   produce_block();
-
-   set_code( "eosio"_n,  contracts::crypto_primitives_test_wasm() );
-   set_abi(  "eosio"_n,  contracts::crypto_primitives_test_abi().data() );
-
-   produce_blocks();
-
+BOOST_FIXTURE_TEST_CASE( bn128_add_serialized_tests, crypto_primitives_tester ) try {
    push_action("eosio"_n, "addtest1"_n, "test"_n, mvo()
       ("p1", "222480c9f95409bfa4ac6ae890b9c150bc88542b87b352e92950c340458b0c092976efd698cf23b414ea622b3f720dd9080d679042482ff3668cb2e32cad8ae2")
       ("p2", "1bd20beca3d8d28e536d2b5bd3bf36d76af68af5e6c96ca6e5519ba9ff8f53322a53edf6b48bcf5cb1c0b4ad1d36dfce06a79dcd6526f1c386a14d8ce4649844")
@@ -121,15 +101,7 @@ BOOST_FIXTURE_TEST_CASE( bn128_add_serialized_tests, tester ) try {
 
 } FC_LOG_AND_RETHROW()
 
-BOOST_FIXTURE_TEST_CASE( bn128_mul_tests, tester ) try {
-   create_accounts( { "test"_n } );
-   produce_block();
-
-   set_code( "eosio"_n,  contracts::crypto_primitives_test_wasm() );
-   set_abi(  "eosio"_n,  contracts::crypto_primitives_test_abi().data() );
-
-   produce_blocks();
-
+BOOST_FIXTURE_TEST_CASE( bn128_mul_tests, crypto_primitives_tester ) try {
    push_action("eosio"_n, "multest"_n, "test"_n, mvo()
       ("g1_x", "007c43fcd125b2b13e2521e395a81727710a46b34fe279adbf1b94c72f7f9136")
       ("g1_y", "0db2f980370fb8962751c6ff064f4516a6a93d563388518bb77ab9a6b30755be")
@@ -139,15 +111,7 @@ BOOST_FIXTURE_TEST_CASE( bn128_mul_tests, tester ) try {
       ("expected_y", "11c76319ebefc5379f7aa6d85d40169a612597637242a4bbb39e5cd3b844becd"));
 } FC_LOG_AND_RETHROW()
 
-BOOST_FIXTURE_TEST_CASE( bn128_pair_tests, tester ) try {
-   create_accounts( { "test"_n } );
-   produce_block();
-
-   set_code( "eosio"_n,  contracts::crypto_primitives_test_wasm() );
-   set_abi(  "eosio"_n,  contracts::crypto_primitives_test_abi().data() );
-
-   produce_blocks();
-
+BOOST_FIXTURE_TEST_CASE( bn128_pair_tests, crypto_primitives_tester ) try {
    push_action("eosio"_n, "pairtest"_n, "test"_n, mvo()
       ("g1_a_x", "0f25929bcb43d5a57391564615c9e70a992b10eafa4db109709649cf48c50dd2")
       ("g1_a_y", "16da2f5cb6be7a0aa72c440c53c9bbdfec6c36c7d515536431b3a865468acbba")
@@ -161,15 +125,7 @@ BOOST_FIXTURE_TEST_CASE( bn128_pair_tests, tester ) try {
 } FC_LOG_AND_RETHROW()
 
 // Test G1 and G2 constructed from serialized points
-BOOST_FIXTURE_TEST_CASE( bn128_serialized_point_tests, tester ) try {
-   create_accounts( { "test"_n } );
-   produce_block();
-
-   set_code( "eosio"_n,  contracts::crypto_primitives_test_wasm() );
-   set_abi(  "eosio"_n,  contracts::crypto_primitives_test_abi().data() );
-
-   produce_blocks();
-
+BOOST_FIXTURE_TEST_CASE( bn128_serialized_point_tests, crypto_primitives_tester ) try {
    push_action("eosio"_n, "pairtest1"_n, "test"_n, mvo()
       ("g1a", "0f25929bcb43d5a57391564615c9e70a992b10eafa4db109709649cf48c50dd216da2f5cb6be7a0aa72c440c53c9bbdfec6c36c7d515536431b3a865468acbba")
       ("g2a", "2e89718ad33c8bed92e210e81d1853435399a271913a6520736a4729cf0d51eb01a9e2ffa2e92599b68e44de5bcf354fa2642bd4f26b259daa6f7ce3ed57aeb314a9a87b789a58af499b314e13c3d65bede56c07ea2d418d6874857b70763713178fb49a2d6cd347dc58973ff49613a20757d0fcc22079f9abd10c3baee24590")
@@ -178,15 +134,7 @@ BOOST_FIXTURE_TEST_CASE( bn128_serialized_point_tests, tester ) try {
       ("expected", 0));
 } FC_LOG_AND_RETHROW()
 
-BOOST_FIXTURE_TEST_CASE( modexp_tests, tester ) try {
-   create_accounts( { "test"_n } );
-   produce_block();
-
-   set_code( "eosio"_n,  contracts::crypto_primitives_test_wasm() );
-   set_abi(  "eosio"_n,  contracts::crypto_primitives_test_abi().data() );
-
-   produce_blocks();
-
+BOOST_FIXTURE_TEST_CASE( modexp_tests, crypto_primitives_tester ) try {
    push_action("eosio"_n, "modexptest"_n, "test"_n, mvo()
       ("base", "03")
       ("exp", "fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2e")
@@ -234,15 +182,7 @@ BOOST_FIXTURE_TEST_CASE( modexp_tests, tester ) try {
 
 } FC_LOG_AND_RETHROW()
 
-BOOST_FIXTURE_TEST_CASE( blake2f_tests, tester ) try {
-   create_accounts( { "test"_n } );
-   produce_block();
-
-   set_code( "eosio"_n,  contracts::crypto_primitives_test_wasm() );
-   set_abi(  "eosio"_n,  contracts::crypto_primitives_test_abi().data() );
-
-   produce_blocks();
-
+BOOST_FIXTURE_TEST_CASE( blake2f_tests, crypto_primitives_tester ) try {
    push_action("eosio"_n, "blake2ftest"_n, "test"_n, mvo()
       ("rounds", 0)
       ("state", "48c9bdf267e6096a3ba7ca8485ae67bb2bf894fe72f36e3cf1361d5f3af54fa5d182e6ad7f520e511f6c3e2b8c68059b6bbd41fbabd9831f79217e1319cde05b")
