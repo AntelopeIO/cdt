@@ -101,23 +101,23 @@ namespace eosio {
       };
 
       /**
-       *  Returns packed x and y
+       *  Return serialzed point containing only x and y
        */
-      std::vector<char> packed() const {
+      std::vector<char> serialized() const {
          std::vector<char> x_and_y( x, x + size );
          x_and_y.insert( x_and_y.end(), y, y + size );
          return x_and_y;
       }
 
       /**
-      * Unpacks a seralized point and populates current point
+      * Copy a serialized buffer to current point
       *
-      * @param packed - The source serialized point
+      * @param source - The source to be copied from
       */
-      void unpack(const std::vector<char>& packed) {
-         eosio::check( packed.size() == 2 * size, "size of packed point must be equal to x's size" );
-         std::memcpy(x, packed.data(), size);
-         std::memcpy(y, packed.data() + size, size);
+      void copy_from(const std::vector<char>& source) {
+         eosio::check( source.size() == 2 * size, "size of souce buffer must be size of x + y" );
+         std::memcpy(x, source.data(), size);
+         std::memcpy(y, source.data() + size, size);
       }
    };
 
@@ -215,12 +215,13 @@ namespace eosio {
     *  @return -1 if there is an error otherwise 0
     */
    inline int32_t alt_bn128_add( const g1_view& op1, const g1_view& op2, g1_view& result) {
-      auto op_1 = op1.packed();
-      auto op_2 = op2.packed();
+      auto op_1 = op1.serialized();
+      auto op_2 = op2.serialized();
+
       std::vector<char> rslt(2*result.size); // buffer storing x and y
       auto ret = internal_use_do_not_use::alt_bn128_add( op_1.data(), op_1.size(), op_2.data(), op_2.size(), rslt.data(), rslt.size());
       if ( ret == 0 ) {
-         result.unpack(rslt); // unpack rslt into result
+         result.copy_from(rslt); // save rslt into result
       }
       return ret;
    }
@@ -251,11 +252,11 @@ namespace eosio {
     *  @return -1 if there is an error otherwise 0
     */
    inline int32_t alt_bn128_mul( const g1_view& g1, const bigint& scalar, g1_view& result) {
-      auto g1_bin = g1.packed();
+      auto g1_bin = g1.serialized();
       std::vector<char> rslt(2*result.size);
       auto ret = internal_use_do_not_use::alt_bn128_mul( g1_bin.data(), g1_bin.size(), scalar.data, scalar.size, rslt.data(), rslt.size());
       if ( ret == 0 ) {
-         result.unpack(rslt);
+         result.copy_from(rslt);
       }
       return ret;
    }
@@ -286,8 +287,8 @@ namespace eosio {
    inline int32_t alt_bn128_pair( const std::vector<std::pair<g1_view, g2_view>>& pairs ) {
       std::vector<char> g1_g2_pairs;
       for ( const auto& pair: pairs ) {
-         auto g1_bin = pair.first.packed();
-         auto g2_bin = pair.second.packed();
+         auto g1_bin = pair.first.serialized();
+         auto g2_bin = pair.second.serialized();
          g1_g2_pairs.insert( g1_g2_pairs.end(), g1_bin.begin(), g1_bin.end() );
          g1_g2_pairs.insert( g1_g2_pairs.end(), g2_bin.begin(), g2_bin.end() );
       }

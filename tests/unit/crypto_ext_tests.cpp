@@ -11,26 +11,26 @@ using namespace eosio::native;
 // Definitions in `eosio.cdt/libraries/eosio/crypto_ext.hpp`
 EOSIO_TEST_BEGIN(point_view_test)
    // -----------------------------------------------------
-   // std::vector<char> packed() const
+   // std::vector<char> serialized() const
    std::vector<char> x {'0', '1', '2', '3', '4', '5', '6', '7'};
    std::vector<char> y {'8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
    std::vector<char> expected {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
    eosio::point_view point{x, y};
 
-   auto packed = point.packed();
-   CHECK_EQUAL( expected, packed );
+   auto serialized = point.serialized();
+   CHECK_EQUAL( expected, serialized );
 
    std::vector<char> x1(8, '\0');
    std::vector<char> y1(8, '\0');
    eosio::point_view point1{x1, y1};
 
-   point1.unpack(packed);
+   point1.copy_from(serialized);
 
-   std::vector<char> unpack_x(point1.x, point1.x + point1.size);
-   std::vector<char> unpack_y(point1.y, point1.y + point1.size);
-   CHECK_EQUAL( unpack_x, x );
-   CHECK_EQUAL( unpack_y, y );
+   std::vector<char> point1_x(point1.x, point1.x + point1.size);
+   std::vector<char> point1_y(point1.y, point1.y + point1.size);
+   CHECK_EQUAL( point1_x, x );
+   CHECK_EQUAL( point1_y, y );
 EOSIO_TEST_END
 
 EOSIO_TEST_BEGIN(g1_view_test)
