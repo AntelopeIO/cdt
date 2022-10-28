@@ -58,20 +58,72 @@ namespace eosio {
     */
 
    /**
-    * Abstracts G1 and G2 points. Ensures sizes of x and y are valid
+    * Abstracts mutable G1 and G2 points
     *
     *  @ingroup crypto
     */
-   struct point_view {
+   template <std::size_t Size = 32>
+   struct ec_point {
+      /**
+       * Bytes of the x coordinate
+       */
+      std::vector<char> x;
+
+      /**
+       * Bytes of the y coordinate
+       */
+      std::vector<char> y;
+
+      /**
+       * Construct a point given x and y
+       *
+       * @param x_ - The x coordinate, a vector of chars
+       * @param y_ - The y coordinate, a vector of chars
+      */
+      ec_point(std::vector<char>& x_, std::vector<char>& y_)
+      :x(x_), y(y_)
+      {
+         eosio::check( x_.size() == y_.size(), "x's size must be equal to y's" );
+         eosio::check ( x_.size() == Size, "point size must match");
+      };
+
+      /**
+       * Construct a point given a serialized point
+       *
+       * @param p - The serialized point
+       */
+      ec_point(std::vector<char>& p)
+      :x(p.data(), p.data() + p.size()/2), y(p.data() + p.size()/2, p.data() + p.size())
+      {
+         eosio::check ( p.size() == Size * 2, "point size must match");
+      };
+
+      /**
+       *  Return serialzed point containing only x and y
+       */
+      std::vector<char> serialized() const {
+         std::vector<char> x_and_y( x );
+         x_and_y.insert( x_and_y.end(), y.begin(), y.end() );
+         return x_and_y;
+      }
+   };
+
+   /**
+    * Abstracts read-only G1 and G2 points
+    *
+    *  @ingroup crypto
+    */
+   template <std::size_t Size = 32>
+   struct ec_point_view {
       /**
        * Pointer to the x coordinate
        */
-      char* x;
+      const char* x;
 
       /**
        * Pointer to the y coordinate
        */
-      char* y;
+      const char* y;
 
       /**
        * Number of bytes in each of x and y
@@ -84,10 +136,11 @@ namespace eosio {
        * @param x_ - The x coordinate, a vector of chars
        * @param y_ - The y coordinate, a vector of chars
        */
-      point_view(std::vector<char>& x_, std::vector<char>& y_)
+      ec_point_view(std::vector<char>& x_, std::vector<char>& y_)
       :x(x_.data()), y(y_.data()), size(x_.size())
       {
          eosio::check( x_.size() == y_.size(), "x's size must be equal to y's" );
+         eosio::check ( size == Size, "point size must match");
       };
 
       /**
@@ -95,9 +148,10 @@ namespace eosio {
        *
        * @param p - The serialized point
        */
-      point_view(std::vector<char>& p)
+      ec_point_view(std::vector<char>& p)
       :x(p.data()), y(p.data() + p.size()/2), size(p.size()/2)
       {
+         eosio::check ( p.size() == Size * 2, "point size must match");
       };
 
       /**
@@ -108,102 +162,22 @@ namespace eosio {
          x_and_y.insert( x_and_y.end(), y, y + size );
          return x_and_y;
       }
-
-      /**
-      * Copy a serialized buffer to current point
-      *
-      * @param source - The source to be copied from
-      */
-      void copy_from(const std::vector<char>& source) {
-         eosio::check( source.size() == 2 * size, "size of souce buffer must be size of x + y" );
-         std::memcpy(x, source.data(), size);
-         std::memcpy(y, source.data() + size, size);
-      }
    };
 
    static constexpr size_t g1_coordinate_size = 32;
    static constexpr size_t g2_coordinate_size = 64;
-   static constexpr size_t blake2f_result_size = 64;
+
+   using g1_point = ec_point<g1_coordinate_size>;
+   using g2_point = ec_point<g2_coordinate_size>;
+   using g1_point_view = ec_point_view<g1_coordinate_size>;
+   using g2_point_view = ec_point_view<g2_coordinate_size>;
 
    /**
-    * Abstracts G1 point. Ensures sizes of x and y are 32
+    * Big integer.
     *
     *  @ingroup crypto
     */
-   struct g1_view : public point_view {
-      /**
-       * Construct a G1 point given x and y
-       *
-       * @param x_ - The x coordinate, a vector of chars
-       * @param y_ - The y coordinate, a vector of chars
-       */
-      g1_view(std::vector<char>& x_, std::vector<char>& y_)
-      : point_view(x_, y_)
-      {
-         eosio::check( size == g1_coordinate_size, "G1 coordinate size must be 32" );
-      }
-
-      /**
-       * Construct a point given a serialized point
-       *
-       * @param p - The serialized point
-       */
-      g1_view(std::vector<char>& p)
-      : point_view(p)
-      {
-         eosio::check( p.size() == g1_coordinate_size * 2, "G1 serialized size must be 64" );
-      };
-   };
-
-   /**
-    * Abstracts G2 point. Ensures sizes of x and y are 64
-    *
-    *  @ingroup crypto
-    */
-   struct g2_view : public point_view {
-      /**
-       * Construct a G2 point given x and y
-       *
-       * @param x_ - The x coordinate, a vector of chars
-       * @param y_ - The y coordinate, a vector of chars
-       */
-      g2_view(std::vector<char>& x_, std::vector<char>& y_)
-      : point_view(x_, y_)
-      {
-         eosio::check( size == g2_coordinate_size, "G2 coordinate size must be 64" );
-      }
-
-      /**
-       * Construct a point given a serialized point
-       *
-       * @param p - The serialized point
-       */
-      g2_view(std::vector<char>& p)
-      : point_view(p)
-      {
-         eosio::check( p.size() == g2_coordinate_size * 2, "G2 serialized size must be 128" );
-      };
-   };
-
-   /**
-    * Abstracts big integer.
-    *
-    *  @ingroup crypto
-    */
-   struct bigint {
-      /**
-       * Construct a bigint given a vector of chars (bytes)
-       *
-       * @param s - The source bytes
-       */
-      bigint(std::vector<char>& s)
-      :data(s.data()), size(s.size())
-      {
-      };
-
-      char* data;
-      uint32_t size;
-   };
+   using bigint = std::vector<char>;
 
    /**
     *  Addition operation on the elliptic curve `alt_bn128`
@@ -211,19 +185,16 @@ namespace eosio {
     *  @ingroup crypto
     *  @param op1 - operand 1
     *  @param op2 - operand 2
-    *  @param result - result of the addition operation
-    *  @return -1 if there is an error otherwise 0
+    *  @return result of the addition operation; throw if error
     */
-   inline int32_t alt_bn128_add( const g1_view& op1, const g1_view& op2, g1_view& result) {
+   template <typename T>
+   inline g1_point alt_bn128_add( const T& op1, const T& op2 ) {
       auto op_1 = op1.serialized();
       auto op_2 = op2.serialized();
-
-      std::vector<char> rslt(2*result.size); // buffer storing x and y
-      auto ret = internal_use_do_not_use::alt_bn128_add( op_1.data(), op_1.size(), op_2.data(), op_2.size(), rslt.data(), rslt.size());
-      if ( ret == 0 ) {
-         result.copy_from(rslt); // save rslt into result
-      }
-      return ret;
+      std::vector<char> buf ( 2 * g1_coordinate_size ); // buffer storing x and y
+      auto ret = internal_use_do_not_use::alt_bn128_add( op_1.data(), op_1.size(), op_2.data(), op_2.size(), buf.data(), buf.size());
+      eosio::check ( ret == 0, "internal_use_do_not_use::alt_bn128_add failed" );
+      return g1_point { buf };
    }
 
    /**
@@ -248,17 +219,15 @@ namespace eosio {
     *  @ingroup crypto
     *  @param g1 - G1 point
     *  @param scalar - scalar factor
-    *  @param result - result of the scalar multiplication operation
-    *  @return -1 if there is an error otherwise 0
+    *  @return result of the scalar multiplication operation; throw if error
     */
-   inline int32_t alt_bn128_mul( const g1_view& g1, const bigint& scalar, g1_view& result) {
+   template <typename T>
+   inline g1_point alt_bn128_mul( const T& g1, const bigint& scalar) {
       auto g1_bin = g1.serialized();
-      std::vector<char> rslt(2*result.size);
-      auto ret = internal_use_do_not_use::alt_bn128_mul( g1_bin.data(), g1_bin.size(), scalar.data, scalar.size, rslt.data(), rslt.size());
-      if ( ret == 0 ) {
-         result.copy_from(rslt);
-      }
-      return ret;
+      std::vector<char> buf( 2 * g1_coordinate_size ); // buffer storing x and y
+      auto ret = internal_use_do_not_use::alt_bn128_mul( g1_bin.data(), g1_bin.size(), scalar.data(), scalar.size(), buf.data(), buf.size());
+      eosio::check ( ret == 0, "internal_use_do_not_use::alt_bn128_mul failed");
+      return g1_point { buf };
    }
 
    /**
@@ -284,7 +253,8 @@ namespace eosio {
     *  @param pairs - g1 and g2 pairs
     *  @return -1 if there is an error, 1 if false and 0 if true and successful
     */
-   inline int32_t alt_bn128_pair( const std::vector<std::pair<g1_view, g2_view>>& pairs ) {
+   template <typename G1_T, typename G2_T>
+   inline int32_t alt_bn128_pair( const std::vector<std::pair<G1_T, G2_T>>& pairs ) {
       std::vector<char> g1_g2_pairs;
       for ( const auto& pair: pairs ) {
          auto g1_bin = pair.first.serialized();
@@ -320,8 +290,8 @@ namespace eosio {
     */
 
    inline int32_t mod_exp( const bigint& base, const bigint& exp, const bigint& mod, bigint& result) {
-      eosio::check( result.size >= mod.size, "mod_exp result parameter's size must be >= mod's size" );
-      auto ret = internal_use_do_not_use::mod_exp( base.data, base.size, exp.data, exp.size, mod.data, mod.size, result.data, result.size);
+      eosio::check( result.size() >= mod.size(), "mod_exp result parameter's size must be >= mod's size" );
+      auto ret = internal_use_do_not_use::mod_exp( base.data(), base.size(), exp.data(), exp.size(), mod.data(), mod.size(), result.data(), result.size());
       return ret;
    }
 
@@ -344,6 +314,8 @@ namespace eosio {
    inline int32_t mod_exp( const char* base, uint32_t base_len, const char* exp, uint32_t exp_len, const char* mod, uint32_t mod_len, char* result, uint32_t result_len ) {
       return internal_use_do_not_use::mod_exp( base, base_len, exp, exp_len, mod, mod_len, result, result_len);
    }
+
+   static constexpr size_t blake2f_result_size = 64;
 
    /**
     *  BLAKE2 compression function "F"

@@ -24,78 +24,102 @@ class [[eosio::contract]] crypto_primitives_tests : public contract{
          eosio::assert_keccak(val.c_str(), val.size(), sha3_dg);
       }
 
-      void addtest_helper(eosio::g1_view& p1, eosio::g1_view& p2, int32_t expected_rc, std::vector<char>& expected_x, std::vector<char>& expected_y) {
-         std::vector<char> result_x(eosio::g1_coordinate_size);
-         std::vector<char> result_y(eosio::g1_coordinate_size);
-         eosio::g1_view result {result_x, result_y};
+      template <typename T>
+      void addtest_helper(T& p1, T& p2, std::vector<char>& expected_x, std::vector<char>& expected_y) {
+         auto result = eosio::alt_bn128_add(p1, p2);
+         eosio::check(result.x == expected_x, "alt_bn128_add: result x does not match");
+         eosio::check(result.y == expected_y, "alt_bn128_add: result y does not match");
+      }
 
-         auto rc = eosio::alt_bn128_add(p1, p2, result);
-         eosio::check(rc == expected_rc, "alt_bn128_add: return code not match");
+      // test add where points are constructed from x and y
+      [[eosio::action]]
+      void addtest(std::vector<char>& x1, std::vector<char>& y1, std::vector<char>& x2, std::vector<char>& y2, std::vector<char>& expected_x, std::vector<char>& expected_y) {
+         // point
+         eosio::g1_point point1 {x1, y1};
+         eosio::g1_point point2 {x2, y2};
+         addtest_helper( point1, point2, expected_x, expected_y );
 
-         std::vector<char> rslt_x(result.x, result.x + result.size);
-         std::vector<char> rslt_y(result.y, result.y + result.size);
-         eosio::check(rslt_x == expected_x, "alt_bn128_add: result x does not match");
-         eosio::check(rslt_y == expected_y, "alt_bn128_add: result y does not match");
+         // view
+         eosio::g1_point_view point_view1 {x1, y1};
+         eosio::g1_point_view point_view2 {x2, y2};
+         addtest_helper( point_view1, point_view2, expected_x, expected_y );
+      }
+
+      // test add where points are constructed from other points
+      [[eosio::action]]
+      void addtest1(std::vector<char>& p1, std::vector<char>& p2, std::vector<char>& expected_x, std::vector<char>& expected_y) {
+         // point
+         eosio::g1_point point1 {p1};
+         eosio::g1_point point2 {p2};
+         addtest_helper( point1, point2, expected_x, expected_y );
+
+         // view
+         eosio::g1_point_view point_view1 {p1};
+         eosio::g1_point_view point_view2 {p2};
+         addtest_helper( point_view1, point_view2, expected_x, expected_y );
+      }
+
+      template <typename T>
+      void multest_helper(T& g1, eosio::bigint& s, std::vector<char>& expected_x, std::vector<char>& expected_y) {
+         auto result = eosio::alt_bn128_mul(g1, s);
+         eosio::check(result.x == expected_x, "alt_bn128_mul: Result x does not match");
+         eosio::check(result.y == expected_y, "alt_bn128_mul: Result y does not match");
       }
 
       [[eosio::action]]
-      void addtest(std::vector<char>& x1, std::vector<char>& y1, std::vector<char>& x2, std::vector<char>& y2, int32_t expected_rc, std::vector<char>& expected_x, std::vector<char>& expected_y) {
-         eosio::g1_view point1 {x1, y1};
-         eosio::g1_view point2 {x2, y2};
-
-         addtest_helper( point1, point2, expected_rc, expected_x, expected_y );
-      }
-
-      [[eosio::action]]
-      void addtest1(std::vector<char>& p1, std::vector<char>& p2, int32_t expected_rc, std::vector<char>& expected_x, std::vector<char>& expected_y) {
-         eosio::g1_view point1 {p1};
-         eosio::g1_view point2 {p2};
-
-         addtest_helper( point1, point2, expected_rc, expected_x, expected_y );
-      }
-
-      [[eosio::action]]
-      void multest(std::vector<char>& g1_x, std::vector<char>& g1_y, std::vector<char>& scalar, int32_t expected_rc, std::vector<char>& expected_x, std::vector<char>& expected_y) {
-         eosio::g1_view g1 {g1_x, g1_y};
+      void multest(std::vector<char>& g1_x, std::vector<char>& g1_y, std::vector<char>& scalar, std::vector<char>& expected_x, std::vector<char>& expected_y) {
          eosio::bigint s {scalar};
-         std::vector<char> result_x(eosio::g1_coordinate_size);
-         std::vector<char> result_y(eosio::g1_coordinate_size);
-         eosio::g1_view result {result_x, result_y};
 
-         auto rc = eosio::alt_bn128_mul(g1, s, result);
-         eosio::check(rc == expected_rc, "alt_bn128_mul: return code not match");
+         // point
+         eosio::g1_point g1_point {g1_x, g1_y};
+         multest_helper(g1_point, s, expected_x, expected_y);
 
-         std::vector<char> rslt_x(result.x, result.x + result.size);
-         std::vector<char> rslt_y(result.y, result.y + result.size);
-         eosio::check(rslt_x == expected_x, "alt_bn128_mul: Result x does not match");
-         eosio::check(rslt_y == expected_y, "alt_bn128_mul: Result y does not match");
+         // view
+         eosio::g1_point_view g1_view {g1_x, g1_y};
+         multest_helper(g1_view, s, expected_x, expected_y);
       }
 
-      void pairtest_helper(eosio::g1_view& g1_a, eosio::g2_view& g2_a, eosio::g1_view& g1_b, eosio::g2_view& g2_b, int32_t expected) {
-         std::vector<std::pair<g1_view, g2_view>> pairs { {g1_a, g2_a}, {g1_b, g2_b} };
-
+      template <typename G1_T, typename G2_T>
+      void pairtest_helper(G1_T& g1_a, G2_T& g2_a, G1_T& g1_b, G2_T& g2_b, int32_t expected) {
+         std::vector<std::pair<G1_T, G2_T>> pairs { {g1_a, g2_a}, {g1_b, g2_b} };
          auto rc = eosio::alt_bn128_pair(pairs);
          eosio::check(rc == expected, "alt_bn128_pair::return code not match");
       }
 
+      // test pairtest where points are constructed from x and y
       [[eosio::action]]
       void pairtest(std::vector<char>& g1_a_x, std::vector<char>& g1_a_y, std::vector<char>& g2_a_x, std::vector<char>& g2_a_y, std::vector<char>& g1_b_x, std::vector<char>& g1_b_y, std::vector<char>& g2_b_x, std::vector<char>& g2_b_y, int32_t expected) {
-         eosio::g1_view g1_a {g1_a_x, g1_a_y};
-         eosio::g2_view g2_a {g2_a_x, g2_a_y};
-         eosio::g1_view g1_b {g1_b_x, g1_b_y};
-         eosio::g2_view g2_b {g2_b_x, g2_b_y};
-
+         // point
+         eosio::g1_point g1_a {g1_a_x, g1_a_y};
+         eosio::g2_point g2_a {g2_a_x, g2_a_y};
+         eosio::g1_point g1_b {g1_b_x, g1_b_y};
+         eosio::g2_point g2_b {g2_b_x, g2_b_y};
          pairtest_helper( g1_a, g2_a, g1_b, g2_b, expected );
+
+         // view
+         eosio::g1_point_view g1_view_a {g1_a_x, g1_a_y};
+         eosio::g2_point_view g2_view_a {g2_a_x, g2_a_y};
+         eosio::g1_point_view g1_view_b {g1_b_x, g1_b_y};
+         eosio::g2_point_view g2_view_b {g2_b_x, g2_b_y};
+         pairtest_helper( g1_view_a, g2_view_a, g1_view_b, g2_view_b, expected );
       }
 
+      // test pairtest where points are constructed from other points
       [[eosio::action]]
       void pairtest1(std::vector<char>& g1a, std::vector<char>& g2a, std::vector<char>& g1b, std::vector<char>& g2b, int32_t expected) {
-         eosio::g1_view g1_a { g1a };
-         eosio::g2_view g2_a { g2a };
-         eosio::g1_view g1_b { g1b };
-         eosio::g2_view g2_b { g2b };
-
+         // point
+         eosio::g1_point g1_a { g1a };
+         eosio::g2_point g2_a { g2a };
+         eosio::g1_point g1_b { g1b };
+         eosio::g2_point g2_b { g2b };
          pairtest_helper( g1_a, g2_a, g1_b, g2_b, expected );
+
+         // view
+         eosio::g1_point_view g1_view_a { g1a };
+         eosio::g2_point_view g2_view_a { g2a };
+         eosio::g1_point_view g1_view_b { g1b };
+         eosio::g2_point_view g2_view_b { g2b };
+         pairtest_helper( g1_view_a, g2_view_a, g1_view_b, g2_view_b, expected );
       }
 
       [[eosio::action]]
@@ -103,14 +127,11 @@ class [[eosio::contract]] crypto_primitives_tests : public contract{
          eosio::bigint base_val {base};
          eosio::bigint exp_val {exp};
          eosio::bigint modulo_val {modulo};
-         std::vector<char> reslut_buf(modulo.size(), '\0');
-         eosio::bigint result {reslut_buf};
+         eosio::bigint result( modulo.size(), '\0' );
 
          auto rc = eosio::mod_exp(base_val, exp_val, modulo_val, result);
          eosio::check(rc == expected_rc, "return code does not match");
-
-         std::vector<char> actual_result(result.data, result.data + result.size);
-         eosio::check(actual_result == expected_result, "Result does not match");
+         eosio::check(result == expected_result, "Result does not match");
       }
 
       [[eosio::action]]

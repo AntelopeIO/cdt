@@ -60,44 +60,43 @@ BOOST_FIXTURE_TEST_CASE( keccak_tests, crypto_primitives_tester ) try {
 
 } FC_LOG_AND_RETHROW()
 
+// test add where points are constructed from x and y
 BOOST_FIXTURE_TEST_CASE( bn128_add_tests, crypto_primitives_tester ) try {
    push_action("eosio"_n, "addtest"_n, "test"_n, mvo()
       ("x1", "222480c9f95409bfa4ac6ae890b9c150bc88542b87b352e92950c340458b0c09")
       ("y1", "2976efd698cf23b414ea622b3f720dd9080d679042482ff3668cb2e32cad8ae2")
       ("x2", "1bd20beca3d8d28e536d2b5bd3bf36d76af68af5e6c96ca6e5519ba9ff8f5332")
       ("y2", "2a53edf6b48bcf5cb1c0b4ad1d36dfce06a79dcd6526f1c386a14d8ce4649844")
-      ("expected_rc", 0)
       ("expected_x", "16c7c4042e3a725ddbacf197c519c3dcad2bc87dfd9ac7e1e1631154ee0b7d9c")
       ("expected_y", "19cd640dd28c9811ebaaa095a16b16190d08d6906c4f926fce581985fe35be0e"));
 
-   // P1 not on curve
-   push_action("eosio"_n, "addtest"_n, "test"_n, mvo()
+   // P1 not on curve, will throw
+   BOOST_CHECK_THROW(push_action("eosio"_n, "addtest"_n, "test"_n, mvo()
       ("x1", "222480c9f95409bfa4ac6ae890b9c150bc88542b87b352e92950c340458b0c09")
       ("y1", "2976efd698cf23b414ea622b3f720dd9080d679042482ff3668cb2e32cad8ae2")
       ("x2", "2a53edf6b48bcf5cb1c0b4ad1d36dfce06a79dcd6526f1c386a14d8ce4649844")
       ("y2", "1bd20beca3d8d28e536d2b5bd3bf36d76af68af5e6c96ca6e5519ba9ff8f5332")
-      ("expected_rc", -1)
       ("expected_x", "0000000000000000000000000000000000000000000000000000000000000000")
-      ("expected_y", "0000000000000000000000000000000000000000000000000000000000000000"));
+      ("expected_y", "0000000000000000000000000000000000000000000000000000000000000000")),
+      eosio_assert_message_exception);
 
 } FC_LOG_AND_RETHROW()
 
-// Test G1 constructed from a serialized point
+// test add where points are constructed from other points
 BOOST_FIXTURE_TEST_CASE( bn128_add_serialized_tests, crypto_primitives_tester ) try {
    push_action("eosio"_n, "addtest1"_n, "test"_n, mvo()
       ("p1", "222480c9f95409bfa4ac6ae890b9c150bc88542b87b352e92950c340458b0c092976efd698cf23b414ea622b3f720dd9080d679042482ff3668cb2e32cad8ae2")
       ("p2", "1bd20beca3d8d28e536d2b5bd3bf36d76af68af5e6c96ca6e5519ba9ff8f53322a53edf6b48bcf5cb1c0b4ad1d36dfce06a79dcd6526f1c386a14d8ce4649844")
-      ("expected_rc", 0)
       ("expected_x", "16c7c4042e3a725ddbacf197c519c3dcad2bc87dfd9ac7e1e1631154ee0b7d9c")
       ("expected_y", "19cd640dd28c9811ebaaa095a16b16190d08d6906c4f926fce581985fe35be0e"));
 
    // P1 not on curve
-   push_action("eosio"_n, "addtest1"_n, "test"_n, mvo()
+   BOOST_CHECK_THROW(push_action("eosio"_n, "addtest1"_n, "test"_n, mvo()
       ("p1", "222480c9f95409bfa4ac6ae890b9c150bc88542b87b352e92950c340458b0c092976efd698cf23b414ea622b3f720dd9080d679042482ff3668cb2e32cad8ae2")
       ("p2", "2a53edf6b48bcf5cb1c0b4ad1d36dfce06a79dcd6526f1c386a14d8ce46498441bd20beca3d8d28e536d2b5bd3bf36d76af68af5e6c96ca6e5519ba9ff8f5332")
-      ("expected_rc", -1)
       ("expected_x", "0000000000000000000000000000000000000000000000000000000000000000")
-      ("expected_y", "0000000000000000000000000000000000000000000000000000000000000000"));
+      ("expected_y", "0000000000000000000000000000000000000000000000000000000000000000")),
+      eosio_assert_message_exception);
 
 } FC_LOG_AND_RETHROW()
 
@@ -106,9 +105,17 @@ BOOST_FIXTURE_TEST_CASE( bn128_mul_tests, crypto_primitives_tester ) try {
       ("g1_x", "007c43fcd125b2b13e2521e395a81727710a46b34fe279adbf1b94c72f7f9136")
       ("g1_y", "0db2f980370fb8962751c6ff064f4516a6a93d563388518bb77ab9a6b30755be")
       ("scalar", "0312ed43559cf8ecbab5221256a56e567aac5035308e3f1d54954d8b97cd1c9b")
-      ("expected_rc", 0)
       ("expected_x", "2d66cdeca5e1715896a5a924c50a149be87ddd2347b862150fbb0fd7d0b1833c")
       ("expected_y", "11c76319ebefc5379f7aa6d85d40169a612597637242a4bbb39e5cd3b844becd"));
+
+   // scalar size < 256 bits, will throw
+   BOOST_CHECK_THROW(push_action("eosio"_n, "multest"_n, "test"_n, mvo()
+      ("g1_x", "007c43fcd125b2b13e2521e395a81727710a46b34fe279adbf1b94c72f7f9136")
+      ("g1_y", "0db2f980370fb8962751c6ff064f4516a6a93d563388518bb77ab9a6b30755be")
+      ("scalar", "03")
+      ("expected_x", "00")
+      ("expected_y", "00")),
+      eosio_assert_message_exception);
 } FC_LOG_AND_RETHROW()
 
 BOOST_FIXTURE_TEST_CASE( bn128_pair_tests, crypto_primitives_tester ) try {
