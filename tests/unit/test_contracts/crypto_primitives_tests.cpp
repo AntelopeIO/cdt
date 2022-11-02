@@ -40,9 +40,13 @@ class [[eosio::contract]] crypto_primitives_tests : public contract{
          addtest_helper( point1, point2, expected_x, expected_y );
 
          // view
-         eosio::g1_point_view point_view1 {x1, y1};
-         eosio::g1_point_view point_view2 {x2, y2};
+         eosio::g1_point_view point_view1 {x1.data(), x1.size(), y1.data(), y1.size()};
+         eosio::g1_point_view point_view2 {x2.data(), x2.size(), y2.data(), y2.size()};
          addtest_helper( point_view1, point_view2, expected_x, expected_y );
+
+         eosio::g1_point_view point_view1_1 {point1};
+         eosio::g1_point_view point_view2_1 {point2};
+         addtest_helper( point_view1_1, point_view2_1, expected_x, expected_y );
       }
 
       // test add where points are constructed from other points
@@ -57,6 +61,10 @@ class [[eosio::contract]] crypto_primitives_tests : public contract{
          eosio::g1_point_view point_view1 {p1};
          eosio::g1_point_view point_view2 {p2};
          addtest_helper( point_view1, point_view2, expected_x, expected_y );
+
+         eosio::g1_point_view point_view1_1 {point1};
+         eosio::g1_point_view point_view2_1 {point2};
+         addtest_helper( point_view1_1, point_view2_1, expected_x, expected_y );
       }
 
       template <typename T>
@@ -75,8 +83,11 @@ class [[eosio::contract]] crypto_primitives_tests : public contract{
          multest_helper(g1_point, s, expected_x, expected_y);
 
          // view
-         eosio::g1_point_view g1_view {g1_x, g1_y};
+         eosio::g1_point_view g1_view {g1_x.data(), g1_x.size(), g1_y.data(), g1_y.size()};
          multest_helper(g1_view, s, expected_x, expected_y);
+
+         eosio::g1_point_view g1_view_1 {g1_point};
+         multest_helper(g1_view_1, s, expected_x, expected_y);
       }
 
       template <typename G1_T, typename G2_T>
@@ -97,11 +108,17 @@ class [[eosio::contract]] crypto_primitives_tests : public contract{
          pairtest_helper( g1_a, g2_a, g1_b, g2_b, expected );
 
          // view
-         eosio::g1_point_view g1_view_a {g1_a_x, g1_a_y};
-         eosio::g2_point_view g2_view_a {g2_a_x, g2_a_y};
-         eosio::g1_point_view g1_view_b {g1_b_x, g1_b_y};
-         eosio::g2_point_view g2_view_b {g2_b_x, g2_b_y};
+         eosio::g1_point_view g1_view_a {g1_a_x.data(), g1_a_x.size(), g1_a_y.data(), g1_a_y.size()};
+         eosio::g2_point_view g2_view_a {g2_a_x.data(), g2_a_x.size(), g2_a_y.data(), g2_a_y.size()};
+         eosio::g1_point_view g1_view_b {g1_b_x.data(), g1_b_x.size(), g1_b_y.data(), g1_b_y.size()};
+         eosio::g2_point_view g2_view_b {g2_b_x.data(), g2_b_x.size(), g2_b_y.data(), g2_b_y.size()};
          pairtest_helper( g1_view_a, g2_view_a, g1_view_b, g2_view_b, expected );
+
+         eosio::g1_point_view g1_view_a_1 { g1_a };
+         eosio::g2_point_view g2_view_a_1 { g2_a };
+         eosio::g1_point_view g1_view_b_1 { g1_b };
+         eosio::g2_point_view g2_view_b_1 { g2_b };
+         pairtest_helper( g1_view_a_1, g2_view_a_1, g1_view_b_1, g2_view_b_1, expected );
       }
 
       // test pairtest where points are constructed from other points

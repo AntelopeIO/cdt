@@ -93,7 +93,7 @@ namespace eosio {
        * @param p - The serialized point
        */
       ec_point(std::vector<char>& p)
-      :x(p.data(), p.data() + p.size()/2), y(p.data() + p.size()/2, p.data() + p.size())
+      :x(p.data(), p.data() + Size), y(p.data() + Size, p.data() + p.size())
       {
          eosio::check ( p.size() == Size * 2, "point size must match");
       };
@@ -131,27 +131,39 @@ namespace eosio {
       uint32_t size;
 
       /**
-       * Construct a point given x and y
+       * Construct a point view from x and y
        *
-       * @param x_ - The x coordinate, a vector of chars
-       * @param y_ - The y coordinate, a vector of chars
+       * @param x_     - The x coordinate, poiter to chars
+       * @param x_size - x's size
+       * @param y_     - The y coordinate, poiter to chars
+       * @param y_size - y's size
        */
-      ec_point_view(std::vector<char>& x_, std::vector<char>& y_)
-      :x(x_.data()), y(y_.data()), size(x_.size())
+      ec_point_view(const char* x_, uint32_t x_size, const char* y_, uint32_t y_size)
+      :x(x_), y(y_), size(x_size)
       {
-         eosio::check( x_.size() == y_.size(), "x's size must be equal to y's" );
+         eosio::check ( x_size == y_size, "x's size must be equal to y's");
          eosio::check ( size == Size, "point size must match");
       };
 
       /**
-       * Construct a point given a serialized point
+       * Construct a point view from a serialized point
        *
        * @param p - The serialized point
        */
-      ec_point_view(std::vector<char>& p)
-      :x(p.data()), y(p.data() + p.size()/2), size(p.size()/2)
+      ec_point_view(const std::vector<char>& p)
+      :x(p.data()), y(p.data() + Size), size(Size)
       {
          eosio::check ( p.size() == Size * 2, "point size must match");
+      };
+
+      /**
+       * Construct a point view from a point
+       *
+       * @param p - The point
+       */
+      ec_point_view(const ec_point<Size>& p)
+      :x(p.x.data()), y(p.y.data()), size(Size)
+      {
       };
 
       /**
