@@ -1,23 +1,25 @@
 #pragma once
 #include <setjmp.h>
 
+#include <string>
+
 namespace eosio { namespace cdt {
    enum output_stream_kind {
       std_out,
       std_err,
       none
    };
-   struct output_stream {
-      static constexpr size_t max_size = 1024 * 2;
-      char output[max_size] = {};
-      size_t index = 0;
-      std::string to_string()const { return std::string((const char*)output, index); }
-      const char* get()const { return output; }
-      void push(char c) {
-         if(index < max_size - 1)
-            output[index++] = c;
-      }
-      void clear() { index = 0; }
+   class output_stream {
+      static constexpr size_t initial_size = 1024 * 4;
+      std::string output;
+
+      public:
+      output_stream() { output.reserve(initial_size); }
+      std::string to_string() const { return output; }
+      const char* get() const { return output.c_str(); }
+      size_t index() const { return output.size(); }
+      void push(char c) { output.push_back(c); }
+      void clear() { output.clear(); }
    };
 }} //ns eosio::cdt
 
