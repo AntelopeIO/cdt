@@ -9,7 +9,6 @@ FOREACH(FN ${SRC_FILENAMES})
 ENDFOREACH(FN)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-everything")
-set(CMAKE_BUILD_TYPE "Release")
 
 add_library(c++
             ${SRC_FILES})

@@ -92,6 +92,13 @@ The binaries will be located at in the `build/bin` directory. You can export the
 
 If you would prefer to install CDT globally, see the section [Install CDT](#install-cdt) below.
 
+#### Build CDT in debug mode
+
+To build CDT in debug mode (with debug symbols) you need to add the following flags to cmake command:
+```sh
+cmake -DCMAKE_BUILD_TYPE="Debug" -DTOOLS_BUILD_TYPE="Debug" -DLIBS_BUILD_TYPE="Debug" ..
+```
+
 ### Run tests
 
 #### Run unit tests
