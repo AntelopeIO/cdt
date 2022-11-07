@@ -90,20 +90,83 @@ uint32_t GetStackPtr( Module& mod, const std::vector<uint8_t>& buff ) {
    return stack_ptr;
 }
 
-void StripZeroedData( Module& mod, size_t& fix_bytes ) {
-   std::vector<DataSegment*> ds;
-   for ( auto DS : mod.data_segments ) {
-      bool isZeroed = true;
-      for ( auto datum : DS->data ) {
-         isZeroed &= datum == 0;
-      }
-      if (!isZeroed) {
-         ds.push_back(DS);
+inline bool IsZeroed(const DataSegment* ds) {
+   for ( auto d : ds->data ) {
+      if (d != 0)
+         return false;
+   }
+   return true;
+}
+
+std::vector<DataSegment*> StripZeroedData( std::vector<DataSegment*>&& ds, size_t& fix_bytes ) {
+   for ( auto itr=ds.begin(); itr != ds.end();) {
+      if (IsZeroed(*itr)) {
+         fix_bytes += (*itr)->data.size();
+	 itr = ds.erase(itr); 
       } else {
-         fix_bytes += DS->data.size();
+         ++itr;
       }
    }
-   mod.data_segments = ds;
+   return ds;
+}
+
+inline std::vector<uint8_t> FillFromSegments(const std::vector<DataSegment*>& segments) {
+  std::vector<uint8_t> memory;  
+  auto last_segment = segments.back();
+  ConstExpr* ce = reinterpret_cast<ConstExpr*>(&(last_segment->offset.front()));
+  memory.resize(ce->const_.u32+last_segment->data.size());
+
+  for (auto ds : segments) {
+    auto offset = reinterpret_cast<ConstExpr*>(&(ds->offset.front()))->const_.u32;
+    for (std::size_t i=0; i < ds->data.size(); ++i) {
+      memory[offset+i] = ds->data[i];
+    }
+  }
+
+  return memory;
+}
+
+inline DataSegment* CreateSegment(uint32_t offset, uint8_t* start, std::size_t size) {
+   DataSegment* segment = new DataSegment();
+   Const c;
+   c.I32(0);
+   c.u32 = offset;
+   std::unique_ptr<Expr> ce(new ConstExpr(c));
+   segment->memory_var = Var(0);
+   segment->offset = ExprList{std::move(ce)};
+   segment->data.resize(size);
+   std::memcpy(segment->data.data(), start, size);
+   return segment;
+}
+
+inline std::vector<DataSegment*> CreateSegments(std::vector<uint8_t> memory) {
+   std::vector<DataSegment*> segments;
+
+   std::size_t f=0;
+   // look for the first non-zero entry
+   for (; f < memory.size(); ++f) {
+      if (memory[f] != 0)
+         break;
+   }
+
+   uint32_t zero_span = 0;
+   uint32_t break_size = 1024;
+   uint32_t last_offset = f;
+
+   for (std::size_t i=f; i < memory.size(); ++i) {
+      zero_span = memory[i] == 0 ? zero_span + 1 : 0;
+      std::size_t size = i - last_offset;
+      if (zero_span > 8 || (size > 1024)) {
+         segments.push_back(CreateSegment(last_offset, &memory[last_offset], size));
+         last_offset = i;
+         zero_span = 0;
+         i += size;
+         continue;
+      }
+   }
+   segments.push_back(CreateSegment(last_offset, &memory[last_offset], memory.size()-last_offset));
+
+   return segments;
 }
 
 void AddHeapPointerData( Module& mod, size_t fixup, const std::vector<uint8_t>& buff, DataSegment& ds ) {
@@ -115,13 +178,10 @@ void AddHeapPointerData( Module& mod, size_t fixup, const std::vector<uint8_t>& 
    ds.offset = ExprList{std::move(ce)};
    uint8_t* dat = reinterpret_cast<uint8_t*>(&heap_ptr);
    ds.data = std::vector<uint8_t>{dat[0],
-                                   dat[1],
-                                   dat[2],
-                                   dat[3]};
+                                  dat[1],
+                                  dat[2],
+                                  dat[3]};
    mod.data_segments.push_back(&ds);
-}
-
-void construct_apply( Module& mod ) {
 }
 
 void WriteBufferToFile(string_view filename,
@@ -152,7 +212,14 @@ int ProgramMain(int argc, char** argv) {
 
     if (Succeeded(result)) {
       size_t fixup = 0;
-      StripZeroedData(module, fixup);
+      auto pre_memory =  FillFromSegments(module.data_segments);
+      auto segments   = CreateSegments(pre_memory);
+      if (pre_memory != FillFromSegments(segments)) {
+        std::cerr << "Fractured Memory Failed, not applying optimizations" << std::endl;
+        module.data_segments = StripZeroedData(std::move(module.data_segments), fixup);
+      } else {
+        module.data_segments = StripZeroedData(std::move(segments), fixup);
+      }
       AddHeapPointerData(module, fixup, file_data, _hds);
      if (Succeeded(result)) {
       MemoryStream stream(s_log_stream.get());
