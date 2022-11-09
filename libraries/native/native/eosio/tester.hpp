@@ -51,7 +51,7 @@ template <size_t N, typename F, typename... Args>
 inline bool expect_assert(bool check, const std::string& li, const char (&expected)[N], F&& func, Args... args) {
    return expect_assert(check, li,
          [&](const std::string& s) {
-            return std_err.index == N-1 &&
+            return std_err.index() == N-1 &&
             memcmp(expected, s.c_str(), N-1) == 0; }, func, args...);
 }
 
@@ -75,7 +75,7 @@ template <size_t N, typename F, typename... Args>
 inline bool expect_print(bool check, const std::string& li, const char (&expected)[N], F&& func, Args... args) {
    return expect_print(check, li,
          [&](const std::string& s) {
-            return std_out.index == N-1 &&
+            return std_out.index() == N-1 &&
             memcmp(expected, s.c_str(), N-1) == 0; }, func, args...);
 
 }
