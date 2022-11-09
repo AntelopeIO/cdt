@@ -15,7 +15,7 @@ namespace eosio { namespace cdt {
 
       public:
       output_stream() { output.reserve(initial_size); }
-      std::string to_string() const { return output; }
+      const std::string& to_string() const { return output; }
       const char* get() const { return output.c_str(); }
       size_t index() const { return output.size(); }
       void push(char c) { output.push_back(c); }
