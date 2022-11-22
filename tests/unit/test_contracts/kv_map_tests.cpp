@@ -17,13 +17,13 @@ public:
 
    [[eosio::action]]
    void test() {
-      testmap_t t = { "eosio"_n, "eosio"_n, {{33, 23.4f}, {10, 13.44f}, {103, 334.3f}} };
+      testmap_t t = { "kvtest"_n, "kvtest"_n, {{33, 23.4f}, {10, 13.44f}, {103, 334.3f}} };
 
       auto p = t[33];
 
       p = 102.23; // note here this will update the held value and do a db set
 
-      testmap_t t2{"eosio"_n, "eosio"_n};
+      testmap_t t2{"kvtest"_n, "kvtest"_n};
 
       eosio::check(p == 102.23f, "should be the same value");
       eosio::check(p == t.at(33), "should be the same value");
@@ -34,47 +34,43 @@ public:
 
       eosio::check(el.value == 13.44f, "should still be the same from before");
 
-      testmap2_t t3 = { "eosio"_n, "eosio"_n, {{"eosio", "fast"}, {"bit...", "hmm"}} };
+      testmap2_t t3 = { "kvtest"_n, "kvtest"_n, {{"eosio", "fast"}, {"bit...", "hmm"}} };
 
       auto it2 = t3.begin();
       auto& el2 = *it2;
 
-      eosio::check(el2.value == std::string("hmm"), "should point to the lowest lexicographic key");
-
       ++it2;
-      auto& el3 = *it2;
-
-      eosio::check(el3.value == std::string("fast"), "should now be pointing to the next");
-
       ++it2;
-
       auto it3 = std::move(it2);
 
       it2 = t3.end();
 
       eosio::check(it2 == it3, "they should be at the end and pointing to the same thing");
       eosio::check(it2 == t3.end(), "iterator should be at end");
-
       eosio::check(it3 == t3.end(), "iterator should be at end");
    }
 
    [[eosio::action]]
    void iter() {
-      testmap_t t = {"eosio"_n, "eosio"_n, {{34, 23.4f}, {11, 13.44f}, {104, 334.3f}, {5, 33.42f}} };
+      testmap_t t = {"kvtest"_n, "kvtest"_n, {{34, 23.4f}, {11, 13.44f}, {104, 334.3f}, {5, 33.42f}} };
 
-      float test_vals[7] = {33.42f, 13.44f, 13.44f, 102.23f, 23.4f, 334.3f, 334.3f};
+      //called after test() and contains more data
+      std::map<int, float> test_vals = {{34, 23.4f}, {11, 13.44f}, {104, 334.3f}, {5, 33.42f}, {33, 102.23f}, {10, 13.44f}, {103, 334.3f}};
 
       int i = 0;
 
       // test that this will work with auto ranged for loop
       for ( const auto& e : t ) {
-         eosio::check(e.value == test_vals[i++], "invalid value in iter test");
+         ++i;
+         eosio::check(test_vals.find(e.key)->second == e.value, "invalid value in iter test");
       }
+      eosio::check(t.size() == 7, "size is wrong");
+      eosio::check(i == 7, "range based loop iterates less elements than there are in container");
    }
 
    [[eosio::action]]
    void erase() {
-      testmap_t t("eosio"_n, "eosio"_n);
+      testmap_t t("kvtest"_n, "kvtest"_n);
 
       t.contains(34);
       t.erase(34);
@@ -84,13 +80,13 @@ public:
 
    [[eosio::action]]
    void eraseexcp() {
-      testmap_t t("eosio"_n, "eosio"_n);
+      testmap_t t("kvtest"_n, "kvtest"_n);
       t.at(34); // this should cause an assertion
    }
 
    [[eosio::action]]
    void bounds() {
-      testmap3_t t = {"eosio"_n, "eosio"_n, {{33, 10}, {10, 41.2f}, {11, 100.100f}, {2, 17.42f}}};
+      testmap3_t t = {"kvtest"_n, "kvtest"_n, {{33, 10}, {10, 41.2f}, {11, 100.100f}, {2, 17.42f}}};
 
       auto it = t.lower_bound(11);
 
@@ -119,7 +115,7 @@ public:
 
    [[eosio::action]]
    void ranges() {
-      testmap3_t t = {"eosio"_n, "eosio"_n, {{17, 9.9f}}};
+      testmap3_t t = {"kvtest"_n, "kvtest"_n, {{17, 9.9f}}};
 
       auto range = t.equal_range(16);
 
@@ -130,5 +126,13 @@ public:
 
       eosio::check(range.first->key == 2, "should be pointing to 2");
       eosio::check(range.second->key == 2, "should be pointing to 2");
+   }
+
+   [[eosio::action]]
+   void empty() {
+      testmap_t t("kvtest"_n, "kvtest"_n);
+      eosio::check(!t.empty(), "should be not empty");
+      t.erase(t.begin(), t.end());
+      eosio::check(t.empty(), "should be empty");
    }
 };

@@ -33,9 +33,9 @@ namespace eosio {
          elem(elem&& e) = default;
          elem& operator=(elem&&) = default;
          elem(key_t k)
-            : key(std::move(k)), hashed_key(hash_t{}(k)) {}
+            : hashed_key(hash_t{}(k)), key(std::move(k)) {}
          elem(key_t k, value_t v)
-            : key(std::move(k)), hashed_key(hash_t{}(k)), value(std::move(v)) {}
+            : hashed_key(hash_t{}(k)), key(std::move(k)), value(std::move(v)) {}
          elem(const hash_key_t hk, const key_t& k, value_t v)
             : key(std::move(k)), hashed_key(hk), value(std::move(v)) {}
          elem(raw_iterator_t it, const hash_key_t hk, const key_t& k, value_t v)
@@ -44,6 +44,10 @@ namespace eosio {
          void update(record_t&& r) {
             key = std::move(r.first);
             value = std::move(r.second);
+         }
+
+         inline bool has_iterator() const {
+            return raw_itr != invalidated_iterator;
          }
 
          key_t          key;
@@ -159,7 +163,15 @@ namespace eosio {
       struct iterator {
          using elem_t         = typename Map::elem_t;
          using record_t       = typename Map::record_t;
+         using bucket_t       = typename Map::bucket_t;
          using raw_iterator_t = typename Map::raw_iterator_t;
+
+         using iterator_category = std::forward_iterator_tag;
+         using value_type = typename elem_t::value_t;
+         using difference_type = size_t;
+         using pointer = record_t*;
+         using reference = record_t&;
+         
          using map_t          = Map;
 
          static constexpr inline raw_iterator_t invalidated_iterator = elem_t::invalidated_iterator;
@@ -169,8 +181,8 @@ namespace eosio {
             : element(itr, {}, {}, {}), map(m) {}
          inline iterator(elem_t&& el, const map_t* m) : element(std::move(el)), map(m) {}
 
-         iterator(const iterator&) = delete;
-         iterator& operator=(const iterator&) = delete;
+         iterator(const iterator&) = default;
+         iterator& operator=(const iterator&) = default;
 
          inline iterator(iterator&& o)
             : element(o.element) {
@@ -204,7 +216,7 @@ namespace eosio {
             return &element;
          }
 
-         iterator& operator++() {
+         iterator& operator++() const {
             assert_valid();
 
             uint64_t next_pk;
@@ -215,13 +227,13 @@ namespace eosio {
             else {
                element.raw_itr = next_itr;
             }
-            return *this;
+            return const_cast<iterator&>(*this);
          }
 
-         inline iterator& operator++(int) {
+         inline iterator& operator++(int) const {
             auto temp = *this;
             ++(*this);
-            return temp;
+            return const_cast<iterator&>(temp);
          }
 
          inline bool operator==(const iterator& o) const {
@@ -232,7 +244,8 @@ namespace eosio {
 
          void materialize() const {
             assert_valid();
-            static auto bucket_data = map->collision_policy.extract_bucket(element.raw_itr);
+            static bucket_t bucket_data;
+            bucket_data = map->collision_policy.extract_bucket(element.raw_itr);
             element.update( map->collision_policy.get_record(bucket_data) );
          }
 
@@ -302,6 +315,13 @@ namespace eosio {
                return *this;
             }
 
+            bool operator == (const writable_wrapper& w) {
+               return std::tie(element.key, element.value) == std::tie(w.element.key, w.element.value);
+            }
+            bool operator == (const value_t& v) {
+               return element.value == v;
+            }
+
             elem_t element;
             name payer;
             unordered_map_t& map_ref;
@@ -315,7 +335,7 @@ namespace eosio {
           */
          inline unordered_map(name o, name s, std::initializer_list<elem_t> l)
             : owner(o), scope(s), collision_policy{o, s} {
-            for ( const auto& e : l ) {
+            for ( auto e : l ) {
                set(e, owner);
             }
          }
@@ -414,10 +434,10 @@ namespace eosio {
          iterator_t erase(const const_iterator_t& it) {
             using namespace internal_use_do_not_use;
 
-            auto raw_itr = (*it).element.raw_itr;
+            auto raw_itr = (*it).raw_itr;
             ++it;
             db_remove_i64(raw_itr);
-            return const_cast<iterator_t>(it);
+            return const_cast<iterator_t&>(it);
          }
          inline iterator_t erase(iterator_t& it) {
             return erase(it);
@@ -426,7 +446,7 @@ namespace eosio {
             while (begin != end) {
                begin = erase(begin);
             }
-            return const_cast<iterator_t>(end);
+            return const_cast<iterator_t&>(end);
          }
          inline iterator_t erase(iterator_t& begin, iterator_t& end) {
             return erase(begin, end);
@@ -487,17 +507,28 @@ public:
                       temp_record.first != element.key && 
                       cur_collision < max_collisions );
             
-            element.value = std::move(temp_record.second);
-            return temp_record != record_t{};
+            bool found = temp_record != record_t{};
+            if (found)
+               element.value = std::move(temp_record.second);
+            return found;
          }
 
-         inline bool set(const elem_t& el, name payer) const {
+         inline void set(elem_t& el, name payer) const {
             using namespace internal_use_do_not_use;
 
-            static bucket_t temp_bucket = collision_policy.element_to_bucket(el);
-            buffer_t buffer = pack_value(temp_bucket);
-            auto wrote = db_store_i64( scope.value, table_name.value, payer.value, el.hashed_key, buffer.data, buffer.size );
-            return wrote == buffer.size;
+            auto temp_el = el;
+            static bucket_t temp_bucket;
+            temp_bucket = collision_policy.element_to_bucket(el);
+            if (!el.has_iterator() && !get(el)) {
+               buffer_t buffer = pack_value(temp_bucket);
+               el.raw_itr = db_store_i64( scope.value, table_name.value, payer.value, el.hashed_key, buffer.data, buffer.size );
+               check(el.has_iterator(), "error inserting element");
+            }
+            else {
+               check(el.has_iterator(), "element can't be updated as it was not found");
+               buffer_t buffer = pack_value(temp_bucket);
+               db_update_i64( el.raw_itr, payer.value, buffer.data, buffer.size );
+            }
          }
 
          template <typename T>
