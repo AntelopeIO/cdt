@@ -5,7 +5,12 @@ include( CDTMacros )
 
 macro(add_cdt_unit_test TEST_NAME)
    add_native_executable(${TEST_NAME} ${TEST_NAME}.cpp)
-   target_compile_options(${TEST_NAME} PRIVATE -O2 -fno-cfl-aa)
+   target_compile_options(${TEST_NAME} PRIVATE -fno-cfl-aa)
+   if(CMAKE_BUILD_TYPE STREQUAL "Release")
+      target_compile_options(${TEST_NAME} PRIVATE -O2)
+   elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
+      target_compile_options(${TEST_NAME} PRIVATE -g)
+   endif()
 endmacro()
 
 add_cdt_unit_test(asset_tests)

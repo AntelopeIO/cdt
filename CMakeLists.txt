@@ -31,6 +31,10 @@ option(ENABLE_TESTS "enable building tests" ON)
 
 include(GNUInstallDirs)
 
+if(NOT CMAKE_BUILD_TYPE)
+   set(CMAKE_BUILD_TYPE "Release")
+endif()
+
 if(NOT TOOLS_BUILD_TYPE)
    set(TOOLS_BUILD_TYPE "Release")
 endif()

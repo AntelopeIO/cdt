@@ -17,7 +17,6 @@ file(GLOB THREAD_SOURCES "cdt-musl/src/thread/*.c") #only for __lock __unlock
 set(INTERNAL_SOURCES cdt-musl/src/internal/floatscan.c cdt-musl/src/internal/intscan.c cdt-musl/src/internal/shgetc.c cdt-musl/src/internal/libc.c)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-everything -allow-sse")
-set(CMAKE_BUILD_TYPE "Release")
 
 if(__APPLE)
   add_definitions(-D__APPLE__)
