@@ -4,7 +4,7 @@ content_title: Crypto Extensions
 
 As of `v3.0` crypto host functions were extended to include
 - `mod_exp`: Big integer modular exponentiation
-- `alt_bn128_add`, `alt_bn128_mul`, `alt_bn128_pair`: Add, multiply, and pairing check functions for the `alt_bn128` elliptic curve.
+- `alt_bn128_add`, `alt_bn128_mul`, `alt_bn128_pair`: Add, multiply, and pairing check functions for the `alt_bn128` elliptic curve
 - `blake2_f`: `BLAKE2b F` compression function
 - `sha3`: sha3` hash function using `SHA3 NIST`
 - `Keccak256`: `sha3` hash function using `SHA3 Keccak`
@@ -20,15 +20,15 @@ In `v3.0`, `C` format was supported; in `v3.1`, `C++` format was added for bette
 ## C Format
 
 - `int32_t alt_bn128_add( const char* op1, uint32_t op1_len, const char* op2, uint32_t op2_len, char* result, uint32_t result_len )`
-Perform addition operation on the elliptic curve `alt_bn128`, store the result in `result`, and and return `0` if success otherwise `-1`
+Perform addition operation on the elliptic curve `alt_bn128`, store the result in `result`, and return `0` if success otherwise `-1`
 - `int32_t alt_bn128_mul( const char* g1, uint32_t g1_len, const char* scalar, uint32_t scalar_len, char* result, uint32_t result_len )`
 Perform scalar multiplication operation on the elliptic curve `alt_bn128`
 - `int32_t alt_bn128_pair( const char* pairs, uint32_t pairs_len )`
-Perform Optimal-Ate pairing check elliptic curve `alt_bn128`, and return `0` if `true` and successful, `1` if `false`, , otherwise `-1`
+Perform Optimal-Ate pairing check elliptic curve `alt_bn128`, and return `0` if `true` and successful, `1` if `false`,  otherwise `-1`
 - `int32_t mod_exp( const char* base, uint32_t base_len, const char* exp, uint32_t exp_len, const char* mod, uint32_t mod_len, char* result, uint32_t result_len )`
-Calculate `( BASE^EXP ) % MOD`, store in `result1, and return `0` if successful, otherwise `-1`.
+Calculate `( BASE^EXP ) % MOD`, store in `result`, and return `0` if successful, otherwise `-1`
 - `int32_t blake2_f( uint32_t rounds, const char* state, uint32_t state_len, const char* msg, uint32_t msg_len, const char* t0_offset, uint32_t t0_len, const char* t1_offset, uint32_t t1_len, int32_t final, char* result, uint32_t result_len)`
-Implement BLAKE2 compression function `F`. Return `0` if success otherwise `-1`.
+Implement BLAKE2 compression function `F`. Return `0` if success otherwise `-1`
 - `eosio::checksum256 sha3(const char* data, uint32_t length)`
 Return hash of `data` using `SHA3 NIST`
 - `void assert_sha3(const char* data, uint32_t length, const eosio::checksum256& hash)`
@@ -38,7 +38,7 @@ Return hash of `data` using `SHA3 Keccak`
 - `void assert_keccak(const char* data, uint32_t length, const eosio::checksum256& hash)
 Test if the SHA3 keccak hash generated from data matches the provided digest
 - `int32_t k1_recover( const char* sig, uint32_t sig_len, const char* dig, uint32_t dig_len, char* pub, uint32_t pub_len )`
-Calculates the uncompressed public key used for a given signature on a given digest. Return `0` if success otherwise `-1`.
+Calculates the uncompressed public key used for a given signature on a given digest. Return `0` if success otherwise `-1`
 
 ## C++ Format
 
@@ -113,7 +113,7 @@ C++ types were added to represent `G1` and `G2` points (read and write) and view
        * @param y_size - y's size
        */
       ec_point_view(const char* x_, uint32_t x_size, const char* y_, uint32_t y_size);
-      
+
       /**
        * Construct a point view from a serialized point
        *
@@ -148,10 +148,10 @@ C++ types were added to represent `G1` and `G2` points (read and write) and view
     *  @ingroup crypto
     */
    using bigint = std::vector<char>;
-   
+```
+
 ### Methods
 
-```
 - `alt_bn128_add`
 ```c++
     template <typename T>
@@ -181,12 +181,12 @@ Take bigints as input
 - `alt_bn128_add`
 ```c++
    std::vector<char> x1, y1, x2, y2;
-   
+
    // point
    eosio::g1_point point1 {x1, y1};
    eosio::g1_point point2 {x2, y2};
    auto result = eosio::alt_bn128_add(point1, point2);
-         
+
    // view
    eosio::g1_point_view point_view1 {x1.data(), x1.size(), y1.data(), y1.size()};
    eosio::g1_point_view point_view2 {x2.data(), x2.size(), y2.data(), y2.size()};
@@ -197,11 +197,11 @@ Take bigints as input
 ```c++
    std::vector<char> x, y, scaler;
    eosio::bigint s {scalar};
-   
+
    // point
    eosio::g1_point g1_point {x, y};
    auto result = eosio::alt_bn128_mul(g1_point, s);
-         
+
    // view
    eosio::g1_point_view g1_view {x.data(), x.size(), y.data(), y.size()};
    result = eosio::alt_bn128_mul(g1_view, s);
@@ -210,8 +210,8 @@ Take bigints as input
 - `alt_bn128_pair`
 ```c++
    std::vector<char> g1_a_x, g1_a_y, g2_a_x, g2_a_y, g1_b_x, g1_b_y, g2_b_x, g2_b_y;
-   
-   
+
+
    // point
    eosio::g1_point g1_a {g1_a_x, g1_a_y};
    eosio::g2_point g2_a {g2_a_x, g2_a_y};
@@ -219,7 +219,7 @@ Take bigints as input
    eosio::g2_point g2_b {g2_b_x, g2_b_y};
    std::vector<std::pair<eosio::g1_point, eosio::g2_point>> pairs { {g1_a, g2_a}, {g1_b, g2_b} };
    auto result = eosio::alt_bn128_pair(pairs);
-         
+
    // view
    eosio::g1_point_view g1_view_a {g1_a_x.data(), g1_a_x.size(), g1_a_y.data(), g1_a_y.size()};
    eosio::g2_point_view g2_view_a {g2_a_x.data(), g2_a_x.size(), g2_a_y.data(), g2_a_y.size()};
