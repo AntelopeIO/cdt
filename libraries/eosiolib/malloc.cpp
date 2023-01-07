@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <alloca.h>
+#include <string.h>
 #include "core/eosio/check.hpp"
 #include "core/eosio/print.hpp"
 
@@ -525,6 +526,8 @@ namespace eosio {
 } /// namespace eosio
 
 extern "C" {
+#ifndef EOSIOLIB_DISABLE_MALLOC
+
 void* malloc(size_t size) {
    return eosio::memory_heap.malloc(size);
 }
@@ -542,5 +545,6 @@ void* realloc(void* ptr, size_t size) {
 void free(void* ptr) {
    return eosio::memory_heap.free(ptr);
 }
+#endif
 }
 

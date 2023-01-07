@@ -268,12 +268,12 @@ namespace eosio {
       /**
        *  Name of the account the action is intended for
        */
-      name                       account;
+      eosio::name                       account;
 
       /**
        *  Name of the action
        */
-      name                       name;
+      eosio::name                       name;
 
       /**
        *  List of permissions that authorize this action
