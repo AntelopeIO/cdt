@@ -10,3 +10,6 @@
 [submodule "libraries/native/softfloat"]
 	path = libraries/native/softfloat
 	url = https://github.com/AntelopeIO/berkeley-softfloat-3
+[submodule "tools/external/eos-vm"]
+	path = tools/external/eos-vm
+	url = git@github.com:AntelopeIO/eos-vm
