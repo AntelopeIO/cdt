@@ -82,7 +82,7 @@ add_subdirectory(cc)
 add_subdirectory(ld)
 add_subdirectory(init)
 add_subdirectory(external)
-#add_subdirectory(antler-run) # TODO: add back when it will be ready
+add_subdirectory(antler-run)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/compiler_options.hpp.in ${CMAKE_BINARY_DIR}/compiler_options.hpp)
 
