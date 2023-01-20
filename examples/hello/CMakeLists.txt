@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.24)
+
 include(ExternalProject)
 # if no cdt root is given use default path
 if(CDT_ROOT STREQUAL "" OR NOT CDT_ROOT)

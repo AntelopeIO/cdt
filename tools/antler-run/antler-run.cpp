@@ -5,6 +5,8 @@
 #include "wasm-runner.hpp"
 #include "version.hpp"
 
+#include "file-utils.hpp"
+
 #include <cassert>
 #include <string.h>
 #include <dlfcn.h>
