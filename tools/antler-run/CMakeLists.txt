@@ -2,10 +2,10 @@ project(antler-run)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/antler-run.cpp ${CMAKE_BINARY_DIR}/antler-run.cpp)
 find_package(eos-vm)
-find_package(cdt_libraries)
 
 set(TOOLS_DIR ${CMAKE_SOURCE_DIR})
 set(LIB_DIR ${CMAKE_SOURCE_DIR}/../libraries)
+set(CDT_NO_START TRUE)
 
 include_directories(${LIB_DIR})
 
