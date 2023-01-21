@@ -4,6 +4,7 @@
 #include <eosio/chain.h>
 #include <eosio/crypto.h>
 #include <eosio/crypto_ext.h>
+#include <eosio/crypto_bls_ext.h>
 #include <eosio/db.h>
 #include <eosio/permission.h>
 #include <eosio/print.h>
@@ -171,8 +172,11 @@ intrinsic_macro(k1_recover) \
 intrinsic_macro(alt_bn128_add) \
 intrinsic_macro(alt_bn128_mul) \
 intrinsic_macro(alt_bn128_pair) \
-intrinsic_macro(mod_exp)
-
+intrinsic_macro(mod_exp) \
+intrinsic_macro(bls_verify)  \
+intrinsic_macro(bls_aggregate_pubkeys)  \
+intrinsic_macro(bls_aggregate_sigs)  \
+intrinsic_macro(bls_aggregate_verify) 
 
 
 #define CREATE_ENUM(name) \

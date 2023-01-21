@@ -45,6 +45,14 @@ capi_signature {
    uint8_t data[66];
 };
 
+struct ALIGNED(capi_bls_public_key) {
+   uint8_t data[48];
+};
+
+struct ALIGNED(capi_bls_signature) {
+   uint8_t data[96];
+};
+
 /**
  * 256-bit hash
  */

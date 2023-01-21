@@ -936,3 +936,19 @@ int32_t mod_exp( const char* base, uint32_t base_len, const char* exp, uint32_t 
 void sha3( const char* data, uint32_t data_len, char* hash, uint32_t hash_len, int32_t keccak ) {
    intrinsics::get().call<intrinsics::sha3>(data, data_len, hash, hash_len, keccak);
 }
+
+bool bls_verify( const char* sig, uint32_t sig_len, const char* dig, uint32_t dig_len, char* pub, uint32_t pub_len) {
+   return intrinsics::get().call<intrinsics::bls_verify>(sig, sig_len, dig, dig_len, pub, pub_len );
+}
+
+int32_t bls_aggregate_pubkeys( const char* pubs, uint32_t pubs_len, const char* agg, uint32_t agg_len) {
+   return intrinsics::get().call<intrinsics::bls_aggregate_pubkeys>(pubs, pubs_len, agg, agg_len );
+}
+
+int32_t bls_aggregate_sigs( const char* sigs, uint32_t sigs_len, const char* agg, uint32_t agg_len) {
+   return intrinsics::get().call<intrinsics::bls_aggregate_sigs>(sigs, sigs_len, agg, agg_len );
+}
+
+bool bls_aggregate_verify( const char* sig, uint32_t sig_len, const char* digs, uint32_t digs_len, char* pubs, uint32_t pubs_len) {
+   return intrinsics::get().call<intrinsics::bls_aggregate_verify>(sig, sig_len, digs, digs_len, pubs, pubs_len );
+}
