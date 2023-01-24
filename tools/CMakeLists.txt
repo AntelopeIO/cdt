@@ -24,6 +24,7 @@ include_directories(${LLVM_BINDIR}/include)
 link_directories(${LLVM_LIBRARY_DIRS})
 add_definitions(${LLVM_DEFINITIONS})
 
+set(CMAKE_CXX_STANDARD 17)
 set(EOSIO_STACK_SIZE 8192)
 set(ENABLE_NATIVE_COMPILER TRUE)
 
