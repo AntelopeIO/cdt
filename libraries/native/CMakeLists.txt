@@ -350,7 +350,8 @@ if (${PARENT_PROJECT_NAME} STREQUAL "cdt_tools")
                                                      ${CMAKE_SOURCE_DIR}/../libraries/eosiolib/capi
                                                      ${CMAKE_SOURCE_DIR}/../libraries/boost/include
                                                      ${CMAKE_SOURCE_DIR}/../libraries/meta_refl/include)
-   target_link_options(${PROJECT_NAME} PUBLIC -z noexecstack) # suppress executable stack warning. this is due to absence of .note.GNU-stack
+   # suppress executable stack warning. this is due to absence of .note.GNU-stack
+   target_link_libraries(${PROJECT_NAME} PUBLIC "-Wl,-z noexecstack")
 else()
    add_native_library ( native STATIC ${softfloat_sources} intrinsics.cpp crt.cpp ${CRT_ASM} ${UTILS_ASM})
 endif()
