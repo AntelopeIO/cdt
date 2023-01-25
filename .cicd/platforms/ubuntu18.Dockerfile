@@ -3,6 +3,7 @@ FROM ubuntu:bionic
 RUN apt-get update && apt-get upgrade -y && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential \
                                                       cmake \
+                                                      g++-8 \
                                                       curl \
                                                       ninja-build \
                                                       software-properties-common \
@@ -16,3 +17,6 @@ RUN curl -L  https://www.python.org/ftp/python/3.10.6/Python-3.10.6.tgz | tar zx
     make -j$(nproc) install && \
     cd .. && \
     rm -rf Python*
+
+ENV CC=gcc-8
+ENV CXX=g++-8
