@@ -16,7 +16,7 @@
 #include <optional>
 #include <variant>
 
-#include <string.h>
+#include <cstring>
 
 #include <boost/fusion/algorithm/iteration/for_each.hpp>
 #include <boost/fusion/include/for_each.hpp>
