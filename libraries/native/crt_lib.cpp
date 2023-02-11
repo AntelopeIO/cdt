@@ -12,6 +12,9 @@ static jmp_buf env;
 static jmp_buf test_env;
 jmp_buf* ___env_ptr = &env;
 
+jmp_buf* __get_jmp_buf() {
+    return ___env_ptr;
+}
 void __set_env_test() {
     ___env_ptr = &test_env;
 }
