@@ -231,7 +231,7 @@ namespace eosio {
        */
       friend int64_t operator/( const asset& a, const asset& b ) {
          eosio::check( b.amount != 0, "divide by zero" );
-         eosio::check( a.symbol == b.symbol, "comparison of assets with different symbols is not allowed" );
+         eosio::check( a.symbol == b.symbol, "attempt to divide assets with different symbol" );
          return a.amount / b.amount;
       }
 
