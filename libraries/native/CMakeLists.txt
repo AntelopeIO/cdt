@@ -339,7 +339,6 @@ target_include_directories( sf PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/softfloat/sou
 if (${PARENT_PROJECT_NAME} STREQUAL "cdt_tools")
    add_library(${PROJECT_NAME} STATIC ${softfloat_sources} intrinsics.cpp crt_lib.cpp)
 
-   target_compile_definitions(${PROJECT_NAME} PUBLIC NATIVELIB_ENABLE_EXCEPTIONS)
    target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/../libraries/eosiolib/core
                                                      ${CMAKE_SOURCE_DIR}/../libraries/eosiolib/contracts
                                                      ${CMAKE_SOURCE_DIR}/../libraries/eosiolib/capi

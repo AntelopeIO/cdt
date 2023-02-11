@@ -8,6 +8,16 @@ eosio::cdt::output_stream std_err;
 bool ___disable_output = false;
 bool ___has_failed = false;
 bool ___earlier_unit_test_has_failed = false;
+static jmp_buf env;
+static jmp_buf test_env;
+jmp_buf* ___env_ptr = &env;
+
+void __set_env_test() {
+    ___env_ptr = &test_env;
+}
+void __reset_env() {
+    ___env_ptr = &env;
+}
 
 void _prints_l(const char* cstr, uint32_t len, uint8_t which) {
     for (int i=0; i < len; i++) {

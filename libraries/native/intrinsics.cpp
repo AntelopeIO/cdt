@@ -13,18 +13,6 @@
 #include <softfloat.hpp>
 #include <float.h>
 
-#ifdef NATIVELIB_ENABLE_EXCEPTIONS
-#define RAISE_ERROR_CHOOSE(_1,_2,NAME,...) NAME
-#define RAISE_ERROR1(msg) \
-   throw eosio::cdt::assert_exception((const char*)msg)
-#define RAISE_ERROR2(msg, len) \
-   throw eosio::cdt::assert_exception(std::string((const char*)msg, (size_t)len))
-#define RAISE_ERROR(...) RAISE_ERROR_CHOOSE(__VA_ARGS__, RAISE_ERROR2, RAISE_ERROR1)(__VA_ARGS__)
-#else
-#define RAISE_ERROR(...) \
-   longjmp(*___env_ptr, 1)
-#endif
-
 // Boilerplate
 using namespace eosio::native;
 extern "C" {
@@ -873,7 +861,7 @@ extern "C" {
       if (test == 0) {
          _prints(msg, eosio::cdt::output_stream_kind::std_err);
          _prints_l("\n", 1, eosio::cdt::output_stream_kind::none);
-         RAISE_ERROR(msg);
+         longjmp(*___env_ptr, 1);
       }
    }
 
@@ -881,7 +869,7 @@ extern "C" {
       if (test == 0) {
          _prints_l(msg, len, eosio::cdt::output_stream_kind::std_err);
          _prints_l("\n", 1, eosio::cdt::output_stream_kind::none);
-         RAISE_ERROR(msg, len);
+         longjmp(*___env_ptr, 1);
       }
    }
 
@@ -891,7 +879,7 @@ extern "C" {
          snprintf(buff, 32, "%llu", code);
          _prints(buff, eosio::cdt::output_stream_kind::std_err);
          _prints_l("\n", 1, eosio::cdt::output_stream_kind::none);
-         RAISE_ERROR(buff);
+         longjmp(*___env_ptr, 1);
       }
    }
 
