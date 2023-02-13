@@ -5,7 +5,7 @@
 #pragma once
 #include <utility>
 #include <string>
-
+#include "types.hpp"
 
 
 namespace eosio {
