@@ -12,7 +12,6 @@ if (${PARENT_PROJECT_NAME} STREQUAL "cdt_tools")
                 ${HEADERS} )
    target_compile_definitions(${PROJECT_NAME} PUBLIC EOSIO_NATIVE EOSIOLIB_DISABLE_MALLOC)
    target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/../libraries/eosiolib/core
-                                                     ${CMAKE_SOURCE_DIR}/../libraries/boost/include
                                                      ${CMAKE_SOURCE_DIR}/../libraries/meta_refl/include)
    target_compile_options(${PROJECT_NAME} PUBLIC -fPIC -fexceptions -fno-rtti)
    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -50,8 +49,7 @@ else()
                                     ${CMAKE_SOURCE_DIR}/libc/cdt-musl/src/crypt
                                     ${CMAKE_SOURCE_DIR}/libc/cdt-musl/arch/eos
                                     ${CMAKE_SOURCE_DIR}/libc++/cdt-libcxx/include
-                                    ${CMAKE_SOURCE_DIR}
-                                    ${CMAKE_SOURCE_DIR}/boost/include)
+                                    ${CMAKE_SOURCE_DIR})
 
    target_link_libraries( eosio c c++ )
    add_custom_command( TARGET eosio POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:eosio> ${BASE_BINARY_DIR}/lib )

@@ -342,7 +342,6 @@ if (${PARENT_PROJECT_NAME} STREQUAL "cdt_tools")
    target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/../libraries/eosiolib/core
                                                      ${CMAKE_SOURCE_DIR}/../libraries/eosiolib/contracts
                                                      ${CMAKE_SOURCE_DIR}/../libraries/eosiolib/capi
-                                                     ${CMAKE_SOURCE_DIR}/../libraries/boost/include
                                                      ${CMAKE_SOURCE_DIR}/../libraries/meta_refl/include)
    # suppress executable stack warning. this is due to absence of .note.GNU-stack
    target_link_libraries(${PROJECT_NAME} PUBLIC "-Wl,-z,noexecstack")
