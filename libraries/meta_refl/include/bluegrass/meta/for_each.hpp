@@ -899,6 +899,7 @@ constexpr size_t for_each_impl(Tuple<Ts...>& tup, Fn fn) {
 /// @param t tuple
 /// @param f functor
 /// @return index of last processed element or size of tuple (if all elements were iterated)
+template <typename Fn, typename Tuple>
 constexpr inline auto for_each( Tuple& t, Fn f ) {
     return for_each_impl(t, f);
 }

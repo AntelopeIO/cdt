@@ -18,6 +18,5 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${TOOLS_DIR}/external/eos-vm/i
                                                   ${LIB_DIR}/eosiolib/capi
                                                   ${LIB_DIR}/eosiolib/native
                                                   ${LIB_DIR}/native
-                                                  ${LIB_DIR}/meta_refl/include
-                                                  ${LIB_DIR}/boost/include)
+                                                  ${LIB_DIR}/meta_refl/include)
 target_link_libraries(${PROJECT_NAME} native_eosio native)
