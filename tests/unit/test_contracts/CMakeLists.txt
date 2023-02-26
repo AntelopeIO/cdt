@@ -7,6 +7,8 @@ add_contract(explicit_nested_tests explicit_nested_tests explicit_nested_tests.c
 add_contract(transfer_contract transfer_contract transfer.cpp)
 add_contract(minimal_tests minimal_tests minimal_tests.cpp)
 add_contract(crypto_primitives_tests crypto_primitives_tests crypto_primitives_tests.cpp)
+add_contract(get_code_hash_tests get_code_hash_write get_code_hash_write.cpp)
+add_contract(get_code_hash_tests get_code_hash_read get_code_hash_read.cpp)
 add_contract(capi_tests capi_tests capi/capi.c capi/action.c capi/chain.c capi/crypto.c capi/db.c capi/permission.c
                                    capi/print.c capi/privileged.c capi/system.c capi/transaction.c)
 
