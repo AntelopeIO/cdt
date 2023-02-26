@@ -8,6 +8,7 @@
 #include "../../core/eosio/serialize.hpp"
 #include "../../core/eosio/datastream.hpp"
 #include "../../core/eosio/name.hpp"
+#include "../../core/eosio/fixed_bytes.hpp"
 #include "../../core/eosio/ignore.hpp"
 #include "../../core/eosio/time.hpp"
 
@@ -52,7 +53,21 @@ namespace eosio {
 
          __attribute__((eosio_wasm_import))
          uint64_t current_receiver();
+
+         __attribute__((eosio_wasm_import))
+         uint32_t get_code_hash( uint64_t account, uint32_t struct_version, char* result_buffer, size_t buffer_size );
       }
+   };
+
+   struct code_hash_result {
+       unsigned_int struct_version;
+       uint64_t code_sequence;
+       checksum256 code_hash;
+       uint8_t vm_type;
+       uint8_t vm_version;
+
+       CDT_REFLECT(struct_version, code_sequence, code_hash, vm_type, vm_version);
+       EOSLIB_SERIALIZE(code_hash_result, (struct_version)(code_sequence)(code_hash)(vm_type)(vm_version));
    };
 
    /**
@@ -148,6 +163,30 @@ namespace eosio {
    */
    inline name current_receiver() {
      return name{internal_use_do_not_use::current_receiver()};
+   }
+
+   /**
+   *  Get the hash of the code currently published on the given account
+   *  @param account Name of the account to hash the code of
+   *  @param full_result Optional: If a full result struct is desired, a pointer to the struct to populate
+   *  @return The SHA256 hash of the specified account's code
+   */
+   inline checksum256 get_code_hash( name account, code_hash_result* full_result = nullptr ) {
+       if (full_result == nullptr)
+           full_result = (code_hash_result*)alloca(sizeof(code_hash_result));
+
+       // Packed size is dynamic, so we don't know what it'll be. Try to have plenty of space.
+       auto struct_buffer_size = sizeof(code_hash_result)*2;
+       char* struct_buffer = (char*)alloca(struct_buffer_size);
+
+       using VersionType = decltype(code_hash_result::struct_version);
+       const VersionType STRUCT_VERSION = 0;
+       internal_use_do_not_use::get_code_hash(account.value, STRUCT_VERSION, struct_buffer, struct_buffer_size);
+       check(unpack<VersionType>(struct_buffer, struct_buffer_size) == STRUCT_VERSION,
+             "Hypervisor returned unexpected code hash struct version");
+       unpack(*full_result, struct_buffer, struct_buffer_size);
+
+       return full_result->code_hash;
    }
 
    /**
