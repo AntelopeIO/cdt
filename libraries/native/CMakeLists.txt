@@ -4,10 +4,8 @@ project(native LANGUAGES CXX ASM)
 
 if (NOT __APPLE)
    set(CRT_ASM elf_crt.s)
-   set(UTILS_ASM utils.s)
 else()
    set(CRT_ASM macho_crt.s)
-   set(UTILS_ASM mac_utils.s)
 endif()
 
 if (NOT ${PARENT_PROJECT_NAME} MATCHES "cdt_tools")
