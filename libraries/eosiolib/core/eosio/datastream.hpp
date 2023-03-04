@@ -5,6 +5,7 @@
 #pragma once
 #include "check.hpp"
 #include "varint.hpp"
+#include <bluegrass/meta/for_each.hpp>
 
 #include <list>
 #include <queue>
@@ -17,14 +18,6 @@
 #include <variant>
 
 #include <cstring>
-
-#include <boost/fusion/algorithm/iteration/for_each.hpp>
-#include <boost/fusion/include/for_each.hpp>
-#include <boost/fusion/adapted/std_tuple.hpp>
-#include <boost/fusion/include/std_tuple.hpp>
-
-#include <boost/mp11/tuple.hpp>
-#include <boost/pfr.hpp>
 
 namespace eosio {
 
@@ -866,7 +859,7 @@ datastream<Stream>& operator >> ( datastream<Stream>& ds, std::map<K,V>& m ) {
  */
 template<typename Stream, typename... Args>
 datastream<Stream>& operator<<( datastream<Stream>& ds, const std::tuple<Args...>& t ) {
-   boost::fusion::for_each( t, [&]( const auto& i ) {
+   bluegrass::meta::for_each( t, [&]( const auto& i ) {
        ds << i;
    });
    return ds;
@@ -883,7 +876,7 @@ datastream<Stream>& operator<<( datastream<Stream>& ds, const std::tuple<Args...
  */
 template<typename Stream, typename... Args>
 datastream<Stream>& operator>>( datastream<Stream>& ds, std::tuple<Args...>& t ) {
-   boost::fusion::for_each( t, [&]( auto& i ) {
+   bluegrass::meta::for_each( t, [&]( auto& i ) {
        ds >> i;
    });
    return ds;
@@ -900,7 +893,7 @@ datastream<Stream>& operator>>( datastream<Stream>& ds, std::tuple<Args...>& t )
  */
 template<typename DataStream, typename T, std::enable_if_t<std::is_class<T>::value && _datastream_detail::is_datastream<DataStream>::value>* = nullptr>
 DataStream& operator<<( DataStream& ds, const T& v ) {
-   boost::pfr::for_each_field(v, [&](const auto& field) {
+   bluegrass::meta::for_each_field(v, [&](const auto& field) {
       ds << field;
    });
    return ds;
@@ -917,7 +910,7 @@ DataStream& operator<<( DataStream& ds, const T& v ) {
  */
 template<typename DataStream, typename T, std::enable_if_t<std::is_class<T>::value && _datastream_detail::is_datastream<DataStream>::value>* = nullptr>
 DataStream& operator>>( DataStream& ds, T& v ) {
-   boost::pfr::for_each_field(v, [&](auto& field) {
+   bluegrass::meta::for_each_field(v, [&](auto& field) {
       ds >> field;
    });
    return ds;
