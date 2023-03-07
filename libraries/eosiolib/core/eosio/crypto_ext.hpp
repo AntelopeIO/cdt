@@ -224,7 +224,7 @@ namespace eosio {
    inline int32_t alt_bn128_add( const char* op1, uint32_t op1_len, const char* op2, uint32_t op2_len, char* result, uint32_t result_len ) {
       return internal_use_do_not_use::alt_bn128_add( op1, op1_len, op2, op2_len, result, result_len);
    }
-   
+
    /**
     *  Scalar multiplication operation on the elliptic curve `alt_bn128`
     *
@@ -257,7 +257,7 @@ namespace eosio {
    inline int32_t alt_bn128_mul( const char* g1, uint32_t g1_len, const char* scalar, uint32_t scalar_len, char* result, uint32_t result_len ) {
       return internal_use_do_not_use::alt_bn128_mul( g1, g1_len, scalar, scalar_len, result, result_len );
    }
-   
+
    /**
     *  Optimal-Ate pairing check elliptic curve `alt_bn128`
     *
@@ -343,7 +343,7 @@ namespace eosio {
     *  @param result - the result of the compression
     *  @return -1 if there is an error otherwise 0
     */
-   int32_t blake2_f( uint32_t rounds, const std::vector<char>& state, const std::vector<char>& msg, const std::vector<char>& t0_offset, const std::vector<char>& t1_offset, bool final, std::vector<char>& result) {
+   inline int32_t blake2_f( uint32_t rounds, const std::vector<char>& state, const std::vector<char>& msg, const std::vector<char>& t0_offset, const std::vector<char>& t1_offset, bool final, std::vector<char>& result) {
       eosio::check( result.size() >= blake2f_result_size, "blake2_f result parameter's size must be >= 64" );
       return internal_use_do_not_use::blake2_f( rounds, state.data(), state.size(), msg.data(), msg.size(), t0_offset.data(), t0_offset.size(), t1_offset.data(), t1_offset.size(), final, result.data(), result.size());
    }
@@ -367,11 +367,11 @@ namespace eosio {
     *  @param result_len - size of result 
     *  @return -1 if there is an error otherwise 0
     */
-   int32_t blake2_f( uint32_t rounds, const char* state, uint32_t state_len, const char* msg, uint32_t msg_len, 
+   inline int32_t blake2_f( uint32_t rounds, const char* state, uint32_t state_len, const char* msg, uint32_t msg_len, 
                      const char* t0_offset, uint32_t t0_len, const char* t1_offset, uint32_t t1_len, int32_t final, char* result, uint32_t result_len) {
       return internal_use_do_not_use::blake2_f( rounds, state, state_len, msg, msg_len, t0_offset, t0_len, t1_offset, t1_len, final, result, result_len);
    }
-   
+
    /**
     *  Hashes `data` using `sha3`
     *
