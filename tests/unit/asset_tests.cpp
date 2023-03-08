@@ -312,7 +312,7 @@ EOSIO_TEST_BEGIN(asset_type_test)
       })
    )
 
-   CHECK_ASSERT( "comparison of assets with different symbols is not allowed", (
+   CHECK_ASSERT( "attempt to divide assets with different symbol", (
       [&]() {
          asset{1LL, s0} / asset{1LL, s1};
       })
