@@ -14,6 +14,7 @@
 #include <eosio/security_group.h>
 
 #include <type_traits>
+#include <functional>
 
 namespace eosio { namespace native {
    template <typename... Args, size_t... Is>

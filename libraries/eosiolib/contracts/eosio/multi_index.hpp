@@ -9,9 +9,10 @@
 #include "../../core/eosio/serialize.hpp"
 #include "../../core/eosio/fixed_bytes.hpp"
 
+#include <bluegrass/meta/for_each.hpp>
+
 #include <vector>
 #include <tuple>
-#include <boost/hana.hpp>
 #include <functional>
 #include <utility>
 #include <type_traits>
@@ -303,8 +304,6 @@ struct secondary_key_traits<TYPE> {\
 
 namespace _multi_index_detail {
 
-   namespace hana = boost::hana;
-
    template<typename T>
    struct secondary_index_db_functions;
 
@@ -342,7 +341,7 @@ namespace _multi_index_detail {
  *
  * @ingroup multiindex
  * @tparam IndexName - is the name of the index. The name must be provided as an EOSIO base32 encoded 64-bit integer and must conform to the EOSIO naming requirements of a maximum of 13 characters, the first twelve from the lowercase characters a-z, digits 1-5, and ".", and if there is a 13th character, it is restricted to lowercase characters a-p and ".".
- * @tparam Extractor - is a function call operator that takes a const reference to the table object type and returns either a secondary key type or a reference to a secondary key type. It is recommended to use the `eosio::const_mem_fun` template, which is a type alias to the `boost::multi_index::const_mem_fun`. See the documentation for the Boost `const_mem_fun` key extractor for more details.
+ * @tparam Extractor - is a function call operator that takes a const reference to the table object type and returns either a secondary key type or a reference to a secondary key type. It is recommended to use the `eosio::const_mem_fun` template.
  *
  * Example:
  *
@@ -760,29 +759,34 @@ class multi_index
       template<uint64_t I>
       struct intc { enum e{ value = I }; operator uint64_t()const{ return I; }  };
 
-      static constexpr auto transform_indices( ) {
-         using namespace _multi_index_detail;
+      template<size_t Num, typename... Values>
+      class make_index_tuple {
+         template <uint64_t... Seq>
+         static constexpr auto get_type(std::index_sequence<Seq...>) {
+            return std::make_tuple(std::make_tuple(index<eosio::name::raw(static_cast<uint64_t>(Values::index_name)),
+                                                         typename Values::secondary_extractor_type,
+                                                         intc<Seq>::e::value, false>{},
+                                                   index<eosio::name::raw(static_cast<uint64_t>(Values::index_name)),
+                                                         typename Values::secondary_extractor_type,
+                                                         intc<Seq>::e::value, true>{})...);
+         }
+      public:
+         using type = decltype( get_type(std::make_index_sequence<Num>{}) );
+      };
 
-         typedef decltype( hana::zip_shortest(
-                             hana::make_tuple( intc<0>(), intc<1>(), intc<2>(), intc<3>(), intc<4>(), intc<5>(),
-                                               intc<6>(), intc<7>(), intc<8>(), intc<9>(), intc<10>(), intc<11>(),
-                                               intc<12>(), intc<13>(), intc<14>(), intc<15>() ),
-                             hana::tuple<Indices...>() ) ) indices_input_type;
-
-         return hana::transform( indices_input_type(), [&]( auto&& idx ){
-             typedef typename std::decay<decltype(hana::at_c<0>(idx))>::type num_type;
-             typedef typename std::decay<decltype(hana::at_c<1>(idx))>::type idx_type;
-             return hana::make_tuple( hana::type_c<index<eosio::name::raw(static_cast<uint64_t>(idx_type::index_name)),
-                                                         typename idx_type::secondary_extractor_type,
-                                                         num_type::e::value, false> >,
-                                      hana::type_c<index<eosio::name::raw(static_cast<uint64_t>(idx_type::index_name)),
-                                                         typename idx_type::secondary_extractor_type,
-                                                         num_type::e::value, true> > );
-
-         });
-      }
-
-      typedef decltype( multi_index::transform_indices() ) indices_type;
+      using indices_type = typename make_index_tuple<sizeof... (Indices), Indices...>::type;
+      
+      class make_extractor_tuple {
+         template <typename Obj, typename IndicesType, uint64_t... Seq>
+         static constexpr auto get_type(const IndicesType& indices, const Obj& obj, std::index_sequence<Seq...>) {
+            return std::make_tuple(decltype(get<0>(std::get<Seq>(indices)))::extract_secondary_key(obj)...);
+         }
+      public:
+         template <typename Obj, typename IndicesType>
+         static auto get_extractor_tuple(const IndicesType& indices, const Obj& obj) {
+            return get_type(indices, obj, std::make_index_sequence<sizeof...(Indices)>{});
+         }
+      };
 
       indices_type _indices;
 
@@ -810,9 +814,8 @@ class multi_index
             ds >> val;
 
             i.__primary_itr = itr;
-            hana::for_each( _indices, [&]( auto& idx ) {
-               typedef typename decltype(+hana::at_c<1>(idx))::type index_type;
-
+            bluegrass::meta::for_each(_indices, [&](auto& idx){
+               typedef decltype(std::get<1>(idx)) index_type;
                i.__iters[ index_type::number() ] = -1;
             });
          });
@@ -850,7 +853,7 @@ class multi_index
        * - `Indices` is a list of up to 16 secondary indices.
        * - Each must be a default constructable class or struct
        * - Each must have a function call operator that takes a const reference to the table object type and returns either a secondary key type or a reference to a secondary key type
-       * - It is recommended to use the eosio::const_mem_fun template, which is a type alias to the boost::multi_index::const_mem_fun.  See the documentation for the Boost const_mem_fun key extractor for more details.
+       * - It is recommended to use the eosio::const_mem_fun template
        *
        * Example:
        *
@@ -1412,13 +1415,13 @@ class multi_index
       auto get_index() {
          using namespace _multi_index_detail;
 
-         auto res = hana::find_if( _indices, []( auto&& in ) {
-            return std::integral_constant<bool, static_cast<uint64_t>(std::decay<typename decltype(+hana::at_c<0>(in))::type>::type::index_name) == static_cast<uint64_t>(IndexName)>();
-         });
+         constexpr uint64_t index_num = bluegrass::meta::for_each(_indices, [&](auto& idx){
+            return decltype(std::get<0>(idx))::index_name == static_cast<uint64_t>(IndexName);
+         }, _indices);
 
-         static_assert( res != hana::nothing, "name provided is not the name of any secondary index within multi_index" );
+         static_assert( index_num < sizeof...(Indices), "name provided is not the name of any secondary index within multi_index" );
 
-         return typename decltype(+hana::at_c<0>(res.value()))::type(this);
+         return decltype(std::get<0>(std::get<index_num>(_indices)))(this);
       }
 
       /**
@@ -1463,13 +1466,13 @@ class multi_index
       auto get_index()const {
          using namespace _multi_index_detail;
 
-         auto res = hana::find_if( _indices, []( auto&& in ) {
-            return std::integral_constant<bool, static_cast<uint64_t>(std::decay<typename decltype(+hana::at_c<1>(in))::type>::type::index_name) == static_cast<uint64_t>(IndexName)>();
-         });
+         constexpr uint64_t index_num = bluegrass::meta::for_each(_indices, [&](auto& idx){
+            return decltype(std::get<1>(idx))::index_name == static_cast<uint64_t>(IndexName);
+         }, _indices);
 
-         static_assert( res != hana::nothing, "name provided is not the name of any secondary index within multi_index" );
+         static_assert( index_num < sizeof...(Indices), "name provided is not the name of any secondary index within multi_index" );
 
-         return typename decltype(+hana::at_c<1>(res.value()))::type(this);
+         return decltype(std::get<1>(std::get<index_num>(_indices)))(this);
       }
 
       /**
@@ -1582,10 +1585,10 @@ class multi_index
             if( pk >= _next_primary_key )
                _next_primary_key = (pk >= no_available_primary_key) ? no_available_primary_key : (pk + 1);
 
-            hana::for_each( _indices, [&]( auto& idx ) {
-               typedef typename decltype(+hana::at_c<0>(idx))::type index_type;
+            bluegrass::meta::for_each(_indices, [&](auto& idx){
+                  typedef decltype(std::get<0>(idx)) index_type;
 
-               i.__iters[index_type::number()] = secondary_index_db_functions<typename index_type::secondary_key_type>::db_idx_store( _scope, index_type::name(), payer.value, obj.primary_key(), index_type::extract_secondary_key(obj) );
+                  i.__iters[index_type::number()] = secondary_index_db_functions<typename index_type::secondary_key_type>::db_idx_store( _scope, index_type::name(), payer.value, obj.primary_key(), index_type::extract_secondary_key(obj) );
             });
          });
 
@@ -1695,11 +1698,7 @@ class multi_index
          auto& mutableitem = const_cast<item&>(objitem);
          eosio::check( _code == current_receiver(), "cannot modify objects in table of another contract" ); // Quick fix for mutating db using multi_index that shouldn't allow mutation. Real fix can come in RC2.
 
-         auto secondary_keys = hana::transform( _indices, [&]( auto&& idx ) {
-            typedef typename decltype(+hana::at_c<0>(idx))::type index_type;
-
-            return index_type::extract_secondary_key( obj );
-         });
+         auto secondary_keys = make_extractor_tuple::get_extractor_tuple(_indices, obj);
 
          auto pk = obj.primary_key();
 
@@ -1724,11 +1723,10 @@ class multi_index
          if( pk >= _next_primary_key )
             _next_primary_key = (pk >= no_available_primary_key) ? no_available_primary_key : (pk + 1);
 
-         hana::for_each( _indices, [&]( auto& idx ) {
-            typedef typename decltype(+hana::at_c<0>(idx))::type index_type;
-
+         bluegrass::meta::for_each(_indices, [&](auto& idx){
+            typedef decltype(std::get<0>(idx)) index_type;
             auto secondary = index_type::extract_secondary_key( obj );
-            if( memcmp( &hana::at_c<index_type::index_number>(secondary_keys), &secondary, sizeof(secondary) ) != 0 ) {
+            if( memcmp( &std::get<index_type::index_number>(secondary_keys), &secondary, sizeof(secondary) ) != 0 ) {
                auto indexitr = mutableitem.__iters[index_type::number()];
 
                if( indexitr < 0 ) {
@@ -1739,7 +1737,7 @@ class multi_index
 
                secondary_index_db_functions<typename index_type::secondary_key_type>::db_idx_update( indexitr, payer.value, secondary );
             }
-         });
+         } );
       }
 
       /**
@@ -1935,8 +1933,8 @@ class multi_index
 
          internal_use_do_not_use::db_remove_i64( objitem.__primary_itr );
 
-         hana::for_each( _indices, [&]( auto& idx ) {
-            typedef typename decltype(+hana::at_c<0>(idx))::type index_type;
+         bluegrass::meta::for_each(_indices, [&](auto& idx){
+            typedef decltype(std::get<0>(idx)) index_type;
 
             auto i = objitem.__iters[index_type::number()];
             if( i < 0 ) {

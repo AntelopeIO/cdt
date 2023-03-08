@@ -4,17 +4,13 @@
  */
 #pragma once
 #include <cstdlib>
+#include <type_traits>
 
 #include "../../core/eosio/serialize.hpp"
 #include "../../core/eosio/datastream.hpp"
 #include "../../core/eosio/name.hpp"
 #include "../../core/eosio/ignore.hpp"
 #include "../../core/eosio/time.hpp"
-
-#include <boost/preprocessor/variadic/size.hpp>
-#include <boost/preprocessor/variadic/to_tuple.hpp>
-#include <boost/preprocessor/tuple/enum.hpp>
-#include <boost/preprocessor/facilities/overload.hpp>
 
 namespace eosio {
 
@@ -268,12 +264,12 @@ namespace eosio {
       /**
        *  Name of the account the action is intended for
        */
-      name                       account;
+      eosio::name                       account;
 
       /**
        *  Name of the action
        */
-      name                       name;
+      eosio::name                       name;
 
       /**
        *  List of permissions that authorize this action
@@ -570,7 +566,7 @@ namespace eosio {
 #define INLINE_ACTION_SENDER2( CONTRACT_CLASS, NAME )\
 INLINE_ACTION_SENDER3( CONTRACT_CLASS, NAME, ::eosio::name(#NAME) )
 
-#define INLINE_ACTION_SENDER(...) BOOST_PP_OVERLOAD(INLINE_ACTION_SENDER,__VA_ARGS__)(__VA_ARGS__)
+#define INLINE_ACTION_SENDER(...) BLUEGRASS_META_OVERLOAD(INLINE_ACTION_SENDER,__VA_ARGS__)(__VA_ARGS__)
 
 /**
  * Send an inline-action from inside a contract.
@@ -599,5 +595,4 @@ INLINE_ACTION_SENDER3( CONTRACT_CLASS, NAME, ::eosio::name(#NAME) )
  */
 
 #define SEND_INLINE_ACTION( CONTRACT, NAME, ... )\
-INLINE_ACTION_SENDER(std::decay_t<decltype(CONTRACT)>, NAME)( (CONTRACT).get_self(),\
-BOOST_PP_TUPLE_ENUM(BOOST_PP_VARIADIC_SIZE(__VA_ARGS__), BOOST_PP_VARIADIC_TO_TUPLE(__VA_ARGS__)) );
+INLINE_ACTION_SENDER(std::decay_t<decltype(CONTRACT)>, NAME)( (CONTRACT).get_self(),__VA_ARGS__)

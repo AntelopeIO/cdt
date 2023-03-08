@@ -1,10 +1,8 @@
 #pragma once
 #include "action.hpp"
 
-#include <boost/fusion/adapted/std_tuple.hpp>
-#include <boost/fusion/include/std_tuple.hpp>
-
-#include <boost/mp11/tuple.hpp>
+#include <bluegrass/meta/preprocessor.hpp>
+#include <tuple>
 
 namespace eosio {
 
@@ -85,7 +83,7 @@ namespace eosio {
          ((&inst)->*func)( a... );
       };
 
-      boost::mp11::tuple_apply( f2, args );
+      std::apply( f2, args );
       if ( max_stack_buffer_size < size ) {
          free(buffer);
       }
@@ -95,14 +93,14 @@ namespace eosio {
   /// @cond INTERNAL
 
  // Helper macro for EOSIO_DISPATCH_INTERNAL
- #define EOSIO_DISPATCH_INTERNAL( r, OP, elem ) \
-    case eosio::name( BOOST_PP_STRINGIZE(elem) ).value: \
+ #define EOSIO_DISPATCH_INTERNAL( OP, elem ) \
+    case eosio::name( BLUEGRASS_META_STRINGIZE(elem) ).value: \
        eosio::execute_action( eosio::name(receiver), eosio::name(code), &OP::elem ); \
        break;
 
  // Helper macro for EOSIO_DISPATCH
  #define EOSIO_DISPATCH_HELPER( TYPE,  MEMBERS ) \
-    BOOST_PP_SEQ_FOR_EACH( EOSIO_DISPATCH_INTERNAL, TYPE, MEMBERS )
+    BLUEGRASS_META_FOREACH_SEQ( EOSIO_DISPATCH_INTERNAL, TYPE, MEMBERS )
 
 /// @endcond
 
