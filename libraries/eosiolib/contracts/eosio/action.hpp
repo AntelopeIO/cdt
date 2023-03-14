@@ -174,17 +174,37 @@ namespace eosio {
    inline checksum256 get_code_hash( name account, code_hash_result* full_result = nullptr ) {
        if (full_result == nullptr)
            full_result = (code_hash_result*)alloca(sizeof(code_hash_result));
+       constexpr size_t max_stack_buffer_size = 50;
 
-       // Packed size is dynamic, so we don't know what it'll be. Try to have plenty of space.
-       auto struct_buffer_size = sizeof(code_hash_result)*2;
+       // Packed size of this struct will virtually always be less than the struct size; always less after padding
+       auto struct_buffer_size = sizeof(code_hash_result);
        char* struct_buffer = (char*)alloca(struct_buffer_size);
 
        using VersionType = decltype(code_hash_result::struct_version);
        const VersionType STRUCT_VERSION = 0;
-       internal_use_do_not_use::get_code_hash(account.value, STRUCT_VERSION, struct_buffer, struct_buffer_size);
+       auto response_size =
+           internal_use_do_not_use::get_code_hash(account.value, STRUCT_VERSION, struct_buffer, struct_buffer_size);
+       // Safety check: in this case, response size should never exceed our buffer, but just in case...
+       bool buffer_on_heap = false;
+       if (response_size > struct_buffer_size) {
+           // Slow path: allocate an adequate buffer and try again
+           // No need to deallocate struct_buffer since it was alloca'd
+           if (response_size > max_stack_buffer_size) {
+               struct_buffer = (char*)malloc(response_size);
+               buffer_on_heap = true;
+           } else {
+               struct_buffer = (char*)alloca(response_size);
+           }
+           internal_use_do_not_use::get_code_hash(account.value, STRUCT_VERSION, struct_buffer, struct_buffer_size);
+       }
+
        check(unpack<VersionType>(struct_buffer, struct_buffer_size) == STRUCT_VERSION,
              "Hypervisor returned unexpected code hash struct version");
        unpack(*full_result, struct_buffer, struct_buffer_size);
+
+       // If struct_buffer is heap allocated, we must free it
+       if (buffer_on_heap)
+           free(struct_buffer);
 
        return full_result->code_hash;
    }
