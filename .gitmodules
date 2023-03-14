@@ -13,3 +13,6 @@
 [submodule "tools/external/eos-vm"]
 	path = tools/external/eos-vm
 	url = https://github.com/AntelopeIO/eos-vm
+[submodule "tools/external/antler-interfaces"]
+	path = tools/external/antler-interfaces
+	url = git@github.com:AntelopeIO/antler-interfaces
