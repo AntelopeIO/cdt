@@ -16,3 +16,6 @@
 [submodule "tools/external/antler-proj"]
 	path = tools/external/antler-proj
 	url = https://github.com/AntelopeIO/antler-proj
+[submodule "tools/external/antler-interfaces"]
+	path = tools/external/antler-interfaces
+	url = git@github.com:AntelopeIO/antler-interfaces

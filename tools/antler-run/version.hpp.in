@@ -1,0 +1,5 @@
+#pragma once
+
+inline const char* app_version() {
+    return "${VERSION_FULL}";
+}

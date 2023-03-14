@@ -1,5 +1,9 @@
 #include "options.hpp"
 #include "file-utils.hpp"
+#include "run.hpp"
+#include "native-runner.hpp"
+#include "wasm-runner.hpp"
+#include "version.hpp"
 
 #include <cassert>
 #include <string.h>
@@ -22,7 +26,7 @@ using namespace llvm;
 int main(int argc, const char **argv) {
 
    cl::SetVersionPrinter([](llvm::raw_ostream& os) {
-         os << "Antler-run version ${VERSION_FULL}" << "\n";
+         os << "Antler-run version " << app_version() << "\n";
    });
 
    cl::ParseCommandLineOptions(argc, argv);
