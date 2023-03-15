@@ -7,4 +7,4 @@ RUN apt-get update && apt-get upgrade -y && \
                                                       ninja-build \
                                                       python3 \
                                                       pkg-config \
-                                                      libcurl
+                                                      libcurl4
