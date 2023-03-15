@@ -5,4 +5,5 @@ RUN apt-get update && apt-get upgrade -y && \
                                                       cmake \
                                                       git \
                                                       ninja-build \
-                                                      python3
+                                                      python3 \
+                                                      pkg-config

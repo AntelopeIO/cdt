@@ -7,7 +7,8 @@ RUN apt-get update && apt-get upgrade -y && \
                                                       curl \
                                                       ninja-build \
                                                       software-properties-common \
-                                                      zlib1g-dev
+                                                      zlib1g-dev \
+                                                      pkg-config
 
 RUN add-apt-repository ppa:git-core/ppa && apt update && apt install -y git
 
