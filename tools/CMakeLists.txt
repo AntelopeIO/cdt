@@ -23,6 +23,8 @@ include_directories(${LLVM_SRCDIR}/include)
 include_directories(${LLVM_BINDIR}/include)
 link_directories(${LLVM_LIBRARY_DIRS})
 add_definitions(${LLVM_DEFINITIONS})
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
 
 set(CMAKE_CXX_STANDARD 17)
 set(EOSIO_STACK_SIZE 8192)
@@ -70,7 +72,6 @@ macro (add_tool name)
      LLVMDemangle
    )
 
-   add_custom_command( TARGET ${name} POST_BUILD COMMAND mkdir -p ${CMAKE_BINARY_DIR}/bin )
    add_custom_command( TARGET ${name} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${name}> ${CMAKE_BINARY_DIR}/bin/ )
 endmacro()
 
@@ -84,3 +85,13 @@ add_subdirectory(external)
 add_subdirectory(antler-run)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/compiler_options.hpp.in ${CMAKE_BINARY_DIR}/compiler_options.hpp)
+
+add_custom_command( OUTPUT ${CMAKE_BINARY_DIR}/bin/antler-proj
+                    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:antler-proj> ${CMAKE_BINARY_DIR}/bin/
+                    DEPENDS antler-proj
+                    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/external/antler-proj/tools
+                  )
+
+add_custom_target(copy_files ALL
+    DEPENDS  ${CMAKE_BINARY_DIR}/bin/antler-proj
+)

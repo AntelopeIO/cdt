@@ -74,6 +74,7 @@ cdt_tool_install_and_symlink(cdt-cpp cdt-cpp)
 cdt_tool_install_and_symlink(cdt-ld cdt-ld)
 cdt_tool_install_and_symlink(cdt-abidiff cdt-abidiff)
 cdt_tool_install_and_symlink(cdt-init cdt-init)
+cdt_tool_install_and_symlink(antler-proj antler-proj)
 
 cdt_clang_install(../lib/LLVMEosioApply${CMAKE_SHARED_LIBRARY_SUFFIX})
 cdt_clang_install(../lib/LLVMEosioSoftfloat${CMAKE_SHARED_LIBRARY_SUFFIX})
