@@ -7,4 +7,5 @@ RUN apt-get update && apt-get upgrade -y && \
                                                       ninja-build \
                                                       python3 \
                                                       pkg-config \
-                                                      libcurl4-openssl-dev
+                                                      libcurl4-openssl-dev \
+                                                      libboost-all-dev
