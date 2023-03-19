@@ -785,7 +785,7 @@ class multi_index
       class make_extractor_tuple {
          template <typename Obj, typename IndicesType, uint64_t... Seq>
          static constexpr auto get_type(const IndicesType& indices, const Obj& obj, std::index_sequence<Seq...>) {
-            return std::make_tuple(decltype(get<0>(std::get<Seq>(indices)))::extract_secondary_key(obj)...);
+            return std::make_tuple(decltype(std::get<0>(std::get<Seq>(indices)))::extract_secondary_key(obj)...);
          }
       public:
          template <typename Obj, typename IndicesType>
