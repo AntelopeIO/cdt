@@ -1,0 +1,9 @@
+{
+   "tests" : [
+      {
+         "expected" : {
+            "abi-file" : "tagged_number_test.abi"
+         }
+      }
+   ]
+}

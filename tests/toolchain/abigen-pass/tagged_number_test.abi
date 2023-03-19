@@ -1,0 +1,38 @@
+{
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
+    "version": "eosio::abi/1.2",
+    "types": [],
+    "structs": [
+        {
+            "name": "TaggedNumber_3472950412842106880",
+            "base": "",
+            "fields": [
+                {
+                    "name": "value",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "test",
+            "base": "",
+            "fields": [
+                {
+                    "name": "",
+                    "type": "TaggedNumber_3472950412842106880"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "name": "test",
+            "type": "test",
+            "ricardian_contract": ""
+        }
+    ],
+    "tables": [],
+    "ricardian_clauses": [],
+    "variants": [],
+    "action_results": []
+}
