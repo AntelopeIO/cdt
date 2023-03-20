@@ -334,6 +334,10 @@ namespace _multi_index_detail {
       static constexpr eosio::fixed_bytes<32> true_lowest() { return eosio::fixed_bytes<32>(); }
    };
 
+   template<typename PK>
+   inline uint64_t to_raw_key(PK pk) { return pk; }
+   inline uint64_t to_raw_key(eosio::name pk) { return pk.value; }
+
 }
 
 /**
@@ -435,6 +439,8 @@ class multi_index
 {
    private:
 
+      static_assert( std::is_same_v<decltype(_multi_index_detail::to_raw_key(std::declval<T>().primary_key())), uint64_t>,
+                     "Primary key must be uint64_t or name" );
       static_assert( sizeof...(Indices) <= 16, "multi_index only supports a maximum of 16 secondary indices" );
 
       constexpr static bool validate_table_name( name n ) {
@@ -779,7 +785,7 @@ class multi_index
       class make_extractor_tuple {
          template <typename Obj, typename IndicesType, uint64_t... Seq>
          static constexpr auto get_type(const IndicesType& indices, const Obj& obj, std::index_sequence<Seq...>) {
-            return std::make_tuple(decltype(get<0>(std::get<Seq>(indices)))::extract_secondary_key(obj)...);
+            return std::make_tuple(decltype(std::get<0>(std::get<Seq>(indices)))::extract_secondary_key(obj)...);
          }
       public:
          template <typename Obj, typename IndicesType>
@@ -821,7 +827,7 @@ class multi_index
          });
 
          const item* ptr = itm.get();
-         auto pk   = itm->primary_key();
+         auto pk   = _multi_index_detail::to_raw_key(itm->primary_key());
          auto pitr = itm->__primary_itr;
 
          _items_vector.emplace_back( std::move(itm), pk, pitr );
@@ -1269,8 +1275,10 @@ class multi_index
        * EOSIO_DISPATCH( addressbook, (myaction) )
        * @endcode
        */
-      const_iterator lower_bound( uint64_t primary )const {
-         auto itr = internal_use_do_not_use::db_lowerbound_i64( _code.value, _scope, static_cast<uint64_t>(TableName), primary );
+      template<typename PK>
+      const_iterator lower_bound( PK primary )const {
+         uint64_t primary_int = _multi_index_detail::to_raw_key(primary);
+         auto itr = internal_use_do_not_use::db_lowerbound_i64( _code.value, _scope, static_cast<uint64_t>(TableName), primary_int );
          if( itr < 0 ) return end();
          const auto& obj = load_object_by_primary_iterator( itr );
          return {this, &obj};
@@ -1313,8 +1321,10 @@ class multi_index
        * EOSIO_DISPATCH( addressbook, (myaction) )
        * @endcode
        */
-      const_iterator upper_bound( uint64_t primary )const {
-         auto itr = internal_use_do_not_use::db_upperbound_i64( _code.value, _scope, static_cast<uint64_t>(TableName), primary );
+      template<typename PK>
+      const_iterator upper_bound( PK primary )const {
+         uint64_t primary_int = _multi_index_detail::to_raw_key(primary);
+         auto itr = internal_use_do_not_use::db_upperbound_i64( _code.value, _scope, static_cast<uint64_t>(TableName), primary_int );
          if( itr < 0 ) return end();
          const auto& obj = load_object_by_primary_iterator( itr );
          return {this, &obj};
@@ -1574,7 +1584,7 @@ class multi_index
             datastream<char*> ds( (char*)buffer, size );
             ds << obj;
 
-            auto pk = obj.primary_key();
+            uint64_t pk = _multi_index_detail::to_raw_key(obj.primary_key());
 
             i.__primary_itr = internal_use_do_not_use::db_store_i64( _scope, static_cast<uint64_t>(TableName), payer.value, pk, buffer, size );
 
@@ -1593,7 +1603,7 @@ class multi_index
          });
 
          const item* ptr = itm.get();
-         auto pk   = itm->primary_key();
+         auto pk   = _multi_index_detail::to_raw_key(itm->primary_key());
          auto pitr = itm->__primary_itr;
 
          _items_vector.emplace_back( std::move(itm), pk, pitr );
@@ -1700,12 +1710,12 @@ class multi_index
 
          auto secondary_keys = make_extractor_tuple::get_extractor_tuple(_indices, obj);
 
-         auto pk = obj.primary_key();
+         uint64_t pk = _multi_index_detail::to_raw_key(obj.primary_key());
 
          auto& mutableobj = const_cast<T&>(obj); // Do not forget the auto& otherwise it would make a copy and thus not update at all.
          updater( mutableobj );
 
-         eosio::check( pk == obj.primary_key(), "updater cannot change primary key when modifying an object" );
+         eosio::check( pk == _multi_index_detail::to_raw_key(obj.primary_key()), "updater cannot change primary key when modifying an object" );
 
          size_t size = pack_size( obj );
          //using malloc/free here potentially is not exception-safe, although WASM doesn't support exceptions
@@ -1772,7 +1782,8 @@ class multi_index
        * The most common mistake is when the local variable is defined as auto 
        * typename, instead it should be of type auto& or decltype(auto).
        */
-      const T& get( uint64_t primary, const char* error_msg = "unable to find key" )const {
+      template<typename PK>
+      const T& get( PK primary, const char* error_msg = "unable to find key" )const {
          auto result = find( primary );
          eosio::check( result != cend(), error_msg );
          return *result;
@@ -1801,14 +1812,16 @@ class multi_index
        * EOSIO_DISPATCH( addressbook, (myaction) )
        * @endcode
        */
-      const_iterator find( uint64_t primary )const {
+      template<typename PK>
+      const_iterator find( PK primary )const {
          auto itr2 = std::find_if(_items_vector.rbegin(), _items_vector.rend(), [&](const item_ptr& ptr) {
             return ptr._item->primary_key() == primary;
          });
          if( itr2 != _items_vector.rend() )
             return iterator_to(*(itr2->_item));
 
-         auto itr = internal_use_do_not_use::db_find_i64( _code.value, _scope, static_cast<uint64_t>(TableName), primary );
+         uint64_t primary_int = _multi_index_detail::to_raw_key(primary);
+         auto itr = internal_use_do_not_use::db_find_i64( _code.value, _scope, static_cast<uint64_t>(TableName), primary_int );
          if( itr < 0 ) return end();
 
          const item& i = load_object_by_primary_iterator( itr );
@@ -1824,14 +1837,16 @@ class multi_index
        * @return An iterator to the found object which has a primary key equal to `primary` OR throws an exception if an object with primary key `primary` is not found.
        */
 
-      const_iterator require_find( uint64_t primary, const char* error_msg = "unable to find key" )const {
+      template<typename PK>
+      const_iterator require_find( PK primary, const char* error_msg = "unable to find key" )const {
          auto itr2 = std::find_if(_items_vector.rbegin(), _items_vector.rend(), [&](const item_ptr& ptr) {
                return ptr._item->primary_key() == primary;
             });
          if( itr2 != _items_vector.rend() )
             return iterator_to(*(itr2->_item));
 
-         auto itr = internal_use_do_not_use::db_find_i64( _code.value, _scope, static_cast<uint64_t>(TableName), primary );
+         uint64_t primary_int = _multi_index_detail::to_raw_key(primary);
+         auto itr = internal_use_do_not_use::db_find_i64( _code.value, _scope, static_cast<uint64_t>(TableName), primary_int );
          eosio::check( itr >= 0,  error_msg );
 
          const item& i = load_object_by_primary_iterator( itr );

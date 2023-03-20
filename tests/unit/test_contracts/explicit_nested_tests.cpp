@@ -32,7 +32,7 @@ CONTRACT explicit_nested_tests : public contract {
       std::tuple<uint64_t, std::optional<float>, std::vector<int>> tup1;
       std::variant<uint64_t, std::optional<std::pair<int, float>>, std::vector<int>> var1;
       std::vector<std::vector<_mystruct>> vvmys;
-      auto primary_key() const { return id; }
+      auto primary_key() const -> decltype(id) { return id; }
 
       EOSLIB_SERIALIZE(testdata, (id)(data)(data_vec)(data_vec2)(data_vec3)(tup1)(var1)(vvmys));
    };
