@@ -27,5 +27,8 @@ namespace eosio::testing {
       static std::vector<char>    get_code_hash_write_test_abi() { return read_abi("${CMAKE_BINARY_DIR}/../unit/test_contracts/get_code_hash_write.abi"); }
       static std::vector<uint8_t> get_code_hash_read_test_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../unit/test_contracts/get_code_hash_read.wasm"); }
       static std::vector<char>    get_code_hash_read_test_abi() { return read_abi("${CMAKE_BINARY_DIR}/../unit/test_contracts/get_code_hash_read.abi"); }
+
+      static std::vector<uint8_t> name_pk_tests_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../unit/test_contracts/name_pk_tests.wasm"); }
+      static std::vector<char>    name_pk_tests_abi() { return read_abi("${CMAKE_BINARY_DIR}/../unit/test_contracts/name_pk_tests.abi"); }
    };
 } //ns eosio::testing
