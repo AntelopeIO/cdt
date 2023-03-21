@@ -491,6 +491,84 @@ EOSIO_TEST_BEGIN(extended_asset_type_test)
       })
    )
 
+   // --------------------------------------------------------------------------
+   // extended_asset& operator*=( int64_t b )
+   CHECK_EQUAL( (extended_asset{ asset{ 0LL, sym_no_prec}, {}} *=  0LL ), (extended_asset{ asset{ 0LL, sym_no_prec}, {}}) );
+   CHECK_EQUAL( (extended_asset{ asset{ 2LL, sym_no_prec}, {}} *=  1LL ), (extended_asset{ asset{ 2LL, sym_no_prec}, {}}) );
+   CHECK_EQUAL( (extended_asset{ asset{ 2LL, sym_no_prec}, {}} *= -1LL ), (extended_asset{ asset{-2LL, sym_no_prec}, {}}) );
+
+   CHECK_ASSERT( "multiplication underflow", (
+      [&]() {
+         extended_asset{ asset{asset_min, sym_no_prec}, {}} *= 2LL;
+      })
+   )
+
+   CHECK_ASSERT( "multiplication overflow", (
+      [&]() {
+         extended_asset{ asset{ asset_max, sym_no_prec}, {}} *= 2LL;
+      })
+   )
+
+   // --------------------------------------------------------------------------
+   // friend extended_asset operator*( const extended_asset& a, int64_t b )
+   CHECK_EQUAL( (extended_asset{ asset{ 0LL, sym_no_prec}, {}} *  0LL ), (extended_asset{ asset{ 0LL, sym_no_prec}, {}}) );
+   CHECK_EQUAL( (extended_asset{ asset{ 2LL, sym_no_prec}, {}} *  1LL ), (extended_asset{ asset{ 2LL, sym_no_prec}, {}}) );
+   CHECK_EQUAL( (extended_asset{ asset{ 2LL, sym_no_prec}, {}} * -1LL ), (extended_asset{ asset{-2LL, sym_no_prec}, {}}) );
+
+   CHECK_ASSERT( "multiplication underflow", (
+      [&]() {
+         extended_asset{ asset{asset_min, sym_no_prec}, {}} * 2LL;
+      })
+   )
+
+   CHECK_ASSERT( "multiplication overflow", (
+      [&]() {
+         extended_asset{ asset{ asset_max, sym_no_prec}, {}} * 2LL;
+      })
+   )
+
+   // --------------------------------------------------------------------------
+   // friend extended_asset operator*( int64_t a, const extended_asset& b )
+   CHECK_EQUAL( ( 0LL * extended_asset{ asset{ 0LL, sym_no_prec}, {}} ), (extended_asset{ asset{ 0LL, sym_no_prec}, {}}) );
+   CHECK_EQUAL( ( 1LL * extended_asset{ asset{ 2LL, sym_no_prec}, {}} ), (extended_asset{ asset{ 2LL, sym_no_prec}, {}}) );
+   CHECK_EQUAL( (-1LL * extended_asset{ asset{ 2LL, sym_no_prec}, {}} ), (extended_asset{ asset{-2LL, sym_no_prec}, {}}) );
+
+   CHECK_ASSERT( "multiplication underflow", (
+      [&]() {
+         2LL * extended_asset{ asset{asset_min, sym_no_prec}, {}};
+      })
+   )
+
+   CHECK_ASSERT( "multiplication overflow", (
+      [&]() {
+         2LL * extended_asset{ asset{ asset_max, sym_no_prec}, {}};
+      })
+   )
+
+   // --------------------------------------------------------------------------
+   // friend int64_t operator/( const extended_asset& a, const extended_asset& b )
+   CHECK_EQUAL( (extended_asset{ asset{ 0LL, sym_no_prec}, {}} / extended_asset{ asset{ 1LL, sym_no_prec}, {}}), 0LL )
+   CHECK_EQUAL( (extended_asset{ asset{ 1LL, sym_no_prec}, {}} / extended_asset{ asset{ 1LL, sym_no_prec}, {}}), 1LL )
+   CHECK_EQUAL( (extended_asset{ asset{ 4LL, sym_no_prec}, {}} / extended_asset{ asset{ 2LL, sym_no_prec}, {}}), 2LL )
+   CHECK_EQUAL( (extended_asset{ asset{-4LL, sym_no_prec}, {}} / extended_asset{ asset{ 2LL, sym_no_prec}, {}}), -2LL )
+   CHECK_EQUAL( (extended_asset{ asset{-4LL, sym_no_prec}, {}} / extended_asset{ asset{-2LL, sym_no_prec}, {}}), 2LL )
+
+   // --------------------------------------------------------------------------
+   // friend extended_asset& operator/=( extended_asset& a, int64_t b )
+   CHECK_EQUAL( (extended_asset{ asset{ 0LL, sym_no_prec}, {}} /= 1LL ), (extended_asset{ asset{ 0LL, sym_no_prec}, {}}) )
+   CHECK_EQUAL( (extended_asset{ asset{ 1LL, sym_no_prec}, {}} /= 1LL ), (extended_asset{ asset{ 1LL, sym_no_prec}, {}}) )
+   CHECK_EQUAL( (extended_asset{ asset{ 4LL, sym_no_prec}, {}} /= 2LL ), (extended_asset{ asset{ 2LL, sym_no_prec}, {}}) )
+   CHECK_EQUAL( (extended_asset{ asset{-4LL, sym_no_prec}, {}} /= 2LL ), (extended_asset{ asset{-2LL, sym_no_prec}, {}}) )
+   CHECK_EQUAL( (extended_asset{ asset{-4LL, sym_no_prec}, {}} /= -2LL ), (extended_asset{ asset{ 2LL, sym_no_prec}, {}}) )
+
+   // --------------------------------------------------------------------------
+   // friend extended_asset operator/( const extended_asset& a, int64_t b )
+   CHECK_EQUAL( (extended_asset{ asset{ 0LL, sym_no_prec}, {}} / 1LL ), (extended_asset{ asset{ 0LL, sym_no_prec}, {}}) )
+   CHECK_EQUAL( (extended_asset{ asset{ 1LL, sym_no_prec}, {}} / 1LL ), (extended_asset{ asset{ 1LL, sym_no_prec}, {}}) )
+   CHECK_EQUAL( (extended_asset{ asset{ 4LL, sym_no_prec}, {}} / 2LL ), (extended_asset{ asset{ 2LL, sym_no_prec}, {}}) )
+   CHECK_EQUAL( (extended_asset{ asset{-4LL, sym_no_prec}, {}} / 2LL ), (extended_asset{ asset{-2LL, sym_no_prec}, {}}) )
+   CHECK_EQUAL( (extended_asset{ asset{-4LL, sym_no_prec}, {}} / -2LL ), (extended_asset{ asset{ 2LL, sym_no_prec}, {}}) )
+
    // --------------------------------------------------------------------
    // friend bool operator==(const extended_asset&, const extended_asset&)
    CHECK_EQUAL( (extended_asset{asset_no_prec, {}} == extended_asset{asset_no_prec, {}}), true )
@@ -508,6 +586,16 @@ EOSIO_TEST_BEGIN(extended_asset_type_test)
    CHECK_ASSERT( "type mismatch", (
       [&]() {
          bool b{extended_asset{{}, name{}} < extended_asset{{}, name{"eosioaccountj"}}};
+         return b;
+      })
+   )
+
+   // -------------------------------------------------------------------
+   // friend bool operator>(const extended_asset&, const extended_asset&)
+   CHECK_EQUAL( (extended_asset{asset{ 1LL, sym_no_prec}, {}} > extended_asset{asset_no_prec, name{}}), true )
+   CHECK_ASSERT( "type mismatch", (
+      [&]() {
+         bool b{extended_asset{{}, name{}} > extended_asset{{}, name{"eosioaccountj"}}};
          return b;
       })
    )
