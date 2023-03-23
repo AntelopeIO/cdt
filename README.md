@@ -12,7 +12,7 @@ The `main` branch is the development branch: do not use this for production. Ref
 CDT currently supports Linux x86_64 Debian packages. Visit the [release page](https://github.com/AntelopeIO/cdt/releases) to download the package for the appropriate version of CDT. This is the fastest way to get started with the software.
 ### Debian package install
 
-Download the appropriate version of the Debian package and then install. To download and install the latest version, run the following:
+Download the appropriate version of the Debian package and then install it. To download and install the latest version, run the following:
 
 ```sh
 wget https://github.com/AntelopeIO/cdt/releases/download/v3.1.0/cdt_3.1.0-amd64.deb
