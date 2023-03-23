@@ -766,6 +766,46 @@ datastream<Stream>& operator >> ( datastream<Stream>& ds, std::vector<T>& v ) {
 }
 
 /**
+ *  Serialize a basic_string
+ *
+ *  @param ds - The stream to write
+ *  @param s - The value to serialize
+ *  @tparam Stream - Type of datastream buffer
+ *  @tparam T - Type of the object contained in the basic_string
+ *  @return datastream<Stream>& - Reference to the datastream
+ */
+template<typename Stream, typename T>
+datastream<Stream>& operator << ( datastream<Stream>& ds, const std::basic_string<T>& s ) {
+   ds << unsigned_int( s.size() );
+   for( const auto& i : s ) {
+      ds << i;
+   }
+   return ds;
+}
+
+/**
+ *  Deserialize a basic_string
+ *
+ *  @param ds - The stream to read
+ *  @param s - The destination for deserialized value
+ *  @tparam Stream - Type of datastream buffer
+ *  @tparam T - Type of the object contained in the basic_string
+ *  @return datastream<Stream>& - Reference to the datastream
+ */
+template<typename Stream, typename T>
+datastream<Stream>& operator >> ( datastream<Stream>& ds, std::basic_string<T>& s ) {
+   s.clear();
+   unsigned_int sz; ds >> sz;
+
+   for( uint32_t i = 0; i < sz.value; ++i ) {
+      T v;
+      ds >> v;
+      s.push_back( std::move(v) );
+   }
+   return ds;
+}
+
+/**
  *  Serialize a set
  *
  *  @param ds - The stream to write
