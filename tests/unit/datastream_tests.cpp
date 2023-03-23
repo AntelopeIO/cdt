@@ -396,6 +396,16 @@ EOSIO_TEST_BEGIN(datastream_stream_test)
    ds >> outputBasicString;
    CHECK_EQUAL( inputBasicString, outputBasicString )
 
+   // -----------
+   // empty std::basic_string
+   ds.seekp(0);
+   fill(begin(datastream_buffer), end(datastream_buffer), 0);
+   static const std::basic_string<uint8_t> emptyBasicString;
+   ds << emptyBasicString;
+   ds.seekp(0);
+   ds >> outputBasicString;
+   CHECK_EQUAL( emptyBasicString, outputBasicString )
+
    // ----------
    // std::tuple
    ds.seekp(0);
