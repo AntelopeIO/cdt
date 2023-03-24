@@ -59,7 +59,7 @@ class datastream {
       *  @param s - the number of bytes to read
       *  @return true
       */
-      inline bool read( char* d, size_t s ) {
+      inline bool read( void* d, size_t s ) {
         eosio::check( size_t(_end - _pos) >= (size_t)s, "datastream attempted to read past the end" );
         memcpy( d, _pos, s );
         _pos += s;
@@ -762,6 +762,41 @@ datastream<Stream>& operator >> ( datastream<Stream>& ds, std::vector<T>& v ) {
    v.resize(s.value);
    for( auto& i : v )
       ds >> i;
+   return ds;
+}
+
+/**
+ *  Serialize a basic_string
+ *
+ *  @param ds - The stream to write
+ *  @param s - The value to serialize
+ *  @tparam Stream - Type of datastream buffer
+ *  @tparam T - Type of the object contained in the basic_string
+ *  @return datastream<Stream>& - Reference to the datastream
+ */
+template<typename Stream, typename T>
+datastream<Stream>& operator << ( datastream<Stream>& ds, const std::basic_string<T>& s ) {
+   ds << unsigned_int(s.size());
+   if (s.size())
+      ds.write(s.data(), s.size()*sizeof(T));
+   return ds;
+}
+
+/**
+ *  Deserialize a basic_string
+ *
+ *  @param ds - The stream to read
+ *  @param s - The destination for deserialized value
+ *  @tparam Stream - Type of datastream buffer
+ *  @tparam T - Type of the object contained in the basic_string
+ *  @return datastream<Stream>& - Reference to the datastream
+ */
+template<typename Stream, typename T>
+datastream<Stream>& operator >> ( datastream<Stream>& ds, std::basic_string<T>& s ) {
+   unsigned_int v;
+   ds >> v;
+   s.resize(v.value);
+   ds.read(s.data(), s.size()*sizeof(T));
    return ds;
 }
 
