@@ -59,7 +59,7 @@ class datastream {
       *  @param s - the number of bytes to read
       *  @return true
       */
-      inline bool read( char* d, size_t s ) {
+      inline bool read( void* d, size_t s ) {
         eosio::check( size_t(_end - _pos) >= (size_t)s, "datastream attempted to read past the end" );
         memcpy( d, _pos, s );
         _pos += s;
@@ -776,10 +776,9 @@ datastream<Stream>& operator >> ( datastream<Stream>& ds, std::vector<T>& v ) {
  */
 template<typename Stream, typename T>
 datastream<Stream>& operator << ( datastream<Stream>& ds, const std::basic_string<T>& s ) {
-   ds << unsigned_int( s.size() );
-   for( const auto& i : s ) {
-      ds << i;
-   }
+   ds << unsigned_int(s.size());
+   if (s.size())
+      ds.write(s.data(), s.size()*sizeof(T));
    return ds;
 }
 
@@ -794,14 +793,10 @@ datastream<Stream>& operator << ( datastream<Stream>& ds, const std::basic_strin
  */
 template<typename Stream, typename T>
 datastream<Stream>& operator >> ( datastream<Stream>& ds, std::basic_string<T>& s ) {
-   s.clear();
-   unsigned_int sz; ds >> sz;
-
-   for( uint32_t i = 0; i < sz.value; ++i ) {
-      T v;
-      ds >> v;
-      s.push_back( std::move(v) );
-   }
+   unsigned_int v;
+   ds >> v;
+   s.resize(v.value);
+   ds.read(s.data(), s.size()*sizeof(T));
    return ds;
 }
 
