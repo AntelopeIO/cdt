@@ -385,6 +385,38 @@ EOSIO_TEST_BEGIN(datastream_stream_test)
    ds >> str;
    CHECK_EQUAL( cstr, str )
 
+   // -----------
+   // std::basic_string<uint8_t>
+   ds.seekp(0);
+   fill(begin(datastream_buffer), end(datastream_buffer), 0);
+   static const std::basic_string<uint8_t> inputBasicString {0, 1, 2, 3, 4, 5};
+   std::basic_string<uint8_t> outputBasicString{};
+   ds << inputBasicString;
+   ds.seekp(0);
+   ds >> outputBasicString;
+   CHECK_EQUAL( inputBasicString, outputBasicString )
+
+   // -----------
+   // empty std::basic_string
+   ds.seekp(0);
+   fill(begin(datastream_buffer), end(datastream_buffer), 0);
+   static const std::basic_string<uint8_t> emptyBasicString;
+   ds << emptyBasicString;
+   ds.seekp(0);
+   ds >> outputBasicString;
+   CHECK_EQUAL( emptyBasicString, outputBasicString )
+
+   // -----------
+   // std::basic_string<wchar_t>
+   ds.seekp(0);
+   fill(begin(datastream_buffer), end(datastream_buffer), 0);
+   static const std::basic_string<wchar_t> inputWideBasicString {L'\x3b1', L'\x3b2'};
+   std::basic_string<wchar_t> outputWideBasicString{};
+   ds << inputWideBasicString;
+   ds.seekp(0);
+   ds >> outputWideBasicString;
+   CHECK_EQUAL( inputWideBasicString, outputWideBasicString )
+
    // ----------
    // std::tuple
    ds.seekp(0);

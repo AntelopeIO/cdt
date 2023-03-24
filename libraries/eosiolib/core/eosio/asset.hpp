@@ -462,30 +462,69 @@ namespace eosio {
          return a;
       }
 
+      /// Multiplication operator.
+      extended_asset& operator*=( int64_t b ) {
+         quantity *= b;
+         return *this;
+      }
+
+      /// Multiplication operator.
+      friend extended_asset operator*( const extended_asset& a, int64_t b ) {
+         return {a.quantity * b, a.contract};
+      }
+
+      /// Multiplication operator.
+      friend extended_asset operator*( int64_t a, const extended_asset& b ) {
+         return {a * b.quantity, b.contract};
+      }
+
+      /// Division operator. Follows format of 'int64_t operator/( const asset& a, const asset& b )'.
+      friend int64_t operator/( const extended_asset& a, const extended_asset& b ) {
+         eosio::check( a.contract == b.contract, "type mismatch" );
+         return a.quantity / b.quantity;
+      }
+
+      /// Division operator.
+      extended_asset& operator/=( int64_t b ) {
+         quantity /= b;
+         return *this;
+      }
+
+      /// Division operator.
+      friend extended_asset operator/( const extended_asset& a, int64_t b ) {
+         return {a.quantity / b, a.contract};
+      }
+
+
       /// Less than operator
       friend bool operator<( const extended_asset& a, const extended_asset& b ) {
          eosio::check( a.contract == b.contract, "type mismatch" );
          return a.quantity < b.quantity;
       }
 
+      /// Greater than operator
+      friend bool operator>( const extended_asset& a, const extended_asset& b ) {
+         eosio::check( a.contract == b.contract, "type mismatch" );
+         return a.quantity > b.quantity;
+      }
 
-      /// Comparison operator
+      /// Equality operator
       friend bool operator==( const extended_asset& a, const extended_asset& b ) {
          return std::tie(a.quantity, a.contract) == std::tie(b.quantity, b.contract);
       }
 
-      /// Comparison operator
+      /// Inequality operator
       friend bool operator!=( const extended_asset& a, const extended_asset& b ) {
          return std::tie(a.quantity, a.contract) != std::tie(b.quantity, b.contract);
       }
 
-      /// Comparison operator
+      /// Less than or equal operator
       friend bool operator<=( const extended_asset& a, const extended_asset& b ) {
          eosio::check( a.contract == b.contract, "type mismatch" );
          return a.quantity <= b.quantity;
       }
 
-      /// Comparison operator
+      /// Greater than or equal operator
       friend bool operator>=( const extended_asset& a, const extended_asset& b ) {
          eosio::check( a.contract == b.contract, "type mismatch" );
          return a.quantity >= b.quantity;
