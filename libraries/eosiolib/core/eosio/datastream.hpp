@@ -777,8 +777,9 @@ datastream<Stream>& operator >> ( datastream<Stream>& ds, std::vector<T>& v ) {
 template<typename Stream, typename T>
 datastream<Stream>& operator << ( datastream<Stream>& ds, const std::basic_string<T>& s ) {
    ds << unsigned_int( s.size() );
-   if (s.size())
-      ds.write(s.data(), s.size());
+   for( const auto& i : s ) {
+      ds << i;
+   }
    return ds;
 }
 
@@ -793,10 +794,14 @@ datastream<Stream>& operator << ( datastream<Stream>& ds, const std::basic_strin
  */
 template<typename Stream, typename T>
 datastream<Stream>& operator >> ( datastream<Stream>& ds, std::basic_string<T>& s ) {
-   unsigned_int v;
-   ds >> v;
-   s.resize( v.value );
-   ds.read( (char*)s.data(), s.size()*sizeof(T) );
+   s.clear();
+   unsigned_int sz; ds >> sz;
+
+   for( uint32_t i = 0; i < sz.value; ++i ) {
+      T v;
+      ds >> v;
+      s.push_back( std::move(v) );
+   }
    return ds;
 }
 
