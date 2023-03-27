@@ -64,6 +64,8 @@ create_symlink eosio-pp eosio-pp
 create_symlink cdt-init cdt-init
 create_symlink eosio-wasm2wast eosio-wasm2wast
 create_symlink eosio-wast2wasm eosio-wast2wasm
+create_symlink eosio-wasm2wast cdt-wasm2wast
+create_symlink eosio-wast2wasm cdt-wast2wasm
 create_symlink cdt-ar cdt-ar
 create_symlink cdt-abidiff cdt-abidiff
 create_symlink cdt-nm cdt-nm
@@ -72,6 +74,8 @@ create_symlink cdt-objdump cdt-objdump
 create_symlink cdt-ranlib cdt-ranlib
 create_symlink cdt-readelf cdt-readelf
 create_symlink cdt-strip cdt-strip
+create_symlink antler-proj antler-proj
+create_symlink antler-proj cdt-proj
 
 echo "Generating Tarball $NAME.tar.gz..."
 tar -cvzf $NAME.tar.gz ./${PREFIX}/* || exit 1
