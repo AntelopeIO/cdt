@@ -9,7 +9,8 @@ RUN apt-get update && apt-get upgrade -y && \
                                                       software-properties-common \
                                                       zlib1g-dev \
                                                       pkg-config \
-                                                      libboost-all-dev
+                                                      libboost-all-dev \
+                                                      libcurl4-gnutls-dev
 
 RUN add-apt-repository ppa:git-core/ppa && apt update && apt install -y git
 
