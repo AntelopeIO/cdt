@@ -10,14 +10,14 @@ This guide provides instructions to modify data in a multi-index table.
 
 See the following code reference:
 
-* The [`multi-index`](../../classeosio_1_1multi__index) class.
-* The [`multi-index::modify(...)`](../../group__multiindex/#function-modify) method.
+* The [`multi-index`](/reference/Classes/classeosio_1_1multi__index) class.
+* The [`multi-index::modify(...)`](/reference/Modules/group__multiindex#function-modify) method.
 
 ## Before you begin
 
 Make sure you have the following prerequisites in place:
 
-* An Antelope development environment, for details consult the [Get Started Guide](https://docs.eosnetwork.com/docs/latest/getting-started/),
+* An Antelope development environment, for details consult the [Documentation Portal](https://docs.eosnetwork.com/docs/latest/).
 * A multi-index `testab` table instance which stores `user` objects indexed by the primary key which is of type `eosio::name`. Consult the section [How to instantiate a multi-index table](./how-to-instantiate-a-multi-index-table) to learn how to set it up.
 
 ## Procedure
@@ -42,7 +42,7 @@ Optionally, for ease of use add the action wrapper definition as well.
 
 ### 2. Find The User You Want To Modify
 
-Use the multi-index [`find(...)`](../../group__multiindex#function-find) method to locate the user object you want to modify. The targeted user is searched based on its account name.
+Use the multi-index [`find(...)`](/reference/Modules/group__multiindex#function-find) method to locate the user object you want to modify. The targeted user is searched based on its account name.
 
 ```cpp
 [[eosio::action]] void multi_index_example::mod( name user, uint32_t value ) {
@@ -52,7 +52,7 @@ Use the multi-index [`find(...)`](../../group__multiindex#function-find) method 
 
 ### 3. Yield Error If User Not Found
 
-If the `user` object you want to update is not found then raise an error message by using the [`eosio::check`](../../namespaceeosio/#function-check-17) method.
+If the `user` object you want to update is not found then raise an error message by using the [`eosio::check`](/reference/Namespaces/namespaceeosio#function-check) method.
 
 ```diff
 [[eosio::action]] void multi_index_example::mod( name user, uint32_t value ) {
@@ -63,7 +63,7 @@ If the `user` object you want to update is not found then raise an error message
 
 ### 4. Update The User If Found
 
-If the `user` object you want to update is found, the [`eosio::check`](../../namespaceeosio/#function-check-17) method will do nothing and the iterator `itr` will be pointing at the object which you want to update. Use the [`multi-index::modify(...)`](../../group__multiindex/#function-modify) method to update the user object `datum` data member with the `value` parameter.
+If the `user` object you want to update is found, the [`eosio::check`](/reference/Namespaces/namespaceeosio#function-check) method will do nothing and the iterator `itr` will be pointing at the object which you want to update. Use the [`multi-index::modify(...)`](/reference/Modules/group__multiindex#function-modify) method to update the user object `datum` data member with the `value` parameter.
 
 ```diff
 [[eosio::action]] void multi_index_example::mod( name user, uint32_t value ) {

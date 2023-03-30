@@ -10,13 +10,13 @@ This guide provides instructions to define a singleton.
 
 See the following code reference:
 
-* The [`singleton`](../../classeosio_1_1singleton) class.
+* The [`singleton`](/reference/Classes/classeosio_1_1singleton) class.
 
 ## Before you begin
 
 Make sure you have the following prerequisites in place:
 
-* An Antelope development environment, for details consult the [Get Started Guide](https://docs.eosnetwork.com/docs/latest/getting-started/),
+* An Antelope development environment, for details consult the [Documentation Portal](https://docs.eosnetwork.com/docs/latest/).
 
 ## Procedure
 
