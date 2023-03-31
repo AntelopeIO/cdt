@@ -43,6 +43,26 @@ void run(runner_interface<Impl>&& runner,
         // letting nodeos know that action debugging was done
         node_client::get().return_control_flow(response->req_id());
     }
+
+    runner.init();
+    // all calls to node_client are synchroneous, if error occurs exception is raised
+    // init starts separate connection thread and returns after successful handshake with nodeos
+    node_client::get().init(host, port);
+    node_client::get().register_account(register_account_name);
+    bool running = true;
+    while (running) {
+        auto response = node_client::get().divert_apply();
+        if (response) {
+            eosio::name receiver( response->divert_result().receiver() );
+            ANTLER_ASSERT( receiver, "receiver name must be set" );
+            eosio::name code( response->divert_result().code() );
+            ANTLER_ASSERT( code, "code name must be set" );
+            eosio::name action( response->divert_result().action() );
+            ANTLER_ASSERT( action, "action name must be set" );
+
+            runner.apply(receiver, code, action);
+        }
+    }
 }
 
 }} //eosio::testing

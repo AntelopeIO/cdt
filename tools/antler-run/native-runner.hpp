@@ -68,6 +68,16 @@ namespace eosio { namespace testing { namespace native {
             //let library override neccesary intrinsics
             exports.initialize();
         }
+
+        void init() {
+            setup_rpc_intrinsics();
+
+            // this macro executes exports.register_intrinsic for every intrinsic
+            INTRINSICS(REGISTER_LIB_INTRINSIC);
+
+            //let library override neccesary intrinsics
+            exports.initialize();
+        }
     private:
         // if closing handle before main finishes, it gives segmentation fault
         // function with destructor attribute will be executed after main finishes, when static objects destroyed 
