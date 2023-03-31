@@ -3,6 +3,7 @@
 #include "utils.hpp"
 #include "file-utils.hpp"
 #include "interface.hpp"
+#include "intrinsics_setup.hpp"
 
 #include <memory>
 
@@ -11,18 +12,16 @@
 namespace eosio { namespace native {
     using apply                 = std::add_pointer_t<void(uint64_t, uint64_t, uint64_t)>;
     using generic_intrinsic     = std::add_pointer_t<void()>;
-    using register_intrinsic    = std::add_pointer_t<void (uint32_t, const generic_intrinsic&)>;
+    using register_intrinsic    = std::add_pointer_t<void (int64_t, const generic_intrinsic&)>;
     using initialize            = std::add_pointer_t<void()>;
-    // struct lib_deleter {
-    //     void operator ()(void* h) const {
-            // int ret = dlclose(h);
-            // if (ret != 0) {
-            //     auto err = dlerror();
-            //     ANTLER_ERROR("error closing shared object: {}", err ? err : "");
-            // }
-    //     }
-    // };
-    // using lib_handle            = std::unique_ptr<void*, lib_deleter>;
+
+    #define REGISTER_LIB_INTRINSIC(ID) \
+        exports.register_intrinsic((int64_t)eosio::native::intrinsics::ID, \
+                                   reinterpret_cast<generic_intrinsic>(\
+                                      get_intrinsic_target<eosio::native::intrinsics::ID, \
+                                                           eosio::native::intrinsics::__ ## ID ## _types::res_t, \
+                                                           eosio::native::intrinsics::__ ## ID ## _types::deduced_full_ts>\
+                                         (eosio::native::intrinsics::__ ## ID ## _types::is)));
 
     template <typename Fn>
     struct function {
@@ -54,6 +53,16 @@ namespace eosio { namespace native {
         }
         inline object_type get_type() {
             return testing::runner_interface<runner>::object_type::shared_object;
+        }
+
+        void init() {
+            setup_rpc_intrinsics();
+
+            // this macro executes exports.register_intrinsic for every intrinsic
+            INTRINSICS(REGISTER_LIB_INTRINSIC);
+
+            //let library override neccesary intrinsics
+            exports.initialize();
         }
     private:
         // if closing handle before main finishes, it gives segmentation fault

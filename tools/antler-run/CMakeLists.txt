@@ -5,14 +5,15 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/version.hpp.in ${CMAKE_BINARY_DIR}/ve
 find_package(eos-vm)
 find_package(cdt_libraries)
 find_package(Boost REQUIRED)
+find_package(Protobuf REQUIRED)
 
 set(TOOLS_DIR ${CMAKE_SOURCE_DIR})
 set(LIB_DIR ${CMAKE_SOURCE_DIR}/../libraries)
 
-include_directories(${LIB_DIR})
+include_directories(${LIB_DIR} ${CMAKE_BINARY_DIR}/include ${Protobuf_INCLUDE_DIRS})
 
 add_tool(antler-run)
-target_compile_options(${PROJECT_NAME} PUBLIC -ldl -fpermissive)
+target_compile_options(${PROJECT_NAME} PUBLIC -ldl -fpermissive -ftemplate-backtrace-limit=0)
 set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-rpath,\"\\$ORIGIN/../lib\"")
 target_include_directories(${PROJECT_NAME} PUBLIC ${TOOLS_DIR}/external/eos-vm/include
                                                   ${TOOLS_DIR}/external/spdlog/include
@@ -23,4 +24,4 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${TOOLS_DIR}/external/eos-vm/i
                                                   ${LIB_DIR}/native
                                                   ${LIB_DIR}/meta_refl/include
                                                   )
-target_link_libraries(${PROJECT_NAME} native_eosio native)
+target_link_libraries(${PROJECT_NAME} native_eosio native antler_interfaces ${Protobuf_LIBRARIES})

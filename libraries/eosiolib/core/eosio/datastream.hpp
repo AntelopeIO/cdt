@@ -560,6 +560,37 @@ datastream<Stream>& operator >> ( datastream<Stream>& ds, std::array<T,N>& v ) {
    return ds;
 }
 
+/**
+ *  Serialize capi_checksum160, capi_checksum256, capi_checksum512 struct
+ *
+ *  @param ds - The stream to write
+ *  @param v - The value to serialize
+ *  @tparam Stream - Type of datastream buffer
+ *  @return datastream<Stream>& - Reference to the datastream
+ */
+template<typename Stream, typename T, typename = std::enable_if_t<std::is_array_v<decltype(T::hash)>>>
+datastream<Stream>& operator << ( datastream<Stream>& ds, const T& v ) {
+   for( int i = 0; i < sizeof(v.hash)/sizeof(v.hash[0]); ++i )
+      ds << v.hash[i];
+   return ds;
+}
+
+
+/**
+ *  Deserialize capi_checksum160, capi_checksum256, capi_checksum512 struct
+ *
+ *  @param ds - The stream to read
+ *  @param v - The destination for deserialized value
+ *  @tparam Stream - Type of datastream buffer
+ *  @return datastream<Stream>& - Reference to the datastream
+ */
+template<typename Stream, typename T, typename = std::enable_if_t<std::is_array_v<decltype(T::hash)>>>
+datastream<Stream>& operator >> ( datastream<Stream>& ds, T& v ) {
+   for( int i = 0; i < sizeof(v.hash)/sizeof(v.hash[0]); ++i )
+      ds >> v.hash[i];
+   return ds;
+}
+
 namespace _datastream_detail {
    /**
     * Check if type T is a pointer
