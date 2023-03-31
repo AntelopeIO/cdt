@@ -24,6 +24,10 @@ namespace eosio { namespace cdt {
    };
 }} //ns eosio::cdt
 
+namespace eosio { namespace native {
+   void set_print_intrinsics();
+}} //eosio::native
+
 extern eosio::cdt::output_stream std_out;
 extern eosio::cdt::output_stream std_err;
 
@@ -39,4 +43,8 @@ extern "C" {
    void __reset_env();
    void _prints_l(const char* cstr, uint32_t len, uint8_t which);
    void _prints(const char* cstr, uint8_t which);
+   
+   //used only in shared object
+   void register_intrinsic(int64_t, void(*)());
+   void initialize();
 }

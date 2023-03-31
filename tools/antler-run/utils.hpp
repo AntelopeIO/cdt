@@ -53,15 +53,21 @@ std::shared_ptr<spdlog::logger> get_std_logger() {
 
 #define ANTLER_EXCEPTION std::runtime_error
 
-#define ANTLER_THROW(...)                                               \
-    ANTLER_MULTILINE_MACRO_BEGIN                                        \
-    throw ANTLER_EXCEPTION( eosio::utils::log_to_str(__VA_ARGS__) );    \
+#define ANTLER_THROW(...)                                                           \
+    ANTLER_MULTILINE_MACRO_BEGIN                                                    \
+    throw ANTLER_EXCEPTION( eosio::utils::log_to_str(__VA_ARGS__) );                \
     ANTLER_MULTILINE_MACRO_END
 
-#define ANTLER_ASSERT(cond, ...)                                        \
-    ANTLER_MULTILINE_MACRO_BEGIN                                        \
-    if (!(cond))                                                        \
-        ANTLER_THROW(__VA_ARGS__);                                      \
+#define ANTLER_ASSERT(cond, ...)                                                    \
+    ANTLER_MULTILINE_MACRO_BEGIN                                                    \
+    if (!(cond))                                                                    \
+        ANTLER_THROW("{}: {}", __func__, eosio::utils::log_to_str(__VA_ARGS__));    \
+    ANTLER_MULTILINE_MACRO_END
+
+#define ANTLER_QUIT(cond, ...)                                                      \
+    ANTLER_MULTILINE_MACRO_BEGIN                                                    \
+    if (!(cond))                                                                    \
+        ANTLER_INFO("{}: {}", __func__, eosio::utils::log_to_str(__VA_ARGS__));     \
     ANTLER_MULTILINE_MACRO_END
 
 std::ostream &operator<<(std::ostream &ost, const std::filesystem::path& p)

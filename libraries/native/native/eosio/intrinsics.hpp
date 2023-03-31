@@ -1,4 +1,3 @@
-#include <eosio/action.hpp>
 #include "intrinsics_def.hpp"
 
 #pragma once
