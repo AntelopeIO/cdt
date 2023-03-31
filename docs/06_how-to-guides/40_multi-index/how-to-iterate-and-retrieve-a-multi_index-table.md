@@ -10,8 +10,8 @@ This guide provides instructions to iterate and retrieve data from a multi-index
 
 See the following code reference:
 
-* The [`multi-index`](/reference/Classes/classeosio_1_1multi__index) class.
-* The [`multi-index::find(...)`](/reference/Modules/group__multiindex#function-find) method.
+* The [`multi-index`](../../reference/Classes/classeosio_1_1multi__index) class.
+* The [`multi-index::find(...)`](../../reference/Modules/group__multiindex#function-find) method.
 
 ## Before you begin
 

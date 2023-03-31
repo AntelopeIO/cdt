@@ -10,9 +10,9 @@ This guide provides instructions to insert data into a multi-index table.
 
 See the following code reference:
 
-* The [`multi-index`](/reference/Classes/classeosio_1_1multi__index) class.
-* The [`multi-index::find(...)`](/reference/Modules/group__multiindex#function-find) method.
-* The [`multi-index::emplace(...)`](/reference/Modules/group__multiindex#function-emplace) method.
+* The [`multi-index`](../../reference/Classes/classeosio_1_1multi__index) class.
+* The [`multi-index::find(...)`](../../reference/Modules/group__multiindex#function-find) method.
+* The [`multi-index::emplace(...)`](../../reference/Modules/group__multiindex#function-emplace) method.
 
 ## Before you begin
 
@@ -38,7 +38,7 @@ Use of the multi-index table iterator to find out if the user object already exi
 
 ### 2. Insert The User If Not Found In Table
 
-Use the [`emplace`](/reference/Modules/group__multiindex#function-emplace) method to make the insertion if the user object is not already in the multi-index table. Otherwise print an informational message.
+Use the [`emplace`](../../reference/Modules/group__multiindex#function-emplace) method to make the insertion if the user object is not already in the multi-index table. Otherwise print an informational message.
 
 ```diff
 [[eosio::action]] void multi_index_example::set( name user ) {

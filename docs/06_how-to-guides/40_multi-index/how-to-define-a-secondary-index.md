@@ -10,7 +10,7 @@ This guide provides instructions to define a secondary index for a multi-index t
 
 See the following code reference:
 
-* The [`multi-index`](/reference/Classes/classeosio_1_1multi__index) class.
+* The [`multi-index`](../../reference/Classes/classeosio_1_1multi__index) class.
 
 ## Before you begin
 

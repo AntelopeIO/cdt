@@ -16,10 +16,10 @@ This guide provides instructions how to perform authorization checks in a smart 
 
 See the following code reference guides for functions which can be used to implement authorization checks in a smart contract:
 
-* function [has_auth(name n)](/reference/Namespaces/namespaceeosio#function-has_auth)
-* function [require_auth(name n)](/reference/Namespaces/namespaceeosio#function-require_auth)
-* function [require_auth2(capi_name name, capi_name permission)](/reference/Files/action_8h)
-* function [check(bool pred, ...)](/reference/Namespaces/namespaceeosio#function-check)
+* function [has_auth(name n)](../../reference/Namespaces/namespaceeosio#function-has_auth)
+* function [require_auth(name n)](../../reference/Namespaces/namespaceeosio#function-require_auth)
+* function [require_auth2(capi_name name, capi_name permission)](../../reference/Files/action_8h)
+* function [check(bool pred, ...)](../../reference/Namespaces/namespaceeosio#function-check)
 
 ## Procedure
 

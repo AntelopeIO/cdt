@@ -11,7 +11,7 @@ This guide provides instructions to create and use an action wrapper in a smart 
 
 See the following code reference guide for action wrapper:
 
-* [eosio::action_wrapper](/reference/Classes/structeosio_1_1action__wrapper).
+* [eosio::action_wrapper](../reference/Classes/structeosio_1_1action__wrapper).
 
 ## Before you begin
 

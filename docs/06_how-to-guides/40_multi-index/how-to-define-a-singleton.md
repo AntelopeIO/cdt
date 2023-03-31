@@ -10,7 +10,7 @@ This guide provides instructions to define a singleton.
 
 See the following code reference:
 
-* The [`singleton`](/reference/Classes/classeosio_1_1singleton) class.
+* The [`singleton`](../../reference/Classes/classeosio_1_1singleton) class.
 
 ## Before you begin
 
