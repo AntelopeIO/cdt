@@ -22,7 +22,7 @@
 #include <memory>
 
 
-namespace eosio { namespace wasm {
+namespace eosio { namespace testing { namespace wasm {
     struct intrinsics_type_converter : eosio::vm::type_converter<eosio::vm::standalone_function_t> {
     using type_converter::type_converter;
     using type_converter::from_wasm;
@@ -49,6 +49,7 @@ namespace eosio { namespace wasm {
     EOS_VM_FROM_WASM(const char*, (void* ptr)) { return static_cast<char*>(ptr); }
     };
 
+/// @brief wasm runner, loads wasm object, performs intrinsics setup and exposes interface to execute apply
     struct runner : testing::runner_interface<runner> {
         using rhf_t = eosio::vm::registered_host_functions<eosio::vm::standalone_function_t, eosio::vm::execution_interface, intrinsics_type_converter>;
         using backend_t = eosio::vm::backend<rhf_t, eosio::vm::interpreter>;
@@ -64,10 +65,10 @@ namespace eosio { namespace wasm {
             backend->call("env", "apply", receiver.value, code.value, action.value);
         }
         inline object_type get_type() {
-            return testing::runner_interface<runner>::object_type::wasm;
+            return object_type::wasm;
         }
         void init() {
-            eosio::native::setup_rpc_intrinsics();
+            eosio::testing::native::setup_rpc_intrinsics();
             
             INTRINSICS(REGISTER_WASM_INTRINSIC);
         }
@@ -104,4 +105,4 @@ namespace eosio { namespace wasm {
             return std::move(wasm);
         }
     };
-}} // eosio::testing
+}}} // eosio::testing::wasm
