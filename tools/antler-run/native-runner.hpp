@@ -70,9 +70,12 @@ namespace eosio { namespace testing { namespace native {
         }
 
         void init() {
+            // this call assigns rpc handlers for every intrinsic
             setup_rpc_intrinsics();
 
             // this macro executes exports.register_intrinsic for every intrinsic
+            // we need this because of shared object has its own native library internal variables
+            // so this call is to supply current intrinsics pointers to shared object
             INTRINSICS(REGISTER_LIB_INTRINSIC);
 
             //let library override neccesary intrinsics
