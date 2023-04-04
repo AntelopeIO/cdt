@@ -42,13 +42,14 @@ class sync_call_traits {
 public:
     template<typename Callback>
     using callback = std::packaged_task<Callback>;
-
-    template<typename Callback>
-    static inline void reset(const std::packaged_task<Callback>& cb) {
-        cb.reset();
-    }
 };
 
+/// @brief connection class that connects to nodeos and processes debug execution messages
+///        interface is synchroneous, actual reads and writes are done in a separate thread
+///        class designed to always listen for incoming messages and write them to read queue
+///        every request and response must have same request_id
+///        in case server sends response for a different request, class leaves it in the read queue
+/// @tparam CallbackTraits 
 template<typename CallbackTraits = sync_call_traits>
 class connection : public std::enable_shared_from_this<connection<CallbackTraits>>{
     using io_context        = boost::asio::io_context;
@@ -88,7 +89,7 @@ public:
 
     template<typename ReqType, typename = std::enable_if_t<std::is_base_of_v<google::protobuf::Message, ReqType>> >
     auto sync_request(ReqType&& req) {
-        ANTLER_ASSERT( !in_context_thread(), "code must be called outside connection context" );
+        ANTLER_ASSERT( !in_context_thread(), "code must be called outside connection thread" );
 
         auto req_id = req.req_id();
         boost::asio::post(context.get_executor(), 
@@ -98,16 +99,16 @@ public:
         return get_response(req_id);
     }
 
-    std::optional<antler_rpc::antler_run_response> divert_apply() {
+    std::optional<antler_rpc::antler_run_response> wait_for_divert_flow() {
         using namespace std::chrono_literals;
 
-        ANTLER_ASSERT( !in_context_thread(), "code must be called outside connection context" );
+        ANTLER_ASSERT( !in_context_thread(), "code must be called outside connection thread" );
         
-        while (stream.is_open()) {
+        while (!closing()) {
             {
                 std::lock_guard<decltype(read_queue_mutex)> lock(read_queue_mutex);
                 for (auto it = read_queue.begin(); it != read_queue.end(); ++it) {
-                    if (it->second.has_divert_result()) {
+                    if (it->second.has_divert_flow_result()) {
                         antler_rpc::antler_run_response ret = std::move(it->second);
                         read_queue.erase(it);
                         return std::optional(std::move(ret));
@@ -118,6 +119,7 @@ public:
             new_response.wait_for(wait_lock, 1s, [&](){ return !read_queue.empty(); });
         }
 
+        // we are here if connection was closed
         return {};
     }
 
@@ -184,11 +186,11 @@ private:
     }
     template <typename ReqType>
     void write(const ReqType& req) {
-        ANTLER_ASSERT( in_context_thread(), "code must be called inside connection context" );
+        ANTLER_ASSERT( in_context_thread(), "code must be called inside connection thread" );
         ANTLER_ASSERT( writing.try_lock(), "current implementation is single-threaded so \
                                             only one write operation is permitted at the same time. \
                                             If you need this functionality you should implement write queue \
-                                            or multi-threaded connection (new thread = new socket)" );
+                                            or multi-socket connection (new thread = new socket)" );
          
         const auto msg_size = req.ByteSizeLong();
         {
@@ -222,11 +224,11 @@ private:
         start_read();
     }
     void start_read() {
-        ANTLER_ASSERT( in_context_thread(), "code must be called inside connection context" );
+        ANTLER_ASSERT( in_context_thread(), "code must be called inside connection thread" );
         ANTLER_ASSERT( reading.try_lock(), "current implementation is single-threaded so \
                                             only one read operation is permitted at the same time. \
                                             If you need this functionality you should implement read queue \
-                                            or multi-threaded connection (new thread = new socket)" );
+                                            or multi-socket connection (new thread = new socket)" );
         stream.async_read(read_buffer, bind_front_this(&connection::on_read));
     }
     template<typename ReqType>
@@ -238,7 +240,7 @@ private:
     }
     void connect() {
         ANTLER_ASSERT( !stream.is_open(), "already connected" );
-        ANTLER_ASSERT( in_context_thread(), "code must be called inside connection context" );
+        ANTLER_ASSERT( in_context_thread(), "code must be called inside connection thread" );
         // Look up the domain name
         resolver.async_resolve(
             host,
@@ -252,9 +254,9 @@ private:
     std::optional<antler_rpc::antler_run_response> get_response(uint64_t id) {
         using namespace std::chrono_literals;
 
-        ANTLER_ASSERT( !in_context_thread(), "code must be called outside connection context" );
+        ANTLER_ASSERT( !in_context_thread(), "code must be called outside connection thread" );
         
-        while (stream.is_open()) {
+        while (!closing()) {
             {
                 std::lock_guard<decltype(read_queue_mutex)> lock(read_queue_mutex);
                 auto it = read_queue.find(id);
@@ -268,10 +270,13 @@ private:
             new_response.wait_for(wait_lock, 1s, [&](){ return !read_queue.empty(); });
         }
 
+        // we are here if connection was closed
         return {};
     }
 };
 
+/// @brief client that exposes debug RPC.
+///        it maintains single thread for network operations where connection class is running
 class node_client {
 private:
     using connection = connection<>;
@@ -286,6 +291,7 @@ private:
     }
     void run() {
         context_thread = std::thread([&](){
+            // blocks until connection is closed
             node_connection->run();
         });
     }
@@ -324,8 +330,8 @@ public:
         std::ignore = sync_request(std::move(request));
     }
 
-    inline std::optional<antler_rpc::antler_run_response> divert_apply() {
-        return node_connection->divert_apply();
+    inline std::optional<antler_rpc::antler_run_response> wait_for_divert_flow() {
+        return node_connection->wait_for_divert_flow();
     }
 
     void set_time(int64_t new_time) {
@@ -393,6 +399,14 @@ public:
             //deserialize intrinsic return value if any
             return deserialize_return_value<Ret>(action_result.ret_val());
         }
+    }
+
+    void return_control_flow(uint64_t id) {
+        antler_rpc::antler_run_request request;
+        // id should match req_id we got from divert_flow
+        request.set_req_id(id);
+
+        std::ignore = sync_request(std::move(request));
     }
 
 private:

@@ -4,7 +4,7 @@
 #include <native/eosio/crt.hpp>
 #include "node-client.hpp"
 
-namespace eosio { namespace native {
+namespace eosio { namespace testing { namespace native {
 
     template<eosio::native::intrinsics::intrinsic_name ID, typename Ret, typename TupleArgs, size_t... Is>
     inline auto get_intrinsic_target(std::index_sequence<Is...>) {
@@ -37,4 +37,4 @@ namespace eosio { namespace native {
         //override print intrinsics to be non-rpc
         eosio::native::set_print_intrinsics();
     }
-}} //eosio::testing
+}}} //eosio::testing::native

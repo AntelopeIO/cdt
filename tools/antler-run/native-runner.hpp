@@ -9,7 +9,7 @@
 
 #include <dlfcn.h>
 
-namespace eosio { namespace native {
+namespace eosio { namespace testing { namespace native {
     using apply                 = std::add_pointer_t<void(uint64_t, uint64_t, uint64_t)>;
     using generic_intrinsic     = std::add_pointer_t<void()>;
     using register_intrinsic    = std::add_pointer_t<void (int64_t, const generic_intrinsic&)>;
@@ -44,6 +44,7 @@ namespace eosio { namespace native {
         }
     };
 
+    /// @brief native runner, loads shared object with contract, performs intrinsics setup and exposes interface to execute apply
     struct runner : testing::runner_interface<runner> {
         runner(const std::string& path) {
             load(path);
@@ -52,13 +53,16 @@ namespace eosio { namespace native {
             exports.apply(receiver.value, code.value, action.value);
         }
         inline object_type get_type() {
-            return testing::runner_interface<runner>::object_type::shared_object;
+            return object_type::shared_object;
         }
 
         void init() {
+            // this call assigns rpc handlers for every intrinsic
             setup_rpc_intrinsics();
 
             // this macro executes exports.register_intrinsic for every intrinsic
+            // we need this because of shared object has its own native library internal variables
+            // so this call is to supply current intrinsics pointers to shared object
             INTRINSICS(REGISTER_LIB_INTRINSIC);
 
             //let library override neccesary intrinsics
@@ -108,4 +112,4 @@ namespace eosio { namespace native {
             }
         }
     };
-}} // eosio::native
+}}} // eosio::testing::native
