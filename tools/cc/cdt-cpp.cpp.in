@@ -145,7 +145,7 @@ int main(int argc, const char **argv) {
                output = opts.output_fn.empty() ? "a.out" : opts.output_fn;
             } else {
                SmallString<64> res;
-               llvm::sys::fs::createTemporaryFile("eosio", ".o", res);
+               llvm::sys::fs::createTemporaryFile("antelope", ".o", res);
                output = res.c_str();
             }
 

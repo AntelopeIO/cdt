@@ -471,7 +471,7 @@ namespace eosio { namespace cdt {
 
                llvm::SmallString<128> fn;
                try {
-                  llvm::sys::fs::createTemporaryFile("eosio", ".cpp", fn);
+                  llvm::sys::fs::createTemporaryFile("antelope", ".cpp", fn);
 
                   std::ofstream out(fn.c_str());
                   {
