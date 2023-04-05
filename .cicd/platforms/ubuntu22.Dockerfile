@@ -8,4 +8,5 @@ RUN apt-get update && apt-get upgrade -y && \
                                                       python3 \
                                                       pkg-config \
                                                       libboost-all-dev \
-                                                      libcurl4-gnutls-dev
+                                                      libcurl4-gnutls-dev \
+                                                      clang-tidy
