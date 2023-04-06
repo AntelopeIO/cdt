@@ -10,15 +10,15 @@ This guide provides instructions to insert data into a multi-index table.
 
 See the following code reference:
 
-* The [`multi-index`](../../classeosio_1_1multi__index) class.
-* The [`multi-index::find(...)`](../../group__multiindex#function-find) method.
-* The [`multi-index::emplace(...)`](../../group__multiindex/#function-emplace) method.
+* The [`multi-index`](../../reference/Classes/classeosio_1_1multi__index) class.
+* The [`multi-index::find(...)`](../../reference/Modules/group__multiindex#function-find) method.
+* The [`multi-index::emplace(...)`](../../reference/Modules/group__multiindex#function-emplace) method.
 
 ## Before you begin
 
 Make sure you have the following prerequisites in place:
 
-* An Antelope development environment, for details consult the [Get Started Guide](https://docs.eosnetwork.com/docs/latest/getting-started/),
+* An Antelope development environment, for details consult the [Documentation Portal](https://docs.eosnetwork.com/docs/latest/).
 * A multi-index `testab` table instance which stores `user` objects indexed by the primary key which is of type `eosio::name`. Consult the section [How to instantiate a multi-index table](./how-to-instantiate-a-multi-index-table.md) to learn how to set it up.
 
 ## Procedure
@@ -38,7 +38,7 @@ Use of the multi-index table iterator to find out if the user object already exi
 
 ### 2. Insert The User If Not Found In Table
 
-Use the [`emplace`](../../group__multiindex/#function-emplace) method to make the insertion if the user object is not already in the multi-index table. Otherwise print an informational message.
+Use the [`emplace`](../../reference/Modules/group__multiindex#function-emplace) method to make the insertion if the user object is not already in the multi-index table. Otherwise print an informational message.
 
 ```diff
 [[eosio::action]] void multi_index_example::set( name user ) {
