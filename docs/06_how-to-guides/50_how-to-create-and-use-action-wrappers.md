@@ -11,13 +11,13 @@ This guide provides instructions to create and use an action wrapper in a smart 
 
 See the following code reference guide for action wrapper:
 
-* [eosio::action_wrapper](../structeosio_1_1action__wrapper).
+* [eosio::action_wrapper](../reference/Classes/structeosio_1_1action__wrapper).
 
 ## Before you begin
 
 Make sure you have the following prerequisites in place:
 
-* An Antelope development environment, for details consult the [Get Started Guide](https://docs.eosnetwork.com/docs/latest/getting-started/).
+* An Antelope development environment, for details consult the [Documentation Portal](https://docs.eosnetwork.com/docs/latest/).
 * A smart contract named `multi_index_example`, defined in file `multi_index_example.hpp`.
 * An action `mod` which modifies the integer value `n` stored for row with key `user`.
 
