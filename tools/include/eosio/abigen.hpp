@@ -802,7 +802,7 @@ namespace eosio { namespace cdt {
          }
          virtual bool VisitDecl(clang::Decl* decl) {
             if (const auto* d = dyn_cast<clang::ClassTemplateSpecializationDecl>(decl)) {
-               if (d->getName() == "multi_index") {
+               if (d->getName() == "multi_index" || d->getName() == "singleton") {
                   ag.add_table(d->getTemplateArgs()[0].getAsIntegral().getExtValue(),
                         (clang::CXXRecordDecl*)((clang::RecordType*)d->getTemplateArgs()[1].getAsType().getTypePtr())->getDecl());
                }
