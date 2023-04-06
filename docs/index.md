@@ -10,4 +10,4 @@ If you are upgrading to CDT version 3.0 or later from version 1.8.1 (or earlier)
 
 ## License
 
-[MIT](../LICENSE)
+[MIT](https://github.com/AntelopeIO/cdt/blob/release/3.1/LICENSE)
