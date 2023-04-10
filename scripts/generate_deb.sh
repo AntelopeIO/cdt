@@ -19,6 +19,7 @@ NAME="${PROJECT}_${VERSION_NO_SUFFIX}-${RELEASE}_${ARCH}"
 mkdir -p ${PROJECT}/DEBIAN
 echo "Package: ${PROJECT} 
 Version: ${VERSION_NO_SUFFIX}-${RELEASE}
+Depends: libcurl4-gnutls-dev
 Section: devel
 Priority: optional
 Architecture: ${ARCH}

@@ -2,12 +2,21 @@ FROM ubuntu:bionic
 
 RUN apt-get update && apt-get upgrade -y && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential \
-                                                      cmake \
                                                       g++-8 \
                                                       curl \
                                                       ninja-build \
                                                       software-properties-common \
-                                                      zlib1g-dev
+                                                      zlib1g-dev \
+                                                      pkg-config \
+                                                      libboost-all-dev \
+                                                      libcurl4-gnutls-dev
+
+RUN curl -L https://cmake.org/files/v3.13/cmake-3.13.5.tar.gz | tar zx && \
+    cd cmake-3.13.5 && \
+    ./configure && \
+    make -j$(nproc) install && \
+    cd .. && \
+    rm -rf cmake-3.13.5
 
 RUN add-apt-repository ppa:git-core/ppa && apt update && apt install -y git
 
