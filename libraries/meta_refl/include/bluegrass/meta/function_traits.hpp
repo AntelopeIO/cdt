@@ -1,9 +1,9 @@
 #pragma once
 
 #include "utility.hpp"
+#include "typelist.hpp"
 
 #include <type_traits>
-#include <tuple>
 
 #define BLUEGRASS_META_HAS_MEMBER_GENERATOR(NAME, MEMBER)                       \
    template <typename T, typename E>                                            \
@@ -78,26 +78,26 @@ namespace bluegrass { namespace meta {
 
    namespace detail {
       template <bool Decay, typename R, typename... Args>
-      constexpr auto get_types(R(Args...)) -> std::tuple<R, freestanding,
-                                              std::tuple<std::conditional_t<Decay, std::decay_t<Args>, Args>...>>;
+      constexpr auto get_types(R(Args...)) -> TypeList::List<R, freestanding,
+                                              TypeList::List<std::conditional_t<Decay, std::decay_t<Args>, Args>...>>;
       template <bool Decay, typename R, typename Cls, typename... Args>
-      constexpr auto get_types(R (Cls::*)(Args...)) -> std::tuple<R, Cls,
-                                                       std::tuple<std::conditional_t<Decay, std::decay_t<Args>, Args>...>>;
+      constexpr auto get_types(R (Cls::*)(Args...)) -> TypeList::List<R, Cls,
+                                                       TypeList::List<std::conditional_t<Decay, std::decay_t<Args>, Args>...>>;
       template <bool Decay, typename R, typename Cls, typename... Args>
-      constexpr auto get_types(R (Cls::*)(Args...)const) -> std::tuple<R, Cls,
-                                                            std::tuple<std::conditional_t<Decay, std::decay_t<Args>, Args>...>>;
+      constexpr auto get_types(R (Cls::*)(Args...)const) -> TypeList::List<R, Cls,
+                                                            TypeList::List<std::conditional_t<Decay, std::decay_t<Args>, Args>...>>;
       template <bool Decay, typename R, typename Cls, typename... Args>
-      constexpr auto get_types(R (Cls::*)(Args...)&) -> std::tuple<R, Cls,
-                                                        std::tuple<std::conditional_t<Decay, std::decay_t<Args>, Args>...>>;
+      constexpr auto get_types(R (Cls::*)(Args...)&) -> TypeList::List<R, Cls,
+                                                        TypeList::List<std::conditional_t<Decay, std::decay_t<Args>, Args>...>>;
       template <bool Decay, typename R, typename Cls, typename... Args>
-      constexpr auto get_types(R (Cls::*)(Args...)&&) -> std::tuple<R, Cls,
-                                                         std::tuple<std::conditional_t<Decay, std::decay_t<Args>, Args>...>>;
+      constexpr auto get_types(R (Cls::*)(Args...)&&) -> TypeList::List<R, Cls,
+                                                         TypeList::List<std::conditional_t<Decay, std::decay_t<Args>, Args>...>>;
       template <bool Decay, typename R, typename Cls, typename... Args>
-      constexpr auto get_types(R (Cls::*)(Args...)const &) -> std::tuple<R, Cls,
-                                                              std::tuple<std::conditional_t<Decay, std::decay_t<Args>, Args>...>>;
+      constexpr auto get_types(R (Cls::*)(Args...)const &) -> TypeList::List<R, Cls,
+                                                              TypeList::List<std::conditional_t<Decay, std::decay_t<Args>, Args>...>>;
       template <bool Decay, typename R, typename Cls, typename... Args>
-      constexpr auto get_types(R (Cls::*)(Args...)const &&) -> std::tuple<R, Cls,
-                                                               std::tuple<std::conditional_t<Decay, std::decay_t<Args>, Args>...>>;
+      constexpr auto get_types(R (Cls::*)(Args...)const &&) -> TypeList::List<R, Cls,
+                                                               TypeList::List<std::conditional_t<Decay, std::decay_t<Args>, Args>...>>;
       template <bool Decay, typename F>
       constexpr auto get_types(F&& fn) {
          if constexpr (std::is_invocable<F>::value)
@@ -120,7 +120,7 @@ namespace bluegrass { namespace meta {
 
       template <std::size_t Sz, std::size_t N, typename Arg, typename... Args>
       struct pack_from<Sz, N, N, Arg, Args...> {
-          using type = std::tuple<Arg, Args...>;
+          using type = TypeList::List<Arg, Args...>;
       };
 
       template <std::size_t N, typename... Args>
@@ -189,32 +189,31 @@ namespace bluegrass { namespace meta {
    constexpr bool is_class(F&&) { return std::is_class_v<F>; }
 
    template <typename F>
-   constexpr auto return_type(F&& fn) -> std::tuple_element_t<0, detail::get_types_t<false, F>>;
+   constexpr auto return_type(F&& fn) -> TypeList::at<detail::get_types_t<false, F>, 0>;
 
    template <auto FN>
    using return_type_t = decltype(return_type(AUTO_PARAM_WORKAROUND(FN)));
 
    template <typename F>
-   constexpr auto class_from_member(F&& fn) -> std::tuple_element_t<1, detail::get_types_t<false, F>>;
+   constexpr auto class_from_member(F&& fn) -> TypeList::at<detail::get_types_t<false, F>, 1>;
 
    template <auto FN>
    using class_from_member_t = decltype(class_from_member(AUTO_PARAM_WORKAROUND(FN)));
 
    template <typename F>
-   constexpr auto flatten_parameters(F&& fn) -> std::tuple_element_t<2, detail::get_types_t<false, F>>;
+   constexpr auto flatten_parameters(F&& fn) -> TypeList::at<detail::get_types_t<false, F>, 2>;
 
    template <auto FN>
    using flatten_parameters_t = decltype(flatten_parameters(AUTO_PARAM_WORKAROUND(FN)));
 
    template <typename F>
-   constexpr auto decayed_flatten_parameters(F&& fn) -> std::tuple_element_t<2, detail::get_types_t<true, F>>;
+   constexpr auto decayed_flatten_parameters(F&& fn) -> TypeList::at<detail::get_types_t<true, F>, 2>;
 
    template <auto FN>
    using decayed_flatten_parameters_t = decltype(decayed_flatten_parameters(AUTO_PARAM_WORKAROUND(FN)));
 
    template <std::size_t N, typename F>
-   constexpr auto parameter_at(F&& fn) -> std::tuple_element_t<N,
-                                             decltype(flatten_parameters(std::declval<F>()))>;
+   constexpr auto parameter_at(F&& fn) -> TypeList::at<decltype(flatten_parameters(std::declval<F>())), N>;
 
    template <std::size_t N, auto FN>
    using parameter_at_t = decltype(parameter_at<N>(AUTO_PARAM_WORKAROUND(FN)));
@@ -226,7 +225,7 @@ namespace bluegrass { namespace meta {
    using parameters_from_t = decltype(parameters_from<N>(AUTO_PARAM_WORKAROUND(FN)));
 
    template <typename F>
-   inline constexpr static std::size_t arity(F&& fn) { return std::tuple_size_v<decltype(flatten_parameters(fn))>; }
+   inline constexpr static std::size_t arity(F&& fn) { return TypeList::length<decltype(flatten_parameters(fn))>(); }
 
    template <auto FN>
    inline constexpr static std::size_t arity_v = arity(FN);

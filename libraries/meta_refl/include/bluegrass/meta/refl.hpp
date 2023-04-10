@@ -3,10 +3,10 @@
 #include "function_traits.hpp"
 #include "utility.hpp"
 #include "preprocessor.hpp"
+#include "typelist.hpp"
 
 #include <array>
 #include <string_view>
-#include <tuple>
 
 #include <eosio/print.hpp>
 
@@ -43,7 +43,7 @@ namespace bluegrass { namespace meta {
          if constexpr (std::is_same_v<T, invalid_fields>)
             return 0;
          else
-            return std::tuple_size_v<T>;
+            return TypeList::length<T>();
       }
 
       template<typename... Args>
@@ -56,7 +56,7 @@ namespace bluegrass { namespace meta {
 
       using field_types = decltype(detail::which_field_types<C>());
       template <std::size_t N>
-      using field_type = std::tuple_element_t<N, field_types>;
+      using field_type = TypeList::at<field_types, N>;
       constexpr static inline std::size_t field_count = detail::fields_size<field_types>();
       constexpr static auto field_names = C::_bluegrass_meta_refl_field_names();
 
