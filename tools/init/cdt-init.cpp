@@ -71,7 +71,8 @@ struct project {
                              "target_include_directories( @ PUBLIC ${CMAKE_SOURCE_DIR}/../include )\n"
                              "target_ricardian_directory( @ ${CMAKE_SOURCE_DIR}/../ricardian )";
 
-   const std::string cmake_extern = "include(ExternalProject)\n"
+   const std::string cmake_extern = "cmake_minimum_required(VERSION 3.5)\n"
+                                    "include(ExternalProject)\n"
                                     "# if no cdt root is given use default path\n"
                                     "if(CDT_ROOT STREQUAL \"\" OR NOT CDT_ROOT)\n"
                                     "   find_package(cdt)\n"
