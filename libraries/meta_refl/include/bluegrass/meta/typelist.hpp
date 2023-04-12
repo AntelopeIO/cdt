@@ -151,7 +151,7 @@ constexpr static std::size_t length() { return apply<List, impl::length>::value;
 template<typename... Lists>
 using concat = typename impl::concat<Lists...>::type;
 
-/// Create a List of sequential integers ranging from [0, count)
+/// Create a List of sequential std::integral_constant<std::size_t> ranging from [0, count)
 template<std::size_t count>
 using makeSequence = typename impl::makeSequence<count>::type;
 
@@ -227,7 +227,7 @@ template<typename List>
 using index = typename impl::zip<typename impl::makeSequence<length<List>()>::type, List>::type;
 
 /// This namespace contains some utilities that provide runtime operations on TypeLists
-namespace runtime {
+namespace Runtime {
 /// Type wrapper object allowing arbitrary types to be passed to functions as information rather than data
 template<typename T> struct wrapper { using type = T; };
 

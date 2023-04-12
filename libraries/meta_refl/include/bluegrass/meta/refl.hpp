@@ -6,9 +6,8 @@
 #include "typelist.hpp"
 
 #include <array>
+#include <tuple>
 #include <string_view>
-
-#include <eosio/print.hpp>
 
 namespace bluegrass { namespace meta {
    template <typename T>
@@ -48,6 +47,14 @@ namespace bluegrass { namespace meta {
 
       template<typename... Args>
       constexpr inline auto va_args_count_helper(Args&&...) { return sizeof...(Args); }
+
+      template<typename Class>
+      struct TransformToFieldPointer {
+         template<typename Field>
+         struct transform {
+            using type = Field Class::*;
+         };
+      };
    } // ns bluegrass::meta::detail
 
    template <typename C>
@@ -60,43 +67,34 @@ namespace bluegrass { namespace meta {
       constexpr static inline std::size_t field_count = detail::fields_size<field_types>();
       constexpr static auto field_names = C::_bluegrass_meta_refl_field_names();
 
-      template <std::size_t N, typename T>
-      constexpr static inline auto& get_field(T&& t) {
-         static_assert(std::is_same_v<std::decay_t<T>, C>, "get_field<N, T>(T), T should be the same type as C");
-         using type = std::tuple_element_t<N, field_types>;
-         return *reinterpret_cast<type*>(t.template _bluegrass_meta_refl_field_ptr<N>());
+      template <std::size_t N>
+      constexpr static inline auto& get_field(C& c) {
+         auto ptr = c.template _bluegrass_meta_refl_field_ptr<N>();
+         return c.*ptr;
       }
 
-      template <std::size_t N, typename T>
-      constexpr static inline auto& get_field(const T& t) {
-         static_assert(std::is_same_v<std::decay_t<T>, C>, "get_field<N, T>(T), T should be the same type as C");
-         using type = std::tuple_element_t<N, field_types>;
-         return *reinterpret_cast<type*>(t.template _bluegrass_meta_refl_field_ptr<N>());
+      template <std::size_t N>
+      constexpr static inline auto& get_field(const C& c) {
+         auto ptr = c.template _bluegrass_meta_refl_field_ptr<N>();
+         return c.*ptr;
       }
 
-   private:
-      template <std::size_t N, typename T, typename F>
-      constexpr inline static auto for_each_field_impl( T&& t, F&& f ) {
-         if constexpr (N+1 == field_count)
-            return f(get_field<N>(std::forward<T>(t)));
-         else {
-            f(get_field<N>(std::forward<T>(t)));
-            return for_each_field_impl<N+1>(std::forward<T>(t), std::forward<F>(f));
-         }
-      }
-   public:
-      template <typename T, typename F>
-      constexpr inline static void for_each_field( T&& t, F&& f ) {
+      template <typename MaybeConstC, typename F>
+      constexpr inline static void for_each_field(MaybeConstC& c, F&& f) {
+         static_assert(std::is_same_v<std::decay_t<MaybeConstC>, C>, "Provided object must be of reflected type");
          if constexpr (field_count == 0)
             return;
          else
-            return for_each_field_impl<0>(std::forward<T>(t), std::forward<F>(f));
+            TypeList::Runtime::ForEach(TypeList::makeSequence<field_count>{}, [&c, &f](auto w) {
+               constexpr auto Index = decltype(w)::type::value;
+               f(get_field<Index>(c));
+            });
       }
    };
 
 }} // ns bluegrass::meta
 
-#define BLUEGRASS_META_ADDRESS( ignore, FIELD ) (void*)&FIELD
+#define BLUEGRASS_META_ADDRESS( CLASS, FIELD ) &CLASS::FIELD
 #define BLUEGRASS_META_DECLTYPE( ignore, FIELD ) decltype(FIELD)
 #define BLUEGRASS_META_PASS_STR( ignore, X ) #X
 
@@ -105,21 +103,30 @@ namespace bluegrass { namespace meta {
          BLUEGRASS_META_FOREACH(                                 \
             BLUEGRASS_META_PASS_STR, "ignored", ##__VA_ARGS__))
 
+// NOTE: There's no fundamental reason the ..._field_ptr(s) methods can't be static like the others, and it would be
+// much nicer if they were; however, a static method can't use the decltype(*this) trick to get the class type, and
+// without the class type, we can't (a) reference members directly, nor (b) declare a pointer to member variable.
+// If we adjusted this macro's interface to take the class name (or came up with another trick like decltype(*this)),
+// we could use option (b) above and make everything static.
 #define BLUEGRASS_META_REFL(...)                                                      \
-   constexpr void _bluegrass_meta_refl_valid();                                       \
-   void _bluegrass_meta_refl_fields                                                   \
+   static constexpr void _bluegrass_meta_refl_valid();                                \
+   static void _bluegrass_meta_refl_fields                                            \
       ( BLUEGRASS_META_FOREACH(BLUEGRASS_META_DECLTYPE, "ignored", ##__VA_ARGS__) ){} \
    inline auto _bluegrass_meta_refl_field_ptrs() const {                              \
-      return std::array<void *, BLUEGRASS_META_VA_ARGS_SIZE(__VA_ARGS__)>{            \
-         BLUEGRASS_META_FOREACH(BLUEGRASS_META_ADDRESS, "ignored", ##__VA_ARGS__)};   \
+      using ClassType = std::decay_t<decltype(*this)>;                                \
+      return std::make_tuple(BLUEGRASS_META_FOREACH(BLUEGRASS_META_ADDRESS,           \
+                                                    ClassType, ##__VA_ARGS__));       \
    }                                                                                  \
    template <std::size_t N>                                                           \
-   inline void* _bluegrass_meta_refl_field_ptr() const {                              \
-     return _bluegrass_meta_refl_field_ptrs()[N];                                     \
+   inline auto _bluegrass_meta_refl_field_ptr() const                                 \
+         -> std::tuple_element_t<N, decltype(_bluegrass_meta_refl_field_ptrs())> {    \
+     return std::get<N>(_bluegrass_meta_refl_field_ptrs());                           \
    }                                                                                  \
    constexpr inline static auto _bluegrass_meta_refl_field_names() {                  \
       return std::array<std::string_view, BLUEGRASS_META_VA_ARGS_SIZE(__VA_ARGS__)> { \
          BLUEGRASS_META_FOREACH(BLUEGRASS_META_PASS_STR, "ignored", ##__VA_ARGS__)    \
       };                                                                              \
    }
+#define BLUEGRASS_META_REFL_BASES(...) \
+    static void _bluegrass_meta_refl_bases( __VA_ARGS__ ){}
 

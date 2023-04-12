@@ -79,16 +79,16 @@ void test_func5(int, int, float, std::string);
 
 TEST_CASE("Testing flattening", "[flatten_tests]") {
    using flatten1 = flatten_parameters_t<&test_func>;
-   REQUIRE( std::tuple_size_v<flatten1> == 0 );
+   REQUIRE( TypeList::length<flatten1>() == 0 );
    REQUIRE( arity_v<&test_func> == 0 );
 
    using flatten2 = flatten_parameters_t<&test_func5>;
-   REQUIRE( std::tuple_size_v<flatten2> == 4 );
+   REQUIRE( TypeList::length<flatten2>() == 4 );
    REQUIRE( arity_v<&test_func5> == 4 );
-   REQUIRE( (std::is_same_v<int, std::tuple_element_t<0, flatten2>> &&
-            std::is_same_v<int, std::tuple_element_t<1, flatten2>> &&
-            std::is_same_v<float, std::tuple_element_t<2, flatten2>> &&
-            std::is_same_v<std::string, std::tuple_element_t<3, flatten2>>)
+   REQUIRE( (std::is_same_v<int, TypeList::at<flatten2, 0>> &&
+            std::is_same_v<int, TypeList::at<flatten2, 1>> &&
+            std::is_same_v<float, TypeList::at<flatten2, 2>> &&
+            std::is_same_v<std::string, TypeList::at<flatten2, 3>>)
          );
    REQUIRE( (std::is_same_v<int, parameter_at_t<0, &test_func5>> &&
             std::is_same_v<int, parameter_at_t<1, &test_func5>> &&
@@ -97,16 +97,16 @@ TEST_CASE("Testing flattening", "[flatten_tests]") {
          );
 
    using flatten3 = flatten_parameters_t<&test_struct2::test>;
-   REQUIRE( std::tuple_size_v<flatten3> == 0 );
+   REQUIRE( TypeList::length<flatten3>() == 0 );
    REQUIRE( arity_v<&test_struct2::test> == 0 );
 
    using flatten4 = flatten_parameters_t<&test_struct2::test2>;
-   REQUIRE( std::tuple_size_v<flatten4> == 4 );
+   REQUIRE( TypeList::length<flatten4>() == 4 );
    REQUIRE( arity_v<&test_struct2::test2> == 4 );
-   REQUIRE( (std::is_same_v<int, std::tuple_element_t<0, flatten4>> &&
-            std::is_same_v<int, std::tuple_element_t<1, flatten4>> &&
-            std::is_same_v<float, std::tuple_element_t<2, flatten4>> &&
-            std::is_same_v<std::string, std::tuple_element_t<3, flatten4>>)
+   REQUIRE( (std::is_same_v<int, TypeList::at<flatten4, 0>> &&
+            std::is_same_v<int, TypeList::at<flatten4, 1>> &&
+            std::is_same_v<float, TypeList::at<flatten4, 2>> &&
+            std::is_same_v<std::string, TypeList::at<flatten4, 3>>)
          );
     REQUIRE( (std::is_same_v<int, parameter_at_t<0, &test_struct2::test2>> &&
             std::is_same_v<int, parameter_at_t<1, &test_struct2::test2>> &&
