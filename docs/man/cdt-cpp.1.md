@@ -33,7 +33,7 @@ execution in Antelope block chain virtual machines.
 
 **`-U=<name>`** 
 
-    Undefine any previous definition of name, either built in or defined with a -D option.              
+    Undefine any previous definition of name, either built in or defined with a -D option              
     
 **`-E`**
 
@@ -69,7 +69,7 @@ execution in Antelope block chain virtual machines.
     
 **`-R=<dir>`**
     
-    Add the directory dir to the list of directories to be searched for resource files.
+    Add the directory dir to the list of directories to be searched for resource files
     
 **`-S`**
 
@@ -97,7 +97,7 @@ execution in Antelope block chain virtual machines.
     
 **`--allow-sse`**
     
-    Should not be used, except for build libc
+    Should not be used, except for building libc
     
 **`--as-secure-log-file-name=<value>`**
     
@@ -105,7 +105,7 @@ execution in Antelope block chain virtual machines.
     
 **`--asm-macro-max-nesting-depth=<uint>`**
     
-    The maximum nesting depth allowed for assembly macros.
+    The maximum nesting depth allowed for assembly macros
     
 **`-c`**
     
@@ -309,7 +309,7 @@ execution in Antelope block chain virtual machines.
     
 **`--non-global-value-max-name-size=<uint>`**
     
-    Maximum size for the name of non-global values.
+    Maximum size for the name of non-global values
     
 **`-o=<file>`**
     
@@ -345,7 +345,7 @@ execution in Antelope block chain virtual machines.
     
 **`--remarks-yaml-string-table`**
     
-    Enable the usage of a string table with YAML remarks.
+    Enable the usage of a string table with YAML remarks
     
 **`--rng-seed=<seed>`**
     
@@ -361,15 +361,15 @@ execution in Antelope block chain virtual machines.
     
 **`--stack-size=<int>`**
     
-    Specifies the maximum stack size for the contract. Defaults to 8192 bytes.
+    Specifies the maximum stack size for the contract. Defaults to 8192 bytes
     
 **`--static-func-full-module-prefix`**
     
-    Use full module build paths in the profile counter names for static functions.
+    Use full module build paths in the profile counter names for static functions
     
 **`--static-func-strip-dirname-prefix=<uint>`**
     
-    Strip specified level of directory name from source path in the profile counter name for static functions.
+    Strip specified level of directory name from source path in the profile counter name for static functions
     
 **`--stats`**
     
@@ -421,7 +421,7 @@ execution in Antelope block chain virtual machines.
     
 **`--view-background`**
     
-    Execute graph viewer in the background. Creates tmp file litter.
+    Execute graph viewer in the background. Creates tmp file litter
     
 **`-w`**
     
