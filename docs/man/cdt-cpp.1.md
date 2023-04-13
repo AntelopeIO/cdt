@@ -2,11 +2,11 @@
 title: CDT-CPP
 section: 1
 header: User Manual
-footer: cdt-cpp
+footer: AntelopeIO
 date: April 08, 2023
 ---
 # NAME
-cdt-cpp - Eosio C++ to WebAssembly compiler
+cdt-cpp - Antelope smart contract C++ to WebAssembly compiler
 
 # SYNOPSIS
 
@@ -14,8 +14,8 @@ cdt-cpp - Eosio C++ to WebAssembly compiler
 
 # DESCRIPTION
 
-**cdt-cpp**  Is a C++ compiler which converts C++ code of the smart contracts to WebAssemply binary code for 
-execution in a virtual machine of Antelope block chains  
+**cdt-cpp**  Is a C++ compiler which converts C++ smart contract code to WebAssemply for 
+execution in Antelope block chain virtual machines.  
 
 # OPTIONS
 
@@ -33,7 +33,7 @@ execution in a virtual machine of Antelope block chains
 
 **`-U=<name>`** 
 
-    Cancel any previous definition of name, either built in or provided with a -D option.              
+    Undefine any previous definition of name, either built in or defined with a -D option.              
     
 **`-E`**
 
@@ -93,7 +93,7 @@ execution in a virtual machine of Antelope block chains
     
 **`--allow-names`**
     
-    Allows name section to be created
+    Allow creation of name section
     
 **`--allow-sse`**
     
