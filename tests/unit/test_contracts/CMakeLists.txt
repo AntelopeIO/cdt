@@ -10,6 +10,7 @@ add_contract(crypto_primitives_tests crypto_primitives_tests crypto_primitives_t
 add_contract(get_code_hash_tests get_code_hash_write get_code_hash_write.cpp)
 add_contract(get_code_hash_tests get_code_hash_read get_code_hash_read.cpp)
 add_contract(name_pk_tests name_pk_tests name_pk_tests.cpp)
+add_contract(test_multi_index test_multi_index multi_index_tests.cpp)
 add_contract(capi_tests capi_tests capi/capi.c capi/action.c capi/chain.c capi/crypto.c capi/db.c capi/permission.c
                                    capi/print.c capi/privileged.c capi/system.c capi/transaction.c)
 

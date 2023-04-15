@@ -876,7 +876,7 @@ void for_each_field(T&& value, F&& func) {
 template <size_t I = 0, template<typename...> typename Tuple, typename Fn, typename... Ts>
 constexpr size_t for_each_impl(Tuple<Ts...>& tup, Fn fn) {
     if constexpr(I < sizeof...(Ts)) {
-        using result_t = std::decay_t<decltype(fn(std::get<I>(tup)))>;
+        using result_t = decltype(fn(std::get<I>(tup)));
         if constexpr (std::is_same_v<void, result_t>) {
             fn(std::get<I>(tup));
         }
