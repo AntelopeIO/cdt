@@ -94,7 +94,7 @@ namespace bluegrass { namespace meta {
 
 }} // ns bluegrass::meta
 
-#define BLUEGRASS_META_ADDRESS( CLASS, FIELD ) &CLASS::FIELD
+#define BLUEGRASS_META_ADDR( CLASS, FIELD ) &CLASS::FIELD
 #define BLUEGRASS_META_DECLTYPE( ignore, FIELD ) decltype(FIELD)
 #define BLUEGRASS_META_PASS_STR( ignore, X ) #X
 
@@ -112,10 +112,15 @@ namespace bluegrass { namespace meta {
    static constexpr void _bluegrass_meta_refl_valid();                                \
    static void _bluegrass_meta_refl_fields                                            \
       ( BLUEGRASS_META_FOREACH(BLUEGRASS_META_DECLTYPE, "ignored", ##__VA_ARGS__) ){} \
-   inline auto _bluegrass_meta_refl_field_ptrs() const {                              \
+   inline auto _bluegrass_meta_refl_field_ptrs() const                                \
+     -> bluegrass::meta::TypeList::apply<                                             \
+           bluegrass::meta::TypeList::transform<                                      \
+              bluegrass::meta::flatten_parameters_t<&_bluegrass_meta_refl_fields>,    \
+              bluegrass::meta::detail::TransformToFieldPointer<                       \
+                 std::decay_t<decltype(*this)>>>,                                     \
+           std::tuple> {                                                              \
       using ClassType = std::decay_t<decltype(*this)>;                                \
-      return std::make_tuple(BLUEGRASS_META_FOREACH(BLUEGRASS_META_ADDRESS,           \
-                                                    ClassType, ##__VA_ARGS__));       \
+      return {BLUEGRASS_META_FOREACH(BLUEGRASS_META_ADDR, ClassType, ##__VA_ARGS__)}; \
    }                                                                                  \
    template <std::size_t N>                                                           \
    inline auto _bluegrass_meta_refl_field_ptr() const                                 \
