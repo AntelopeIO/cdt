@@ -1,7 +1,7 @@
 ---
 title: CDT-CPP
 section: 1
-header: User Manual
+header: Contract Development Toolkit (CDT)
 footer: AntelopeIO
 date: April 08, 2023
 ---
