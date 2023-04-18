@@ -6,8 +6,7 @@ footer: AntelopeIO
 header: Contract Development Toolkit (CDT)
 ---
 
-NAME
-====
+# NAME
 
 cdt-objdump - manual page for cdt-objdump
 
