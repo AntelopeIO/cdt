@@ -6,7 +6,7 @@ footer: AntelopeIO
 date: April 18 2023
 ---
 # NAME
-cdt-abidiff - A tool for comparizon of two CDT ABI files.
+cdt-abidiff - A tool for comparison of two CDT ABI files.
 
 # SYNOPSIS
 

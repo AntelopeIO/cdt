@@ -34,23 +34,23 @@ cdt-objdump MachO Specific Options:
 **\--arch=**\<string\> - architecture(s) from a Mach-O file to dump
 
 **\--archive-member-offsets** - Print the offset to each archive member
-for Mach-O archives (requires **-macho** and **-archive-headers**)
+for Mach-O archives (requires **\--macho** and **-archive-headers**)
 
 **\--bind** - Display mach-o binding info
 
 **\--data-in-code** - Print the data in code table for Mach-O objects
-(requires **-macho**)
+(requires **\--macho**)
 
 **\--dis-symname=**\<string\> - disassemble just this symbol\'s
-instructions (requires **-macho**)
+instructions (requires **\--macho**)
 
 **\--dsym=**\<string\> - Use .dSYM file for debug info
 
 **\--dylib-id** - Print the shared library\'s id for the dylib Mach-O
-file (requires **-macho**)
+file (requires **\--macho**)
 
 **\--dylibs-used** - Print the shared libraries used for linked Mach-O
-files (requires **-macho**)
+files (requires **\--macho**)
 
 **\--exports-trie** - Display mach-o exported symbols
 
@@ -59,26 +59,26 @@ files (requires **-macho**)
 **-g** - Print line information from debug info if available
 
 **\--indirect-symbols** - Print indirect symbol table for Mach-O objects
-(requires **-macho**)
+(requires **\--macho**)
 
 **\--info-plist** - Print the info plist section as strings for Mach-O
-objects (requires **-macho**)
+objects (requires **\--macho**)
 
 **\--lazy-bind** - Display mach-o lazy binding info
 
 **\--link-opt-hints** - Print the linker optimization hints for Mach-O
-objects (requires **-macho**)
+objects (requires **\--macho**)
 
 **\--no-leading-headers** - Print no leading headers
 
 **\--no-symbolic-operands** - do not symbolic operands when
-disassembling (requires **-macho**)
+disassembling (requires **\--macho**)
 
 **\--non-verbose** - Print the info for Mach-O objects in non-verbose or
-numeric form (requires **-macho**)
+numeric form (requires **\--macho**)
 
 **\--objc-meta-data** - Print the Objective-C runtime meta data for
-Mach-O files (requires **-macho**)
+Mach-O files (requires **\--macho**)
 
 **\--private-header** - Display only the first format specific file
 header
@@ -86,7 +86,7 @@ header
 **\--rebase** - Display mach-o rebasing info
 
 **\--universal-headers** - Print Mach-O universal headers (requires
-**-macho**)
+**\--macho**)
 
 **\--weak-bind** - Display mach-o weak binding info
 
@@ -100,7 +100,7 @@ cdt-objdump Options:
 
 **-R** - Alias for **\--dynamic-reloc**
 
-**-S** - Alias for **-source**
+**-S** - Alias for **\--source**
 
 **-T** - Alias for **\--dynamic-syms**
 
@@ -217,7 +217,7 @@ section
 **-s** - Alias for **\--full-contents**
 
 **\--section=**\<string\> - Operate on the specified sections only. With
-**-macho** dump segment,section
+**\--macho** dump segment,section
 
 **\--section-headers** - Display summaries of the headers for each
 section.
