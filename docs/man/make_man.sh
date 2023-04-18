@@ -1,3 +1,4 @@
-#!/bin/sh
-
-pandoc cdt-cpp.1.md -s -t man -o cdt-cpp.1
+#!/bin/bash
+for file in cdt-*.1.md; do
+    pandoc "$file" -s -t man -o "${file%.md}"
+done
