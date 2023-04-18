@@ -1,20 +1,20 @@
 ---
-title: CDT-CPP
+title: CDT-CC
 section: 1
 header: Contract Development Toolkit (CDT)
 footer: AntelopeIO
-date: April 08, 2023
+date: April 14, 2023
 ---
 # NAME
-cdt-cpp - Antelope smart contract C++ to WebAssembly compiler
+cdt-cc - Antelope smart contract C to WebAssembly compiler
 
 # SYNOPSIS
 
-`cdt-cpp [options] <input file>`
+`cdt-cc [options] <input file>`
 
 # DESCRIPTION
 
-**cdt-cpp**  Is a C++ compiler which converts C++ smart contract code to WebAssemply for 
+**cdt-cc**  Is a C compiler which converts C smart contract code to WebAssemply for 
 execution in Antelope block chain virtual machines.  
 
 # OPTIONS
@@ -97,24 +97,12 @@ execution in Antelope block chain virtual machines.
     
 **`--allow-sse`**
     
-    Should not be used, except for building libc
-    
-**`--as-secure-log-file-name=<value>`**
-    
-    As secure log file name (initialized from AS_SECURE_LOG_FILE env variable)
-    
-**`--asm-macro-max-nesting-depth=<uint>`**
-    
-    The maximum nesting depth allowed for assembly macros
-    
+    Should not be used, except for build libc
+            
 **`-c`**
     
     Only run preprocess, compile, and assemble steps
-    
-**`--color`**
-    
-    Use colors in output (default=autodetect)
-    
+        
 **`--contract=<string>`**
     
     Contract name
@@ -154,11 +142,7 @@ execution in Antelope block chain virtual machines.
 **`--fPIC`**
     
     Generate position independent code. This option is used for shared libraries
-    
-**`--faligned-allocation`**
-    
-    Enable C++17 aligned allocation functions
-    
+       
 **`--fasm`**
     
     Assemble file for x86-64
@@ -166,11 +150,7 @@ execution in Antelope block chain virtual machines.
 **`--fcolor-diagnostics`**
     
     Use colors in diagnostics
-    
-**`--fcoroutine-ts`**
-    
-    Enable support for the C++ Coroutines TS
-    
+        
 **`--finline-functions`**
     
     Inline suitable functions
@@ -274,11 +254,7 @@ execution in Antelope block chain virtual machines.
 **`--include=<string>`**
     
     Include file before parsing
-    
-**`--info-output-file=<filename>`**
-    
-    File to append -stats and -timer output to
-    
+        
 **`--isysroot=<string>`**
     
     Set the system root directory (usually /)
@@ -306,11 +282,7 @@ execution in Antelope block chain virtual machines.
 **`--no-missing-ricardian-clause`**
     
     Disable warnings for missing Ricardian clauses
-    
-**`--non-global-value-max-name-size=<uint>`**
-    
-    Maximum size for the name of non-global values
-    
+        
 **`-o=<file>`**
     
     Write output to <file>
@@ -318,23 +290,7 @@ execution in Antelope block chain virtual machines.
 **`--only-export=<string>`**
     
     Export only this symbol
-    
-**`--opt-bisect-limit=<int>`**
-    
-    Maximum optimization to perform
-    
-**`--pass-remarks=<pattern>`**
-    
-    Enable optimization remarks from passes whose name match the given regular expression
-    
-**`--pass-remarks-analysis=<pattern>`**
-    
-    Enable optimization analysis remarks from passes whose name match the given regular expression
-    
-**`--pass-remarks-missed=<pattern>`**
-    
-    Enable missed optimization remarks from passes whose name match the given regular expression
-    
+            
 **`--print-all-options`**
     
     Print all option values after command line parsing
@@ -342,15 +298,7 @@ execution in Antelope block chain virtual machines.
 **`--print-options`**
     
     Print non-default options after command line parsing
-    
-**`--remarks-yaml-string-table`**
-    
-    Enable the usage of a string table with YAML remarks
-    
-**`--rng-seed=<seed>`**
-    
-    Seed for the random number generator
-    
+            
 **`--shared`**
     
     Make shared object native library
@@ -362,47 +310,11 @@ execution in Antelope block chain virtual machines.
 **`--stack-size=<int>`**
     
     Specifies the maximum stack size for the contract. Defaults to 8192 bytes
-    
-**`--static-func-full-module-prefix`**
-    
-    Use full module build paths in the profile counter names for static functions
-    
-**`--static-func-strip-dirname-prefix=<uint>`**
-    
-    Strip specified level of directory name from source path in the profile counter name for static functions
-    
-**`--stats`**
-    
-    Enable statistics output from program (available with Asserts)
-    
-**`--stats-json`**
-    
-    Display statistics as json data
-    
-**`--std=<string>`**
-    
-    Language standard to compile for
-    
-**`--switch-inst-prof-update-wrapper-strict`**
-    
-    Assert that prof branch_weights metadata is valid when creating an instance of SwitchInstProfUpdateWrapper
-    
+        
 **`--sysroot=<string>`**
     
-    Set the system root directory
-    
-**`--time-trace-granularity=<uint>`**
-    
-    Minimum time granularity (in microseconds) traced by time profiler
-    
-**`--track-memory`**
-    
-    Enable -time-passes memory tracking (this may be slow)
-    
-**`--use-dbg-addr`**
-    
-    Use llvm.dbg.addr for all local variables
-    
+    Set the system root directory    
+        
 **`--use-freeing-malloc`**
     
     Set the malloc implementation to the old freeing malloc
@@ -418,11 +330,7 @@ execution in Antelope block chain virtual machines.
 **`--version`**
     
     Display the version of this program
-    
-**`--view-background`**
-    
-    Execute graph viewer in the background. Creates tmp file litter
-    
+        
 **`-w`**
     
     Suppress all warnings
