@@ -753,6 +753,8 @@ class multi_index
 
             static auto extract_secondary_key(const T& obj) { return secondary_extractor_type()(obj); }
 
+            // used only for type deduction
+            constexpr index() : _multidx(nullptr) { }
          private:
             friend class multi_index;
 
@@ -764,17 +766,19 @@ class multi_index
 
       template<uint64_t I>
       struct intc { enum e{ value = I }; operator uint64_t()const{ return I; }  };
+      enum index_cv { const_index = 0, mutable_index = 1 };
 
-      template<size_t Num, typename... Values>
+      template<std::size_t Num, typename... Values>
       class make_index_tuple {
-         template <uint64_t... Seq>
+
+         template <std::size_t... Seq>
          static constexpr auto get_type(std::index_sequence<Seq...>) {
             return std::make_tuple(std::make_tuple(index<eosio::name::raw(static_cast<uint64_t>(Values::index_name)),
                                                          typename Values::secondary_extractor_type,
-                                                         intc<Seq>::e::value, false>{},
+                                                         intc<Seq>::e::value, const_index>{},
                                                    index<eosio::name::raw(static_cast<uint64_t>(Values::index_name)),
                                                          typename Values::secondary_extractor_type,
-                                                         intc<Seq>::e::value, true>{})...);
+                                                         intc<Seq>::e::value, mutable_index>{})...);
          }
       public:
          using type = decltype( get_type(std::make_index_sequence<Num>{}) );
@@ -783,18 +787,16 @@ class multi_index
       using indices_type = typename make_index_tuple<sizeof... (Indices), Indices...>::type;
       
       class make_extractor_tuple {
-         template <typename Obj, typename IndicesType, uint64_t... Seq>
-         static constexpr auto get_type(const IndicesType& indices, const Obj& obj, std::index_sequence<Seq...>) {
-            return std::make_tuple(decltype(std::get<0>(std::get<Seq>(indices)))::extract_secondary_key(obj)...);
+         template <typename Obj, typename IndicesType, std::size_t... Seq>
+         static constexpr auto extractor_tuple(IndicesType, const Obj& obj, std::index_sequence<Seq...>) {
+            return std::make_tuple(std::tuple_element_t<const_index, std::tuple_element_t<Seq, IndicesType>>::extract_secondary_key(obj)...);
          }
       public:
          template <typename Obj, typename IndicesType>
-         static auto get_extractor_tuple(const IndicesType& indices, const Obj& obj) {
-            return get_type(indices, obj, std::make_index_sequence<sizeof...(Indices)>{});
+         static constexpr auto get_extractor_tuple(IndicesType, const Obj& obj) {
+            return extractor_tuple(IndicesType{}, obj, std::make_index_sequence<std::tuple_size_v<IndicesType>>{});
          }
       };
-
-      indices_type _indices;
 
       const item& load_object_by_primary_iterator( int32_t itr )const {
          using namespace _multi_index_detail;
@@ -820,8 +822,8 @@ class multi_index
             ds >> val;
 
             i.__primary_itr = itr;
-            bluegrass::meta::for_each(_indices, [&](auto& idx){
-               typedef decltype(std::get<1>(idx)) index_type;
+            bluegrass::meta::for_each(indices_type{}, [&](auto idx){
+               typedef std::tuple_element_t<const_index, decltype(idx)> index_type;
                i.__iters[ index_type::number() ] = -1;
             });
          });
@@ -1425,13 +1427,13 @@ class multi_index
       auto get_index() {
          using namespace _multi_index_detail;
 
-         constexpr uint64_t index_num = bluegrass::meta::for_each(_indices, [&](auto& idx){
-            return decltype(std::get<0>(idx))::index_name == static_cast<uint64_t>(IndexName);
-         }, _indices);
+         constexpr uint64_t index_num = bluegrass::meta::for_each(indices_type{}, [](auto idx){
+            return std::tuple_element_t<const_index, decltype(idx)>::index_name == static_cast<uint64_t>(IndexName);
+         });
 
          static_assert( index_num < sizeof...(Indices), "name provided is not the name of any secondary index within multi_index" );
 
-         return decltype(std::get<0>(std::get<index_num>(_indices)))(this);
+         return std::tuple_element_t<const_index, std::tuple_element_t<index_num, indices_type>>(this);
       }
 
       /**
@@ -1476,13 +1478,13 @@ class multi_index
       auto get_index()const {
          using namespace _multi_index_detail;
 
-         constexpr uint64_t index_num = bluegrass::meta::for_each(_indices, [&](auto& idx){
-            return decltype(std::get<1>(idx))::index_name == static_cast<uint64_t>(IndexName);
-         }, _indices);
+         constexpr uint64_t index_num = bluegrass::meta::for_each(indices_type{}, [](auto idx){
+            return std::tuple_element_t<mutable_index, decltype(idx)>::index_name == static_cast<uint64_t>(IndexName);
+         });
 
          static_assert( index_num < sizeof...(Indices), "name provided is not the name of any secondary index within multi_index" );
 
-         return decltype(std::get<1>(std::get<index_num>(_indices)))(this);
+         return std::tuple_element_t<mutable_index, std::tuple_element_t<index_num, indices_type>>(this);
       }
 
       /**
@@ -1595,8 +1597,8 @@ class multi_index
             if( pk >= _next_primary_key )
                _next_primary_key = (pk >= no_available_primary_key) ? no_available_primary_key : (pk + 1);
 
-            bluegrass::meta::for_each(_indices, [&](auto& idx){
-                  typedef decltype(std::get<0>(idx)) index_type;
+            bluegrass::meta::for_each(indices_type{}, [&](auto idx){
+                  typedef std::tuple_element_t<const_index, decltype(idx)> index_type;
 
                   i.__iters[index_type::number()] = secondary_index_db_functions<typename index_type::secondary_key_type>::db_idx_store( _scope, index_type::name(), payer.value, obj.primary_key(), index_type::extract_secondary_key(obj) );
             });
@@ -1708,7 +1710,7 @@ class multi_index
          auto& mutableitem = const_cast<item&>(objitem);
          eosio::check( _code == current_receiver(), "cannot modify objects in table of another contract" ); // Quick fix for mutating db using multi_index that shouldn't allow mutation. Real fix can come in RC2.
 
-         auto secondary_keys = make_extractor_tuple::get_extractor_tuple(_indices, obj);
+         auto secondary_keys = make_extractor_tuple::get_extractor_tuple(indices_type{}, obj);
 
          uint64_t pk = _multi_index_detail::to_raw_key(obj.primary_key());
 
@@ -1733,8 +1735,8 @@ class multi_index
          if( pk >= _next_primary_key )
             _next_primary_key = (pk >= no_available_primary_key) ? no_available_primary_key : (pk + 1);
 
-         bluegrass::meta::for_each(_indices, [&](auto& idx){
-            typedef decltype(std::get<0>(idx)) index_type;
+         bluegrass::meta::for_each(indices_type{}, [&](auto idx){
+            typedef std::tuple_element_t<const_index, decltype(idx)> index_type;
             auto secondary = index_type::extract_secondary_key( obj );
             if( memcmp( &std::get<index_type::index_number>(secondary_keys), &secondary, sizeof(secondary) ) != 0 ) {
                auto indexitr = mutableitem.__iters[index_type::number()];
@@ -1948,8 +1950,8 @@ class multi_index
 
          internal_use_do_not_use::db_remove_i64( objitem.__primary_itr );
 
-         bluegrass::meta::for_each(_indices, [&](auto& idx){
-            typedef decltype(std::get<0>(idx)) index_type;
+         bluegrass::meta::for_each(indices_type{}, [&](auto idx){
+            typedef std::tuple_element_t<const_index, decltype(idx)> index_type;
 
             auto i = objitem.__iters[index_type::number()];
             if( i < 0 ) {
