@@ -165,3 +165,39 @@ assertion failure with message: system contract must first be initialized
 
 The failure is stating that `eosio.system` `init` action was not called yet. The `init` action is implemented by the `void init(uint64_t, symbol)` function. The first parameter is the version, this should always be `0` for now, until a new version of `init` will be created that handles more information.
 The second parameter is the system's symbol (i.e. for main net this is `EOS`). If you followed the [BIOS Boot Sequence](https://docs.eosnetwork.com/docs/latest/tutorials/bios-boot-sequence) tutorial and created a system with the default symbol `SYS` then `SYS` shall be used as the system's symbol in the `init` action. It is whatever symbol you as the chain creator want to use in your `Antelope` based blockchain.
+
+## Backward incompatible change in generating abi for maps
+
+In CDT version 3.0.1, there has been breaking ABI change in std::map. The change is as follows:
+
+Old Version (CDT 3.0.0 or earlier):
+```
+  "fields": [
+      {
+          "name": "key",
+          "type": "<map first type>"
+      },
+      {
+          "name": "value",
+          "type": "<map second type>"
+      }
+  ]
+```
+
+New Version (CDT 3.0.1 and above):
+```
+  "fields": [
+      {
+          "name": "first",
+          "type": "<map first type>"
+      },
+      {
+          "name": "second",
+          "type": "<map second type>"
+      }
+  ]
+```
+
+As a result, if you are using code based on CDT 3.0.0 or earlier, you may encounter errors when upgrading to CDT 3.0.1 and above.
+An example error message could be: `Error: missing pair_uint64_bytes.first (type=uint64)`.
+To resolve this issue, you need to update your code to use `first` and `second` to access the elements of `std::map`, instead of the old `key` and `value` identifiers.
