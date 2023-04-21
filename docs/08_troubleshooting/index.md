@@ -168,7 +168,7 @@ The second parameter is the system's symbol (i.e. for main net this is `EOS`). I
 
 ## Backward incompatible change in generating abi for maps
 
-In CDT version 3.0.1, there has been a backward incompatible change in generating ABI for std::map. The change is as follows:
+In CDT version 3.0.1, there has been breaking ABI change in std::map. The change is as follows:
 
 Old Version (CDT 3.0.0 or earlier):
 ```
