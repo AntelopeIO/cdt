@@ -469,7 +469,14 @@ struct generation_utils {
          {"capi_checksum512", "checksum512"},
          {"fixed_bytes_20", "checksum160"},
          {"fixed_bytes_32", "checksum256"},
-         {"fixed_bytes_64", "checksum512"}
+         {"fixed_bytes_64", "checksum512"},
+
+         {"capi_bls_scalar", "bls_scalar"},
+         {"capi_bls_g1", "bls_fp"},
+         {"capi_bls_g2", "bls_fp2"},
+         {"capi_bls_g1", "bls_g1"},
+         {"capi_bls_g2", "bls_g2"},
+         {"capi_bls_gt", "bls_gt"}
       };
 
       auto ret = translation_table[t];
@@ -764,7 +771,13 @@ struct generation_utils {
          "symbol",
          "symbol_code",
          "asset",
-         "extended_asset"
+         "extended_asset",
+         "bls_scalar",
+         "bls_fp",
+         "bls_fp2",
+         "bls_g1",
+         "bls_g2",
+         "bls_gt"
       };
       return builtins.count(_translate_type(t)) >= 1;
    }
