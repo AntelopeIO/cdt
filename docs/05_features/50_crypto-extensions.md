@@ -7,10 +7,10 @@ As of `v3.0` crypto host functions were extended to include
 - `alt_bn128_add`, `alt_bn128_mul`, `alt_bn128_pair`: Add, multiply, and pairing check functions for the `alt_bn128` elliptic curve
 - `blake2_f`: `BLAKE2b F` compression function
 - `sha3`: sha3` hash function using `SHA3 NIST`
-- `Keccak256`: `sha3` hash function using `SHA3 Keccak`
+- `keccak`: `Keccak256` hash function using `SHA3 Keccak`
 - `k1_recover`: Safe `ECDSA` uncompressed pubkey recover for the `secp256k1` curve
 
-In `v3.0`, `C` format was supported; in `v3.1`, `C++` format was added for better data abstraction.
+In `v3.0`, `C` format was supported; in `v3.1` and newer versions, `C++` format was added for better data abstraction.
 
 ## Prerequisites
 
@@ -79,7 +79,7 @@ C++ types were added to represent `G1` and `G2` points (read and write) and view
       ec_point(std::vector<char>& p);
 
       /**
-       *  Return serialzed point containing only x and y
+       *  Return serialized point containing only x and y
        */
       std::vector<char> serialized() const;
    };
@@ -129,7 +129,7 @@ C++ types were added to represent `G1` and `G2` points (read and write) and view
       ec_point_view(const ec_point<Size>& p);
 
       /**
-       *  Return serialzed point containing only x and y
+       *  Return serialized point containing only x and y
        */
       std::vector<char> serialized() const;
    };
