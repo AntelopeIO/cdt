@@ -15,8 +15,8 @@ CDT currently supports Linux x86_64 Debian packages. Visit the [release page](ht
 Download the appropriate version of the Debian package and then install it. To download and install the latest version, run the following:
 
 ```sh
-wget https://github.com/AntelopeIO/cdt/releases/download/v3.1.0/cdt_3.1.0_amd64.deb
-sudo apt install ./cdt_3.1.0_amd64.deb
+wget https://github.com/AntelopeIO/cdt/releases/download/v4.0.0-rc1/cdt_4.0.0-rc1_amd64.deb
+sudo apt install ./cdt_4.0.0-rc1_amd64.deb
 ```
 ### Debian package uninstall
 
