@@ -1,0 +1,10 @@
+{
+    "tests" : [
+       {
+          "expected" : {
+             "abi-file" : "singleton_contract_simple.abi"
+          }
+       }
+    ]
+ }
+ 

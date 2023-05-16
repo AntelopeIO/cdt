@@ -243,14 +243,13 @@ namespace eosio { namespace cdt {
          ctables.insert(t);
       }
 
-      void add_table( uint64_t name, const clang::CXXRecordDecl* decl ) {
-         if (!(decl->isEosioTable() && abigen::is_eosio_contract(decl, get_contract_name())))
-            return;
-
-         abi_table t;
-         t.type = decl->getNameAsString();
-         t.name = name_to_string(name);
-         _abi.tables.insert(t);
+      void add_table( uint64_t name, const clang::CXXRecordDecl* decl, bool force=false ) {
+         if (force || decl->isEosioTable() && abigen::is_eosio_contract(decl, get_contract_name())) {
+            abi_table t;
+            t.type = decl->getNameAsString();
+            t.name = name_to_string(name);
+            _abi.tables.insert(t);
+         }
       }
 
       void add_clauses( const std::vector<std::pair<std::string, std::string>>& clauses ) {
@@ -804,7 +803,7 @@ namespace eosio { namespace cdt {
             if (const auto* d = dyn_cast<clang::ClassTemplateSpecializationDecl>(decl)) {
                if (d->getName() == "multi_index" || d->getName() == "singleton") {
                   ag.add_table(d->getTemplateArgs()[0].getAsIntegral().getExtValue(),
-                        (clang::CXXRecordDecl*)((clang::RecordType*)d->getTemplateArgs()[1].getAsType().getTypePtr())->getDecl());
+                               d->getTemplateArgs()[1].getAsType().getTypePtr()->getAsCXXRecordDecl(), true);
                }
             }
             return true;
