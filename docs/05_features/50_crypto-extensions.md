@@ -4,7 +4,7 @@ content_title: Crypto Extensions API
 
 
 Antelope blockchain implements cryptographic functions for operations on points on elliptic curves, computing hashes 
-of big integers, Big integer modular exponentiation, and other operations useful for implementing 
+of big integers, big integer modular exponentiation, and other operations useful for implementing 
 cryptographic algorithms in your contracts.
 
 In order to use the Crypto Extensions API you need to activate a protocol feature `CRYPTO_PRIMITIVES`
