@@ -12,7 +12,7 @@ in `nodeos`. To do this you should call the following command in your command li
 
 `"cleos push action eosio activate ["6bcb40a24e49c26d0a60513b6aeb8551d264e4717f306b81a37a5afb3b47cedc"] -p eosio@active"`
 
-And you need to include to the source code of your contract the following header: [crypto_ext.hpp](https://github.com/AntelopeIO/cdt/blob/main/libraries/eosiolib/core/eosio/crypto_ext.hpp)
+And you need to include in the source code of your contract the following header: [crypto_ext.hpp](https://github.com/AntelopeIO/cdt/blob/main/libraries/eosiolib/core/eosio/crypto_ext.hpp)
 
 The header declares following basic plain C functions which implement the core functionality:
 
@@ -136,9 +136,9 @@ header file, it contains more wrappers and helper functions which may be useful 
    std::vector<char> x, y, scalar;
    eosio::bigint s {scalar};
 
-   // Create the point object by given coordinates
+   // Create the point object with given coordinates
    eosio::g1_point g1_point {x, y};
-   // Multiply the point to a big integer and get a point on the curve as result
+   // Multiply the point with a big integer and get a point on the curve as result
    auto result = eosio::alt_bn128_mul(g1_point, s);
 
    // Do the same multiplication but with g1_point_view data type
