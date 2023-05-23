@@ -71,8 +71,8 @@ jobs:
           run: |
             mkdir build
             cd build
-            cmake -DCMAKE_BUILD_TYPE=Release -GNinja ..
-            ninja
+            cmake -DCMAKE_BUILD_TYPE=Release ..
+            make -j $(nproc)
             cd tests
             ctest -j $(nproc) --output-on-failure
         - name: Package (Ubuntu 18 only)
