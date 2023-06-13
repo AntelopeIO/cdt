@@ -42,9 +42,11 @@ std::shared_ptr<spdlog::logger> get_std_logger() {
     return logger;
 }
 
-#define ANTLER_ERROR(...)                                               \
+#define ANTLER_ERROR(...)                                                           \
     SPDLOG_LOGGER_ERROR(eosio::utils::get_std_logger(), __VA_ARGS__)
-#define ANTLER_INFO(...)                                                \
+#define ANTLER_WARN(...)                                                            \
+    SPDLOG_LOGGER_WARN(eosio::utils::get_std_logger(), __VA_ARGS__)
+#define ANTLER_INFO(...)                                                            \
     SPDLOG_LOGGER_INFO(eosio::utils::get_std_logger(), __VA_ARGS__)
 
 

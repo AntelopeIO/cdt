@@ -30,6 +30,7 @@
 #include <type_traits>
 #include <condition_variable>
 #include <optional>
+#include <signal.h>
 
 // restoring eosiolib macro
 #ifndef TABLE
@@ -60,6 +61,7 @@ class connection : public std::enable_shared_from_this<connection<CallbackTraits
     using stream_base       = boost::beast::websocket::stream_base;
     using data_buffer       = boost::beast::flat_buffer;
     using request_type      = boost::beast::websocket::request_type;
+    using close_code        = boost::beast::websocket::close_code;
     using read_queue_type   = std::unordered_map<uint64_t, antler_rpc::antler_run_response>;
     using on_event          = typename CallbackTraits::callback<void()>;
 
@@ -123,6 +125,21 @@ public:
         return {};
     }
 
+    void close() {
+        ANTLER_ASSERT( !in_context_thread(), "code must be called outside connection thread" );
+        if (closing()) {
+            ANTLER_INFO("close called on non-opened or already closed connection, doing nothing");
+            return;
+        }
+
+        boost::asio::post(context.get_executor(),
+                            [c = shared_from_this()](){
+                                c->stream.close(close_code::normal);
+                            });
+        // get_response returns control flow when stream is closed. return value is empty optional<>
+        // so we ensure here we got empty response
+        ANTLER_ASSERT(!get_response(0).has_value(), "no response expected");
+    }
 
     inline bool closing() {
         return stream.is_open();
@@ -282,12 +299,21 @@ private:
     using connection = connection<>;
     std::shared_ptr<connection>      node_connection;
     std::thread                      context_thread;
+    eosio::name                      registered_name;
+    sighandler_t                     previous_signal;
 
-    node_client() {}
+    node_client() : previous_signal(0x0) {}
 
     static inline uint64_t generate_req_id() {
         static uint64_t counter = 0;
         return ++counter;
+    }
+    static void sigint_handler(int sig) {
+        node_client::get().unregister_account(node_client::get().registered_name);
+        node_client::get().close();
+
+        if (node_client::get().previous_signal)
+            node_client::get().previous_signal(sig);
     }
     void run() {
         context_thread = std::thread([&](){
@@ -305,6 +331,16 @@ public:
         run();
         node_connection->start_connection();
 
+        //TODO: test this
+        auto signal_ret = signal(SIGINT, &node_client::sigint_handler);
+        ANTLER_ASSERT(signal_ret != SIG_ERR, "error setting signal: {}", std::strerror(errno));
+        // if noone set signal, return address supposed to be zero. this warning indicates that we override someone else's signal
+        if (signal_ret != 0x0) {
+            previous_signal = signal_ret;
+            ANTLER_INFO("Overriding previously set SIGINT signal. Previous handler will be called at the end of current one");
+        }
+
+        //wait until handshake
         future.get();
     }
     static inline node_client& get() {
@@ -319,6 +355,8 @@ public:
 
         //sync_request will check return code, as long as it doesn't throw we good to return
         std::ignore = sync_request(std::move(request));
+
+        registered_name = acc_name;
     }
 
     void unregister_account(eosio::name acc_name) {
@@ -407,6 +445,11 @@ public:
         request.set_req_id(id);
 
         std::ignore = sync_request(std::move(request));
+    }
+
+    void close() {
+        //syncroneous
+        node_connection->close();
     }
 
 private:
