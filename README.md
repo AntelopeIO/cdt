@@ -26,6 +26,14 @@ To remove CDT that was installed using a Debian package, simply execute the foll
 sudo apt remove cdt
 ```
 
+### Docker Build and Test
+
+Alternatively, use the prebuilt docker image to get up and running with develompment envirement quickly:
+1. Start the interactive shell: `make dev-docker-start`
+1. build: `make build`
+1. Run test: `make test`
+1. Run integration test : `make test-integration`
+
 ## Building from source
 
 Recent Ubuntu LTS releases are the only Linux distributions that we fully support. Other Linux distros and other POSIX operating systems (such as macOS) are tended to on a best-effort basis and may not be full featured. 

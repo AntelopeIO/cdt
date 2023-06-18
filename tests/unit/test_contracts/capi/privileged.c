@@ -11,4 +11,8 @@ void test_privileged( void ) {
    set_blockchain_parameters_packed(NULL, 0);
    get_blockchain_parameters_packed(NULL, 0);
    preactivate_feature(NULL);
+   set_fees_parameters(0, 0, 0, 0);
+   config_fee_limits(0, 0, 0);
+   set_fee_limits(0, 0, 0);
+   get_fee_consumption(0, NULL, NULL);
 }

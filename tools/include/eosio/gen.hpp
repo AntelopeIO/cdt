@@ -895,7 +895,10 @@ struct generation_utils {
          "db_idx_long_double_remove",
          "send_deferred",
          "send_inline",
-         "send_context_free_inline"
+         "send_context_free_inline",
+         "set_fees_parameters",
+         "config_fee_limits",
+         "set_fee_limits"
       };
 
       return write_host_funcs.count(func_decl->getNameInfo().getAsString()) >= 1;

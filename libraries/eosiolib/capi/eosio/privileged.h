@@ -123,6 +123,48 @@ void set_kv_parameters_packed( const char* data, uint32_t datalen );
 __attribute__((eosio_wasm_import))
 void preactivate_feature( const struct capi_checksum256* feature_digest );
 
+/**
+ * Set the fees parameters
+ *
+ * @param cpu_fee_scaler - cpu fee scaler
+ * @param free_block_cpu_threshold - the cpu threshold to start charge fee
+ * @param net_fee_scaler - net fee scaler
+ * @param free_block_net_threshold - the net threshold to start charge fee
+ * @pre `threshold` must be smaller than maximum resource limit
+ */
+__attribute__((eosio_wasm_import))
+void set_fees_parameters(uint64_t cpu_fee_scaler, uint64_t free_block_cpu_threshold, uint64_t net_fee_scaler, uint64_t free_block_net_threshold);
+
+/**
+ * Configure the maximum fees for an account.
+ *
+ * @param account - name of the account whose resource limit to be set.
+ * @param tx_fee_limit - the maximum fee limit per transaction for the account.
+ * @param account_fee_limit - the maximum fee limit for the account.
+ */
+__attribute__((eosio_wasm_import))
+void config_fee_limits(capi_name account, int64_t tx_fee_limit, int64_t account_fee_limit);
+
+/**
+ * Set the fee limits for an account.
+ *
+ * @param account - name of the account whose resource limit to be set.
+ * @param net_weight_limit - The limit on NET weight for the account.
+ * @param cpu_weight_limit - The limit on CPU weight for the account.
+ */
+__attribute__((eosio_wasm_import))
+void set_fee_limits( capi_name account, int64_t net_weight_limit, int64_t cpu_weight_limit);
+
+ /**
+ * Get the fee consumption for an account.
+ *
+ * @param account - name of the account whose resource limit to get
+ * @param net_weight_consumption - pointer to `int64_t` to hold net weight consumption
+ * @param cpu_weight_consumption - pointer to `int64_t` to hold cpu weight consumption
+ */
+__attribute__((eosio_wasm_import))
+void get_fee_consumption( capi_name account, int64_t* net_weight_consumption, int64_t* cpu_weight_consumption);
+
 #ifdef __cplusplus
 }
 #endif

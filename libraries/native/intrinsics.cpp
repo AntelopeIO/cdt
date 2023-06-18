@@ -906,6 +906,21 @@ extern "C" {
       return intrinsics::get().call<intrinsics::get_active_security_group>(data, datalen);
    }
 
+   void set_fees_parameters(uint64_t cpu_fee_scaler, uint64_t free_block_cpu_threshold, uint64_t net_fee_scaler, uint64_t free_block_net_threshold) {
+         return intrinsics::get().call<intrinsics::set_fees_parameters>(cpu_fee_scaler, free_block_cpu_threshold, net_fee_scaler, free_block_net_threshold);
+      }
+
+   void config_fee_limits(capi_name account, int64_t tx_fee_limit, int64_t account_fee_limit) {
+      return intrinsics::get().call<intrinsics::config_fee_limits>(account, tx_fee_limit, account_fee_limit);
+   }
+
+   void set_fee_limits( capi_name account, int64_t net_weight_limit, int64_t cpu_weight_limit) {
+      return intrinsics::get().call<intrinsics::set_fee_limits>(account, net_weight_limit, cpu_weight_limit);
+   }
+
+   void get_fee_consumption( capi_name account, int64_t* net_weight_consumption, int64_t* cpu_weight_consumption) {
+      return intrinsics::get().call<intrinsics::get_fee_consumption>(account, net_weight_consumption, cpu_weight_consumption);
+   }
 }
 
 int32_t blake2_f( uint32_t rounds, const char* state, uint32_t state_len, const char* msg, uint32_t msg_len, 
