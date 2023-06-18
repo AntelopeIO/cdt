@@ -8,7 +8,7 @@ set_blockchain_parameters_packed : yes
 set_parameters_packed : yes
 set_privileged  : yes
 send_deferred : yes
-set_fees_parameters : yes
+set_fee_parameters : yes
 config_fee_limits : yes
 set_fee_limits : yes
 get_fee_consumption : yes

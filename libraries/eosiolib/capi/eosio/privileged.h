@@ -133,7 +133,7 @@ void preactivate_feature( const struct capi_checksum256* feature_digest );
  * @pre `threshold` must be smaller than maximum resource limit
  */
 __attribute__((eosio_wasm_import))
-void set_fees_parameters(uint64_t cpu_fee_scaler, uint64_t free_block_cpu_threshold, uint64_t net_fee_scaler, uint64_t free_block_net_threshold);
+void set_fee_parameters(uint64_t cpu_fee_scaler, uint64_t free_block_cpu_threshold, uint64_t net_fee_scaler, uint64_t free_block_net_threshold);
 
 /**
  * Configure the maximum fees for an account.

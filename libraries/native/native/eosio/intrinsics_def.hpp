@@ -173,7 +173,7 @@ intrinsic_macro(alt_bn128_add) \
 intrinsic_macro(alt_bn128_mul) \
 intrinsic_macro(alt_bn128_pair) \
 intrinsic_macro(mod_exp) \
-intrinsic_macro(set_fees_parameters) \
+intrinsic_macro(set_fee_parameters) \
 intrinsic_macro(config_fee_limits) \
 intrinsic_macro(set_fee_limits) \
 intrinsic_macro(get_fee_consumption)

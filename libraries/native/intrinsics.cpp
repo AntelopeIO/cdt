@@ -906,8 +906,8 @@ extern "C" {
       return intrinsics::get().call<intrinsics::get_active_security_group>(data, datalen);
    }
 
-   void set_fees_parameters(uint64_t cpu_fee_scaler, uint64_t free_block_cpu_threshold, uint64_t net_fee_scaler, uint64_t free_block_net_threshold) {
-         return intrinsics::get().call<intrinsics::set_fees_parameters>(cpu_fee_scaler, free_block_cpu_threshold, net_fee_scaler, free_block_net_threshold);
+   void set_fee_parameters(uint64_t cpu_fee_scaler, uint64_t free_block_cpu_threshold, uint64_t net_fee_scaler, uint64_t free_block_net_threshold) {
+         return intrinsics::get().call<intrinsics::set_fee_parameters>(cpu_fee_scaler, free_block_cpu_threshold, net_fee_scaler, free_block_net_threshold);
       }
 
    void config_fee_limits(capi_name account, int64_t tx_fee_limit, int64_t account_fee_limit) {

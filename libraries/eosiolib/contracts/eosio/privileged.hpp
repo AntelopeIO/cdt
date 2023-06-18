@@ -37,7 +37,7 @@ namespace eosio {
          int64_t set_proposed_producers_ex( uint64_t producer_data_format, char *producer_data, uint32_t producer_data_size );
 
          __attribute__((eosio_wasm_import))
-         void set_fees_parameters(uint64_t cpu_fee_scaler, uint64_t free_block_cpu_threshold, uint64_t net_fee_scaler, uint64_t free_block_net_threshold);
+         void set_fee_parameters(uint64_t cpu_fee_scaler, uint64_t free_block_cpu_threshold, uint64_t net_fee_scaler, uint64_t free_block_net_threshold);
 
          __attribute__((eosio_wasm_import))
          void config_fee_limits(uint64_t account, int64_t tx_fee_limit, int64_t account_fee_limit);

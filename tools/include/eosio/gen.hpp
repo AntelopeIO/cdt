@@ -896,7 +896,7 @@ struct generation_utils {
          "send_deferred",
          "send_inline",
          "send_context_free_inline",
-         "set_fees_parameters",
+         "set_fee_parameters",
          "config_fee_limits",
          "set_fee_limits"
       };
