@@ -13,26 +13,25 @@ std::string to_hex(WideInt value) {
   if (value == 0)
     return "0";
 
-  std::string hex_string;
-  const char *hex_digits = "0123456789abcdef";
+  constexpr int num_digits = (sizeof(WideInt) * 2);
+  constexpr int hex_digits_capacity = num_digits + 1; // +1 for null terminator
 
-  const int num_digits = (sizeof(WideInt) * 2);
-
-  hex_string.resize(num_digits);
-  char *hex_chars = &hex_string[0];
+  char hex_digits[hex_digits_capacity];
+  int digit_index = num_digits;
   int leading_zeros = 0;
 
-  for (int i = num_digits - 1; i >= 0; --i) {
+  while (value != 0 && digit_index > 0) {
     int least_significant_digit = value & 0xF;
     if (least_significant_digit != 0)
       leading_zeros = 0;
     else
       leading_zeros++;
-    hex_chars[i] = hex_digits[least_significant_digit];
-    value >>= 4; // Shift right by 4 bits
+    hex_digits[--digit_index] = "0123456789abcdef"[least_significant_digit];
+    value >>= 4;
   }
 
-  return hex_string.substr(leading_zeros);
+  return std::string(hex_digits + digit_index,
+                     num_digits - digit_index - leading_zeros);
 }
 
 template <typename WideInt,
@@ -42,24 +41,38 @@ WideInt from_hex(const std::string &hex_string) {
                "eosio::wideint::from_hex Empty hexadecimal string");
 
   const std::size_t start_idx =
-      (hex_string.size() > 2 && hex_string.substr(0, 2) == "0x") ? 2 : 0;
+      (hex_string.size() > 2 && hex_string[0] == '0' &&
+       (hex_string[1] == 'x' || hex_string[1] == 'X'))
+          ? 2
+          : 0;
 
   WideInt result = 0;
 
   for (std::size_t i = start_idx; i < hex_string.size(); ++i) {
     const char c = hex_string[i];
 
-    if (c >= '0' && c <= '9')
-      result = (result << 4) | (c - '0');
-    else if (c >= 'a' && c <= 'f')
-      result = (result << 4) | (c - 'a' + 10);
-    else if (c >= 'A' && c <= 'F')
-      result = (result << 4) | (c - 'A' + 10);
-    else
-      eosio::check(false,
-                   "eosio::wideint::from_hex Invalid hexadecimal string");
-  }
+    int val = 0;
+    if (c <= '9') {
+      if (c < '0')
+        eosio::check(false, "eosio::wideint::from_hex Invalid hexadecimal string");
 
+      val = c - '0';
+    } else {
+      if (c <= 'F') {
+        if (c < 'A')
+          eosio::check(false, "eosio::wideint::from_hex Invalid hexadecimal string");
+
+        val = c - 'A' + 10;
+      } else {
+        if (c < 'a' || c > 'f')
+          eosio::check(false, "eosio::wideint::from_hex Invalid hexadecimal string");
+
+        val = c - 'a' + 10;
+      }
+    }
+
+    result = (result << 4) | static_cast<WideInt>(val);
+  }
   return result;
 }
 
