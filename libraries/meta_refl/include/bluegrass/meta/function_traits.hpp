@@ -80,6 +80,9 @@ namespace bluegrass { namespace meta {
       template <bool Decay, typename R, typename... Args>
       constexpr auto get_types(R(Args...)) -> std::tuple<R, freestanding,
                                               std::tuple<std::conditional_t<Decay, std::decay_t<Args>, Args>...>>;
+      template <bool Decay, typename R, typename... Args>
+      constexpr auto get_types(R(Args...) noexcept) -> std::tuple<R, freestanding,
+                                              std::tuple<std::conditional_t<Decay, std::decay_t<Args>, Args>...>>;
       template <bool Decay, typename R, typename Cls, typename... Args>
       constexpr auto get_types(R (Cls::*)(Args...)) -> std::tuple<R, Cls,
                                                        std::tuple<std::conditional_t<Decay, std::decay_t<Args>, Args>...>>;
@@ -100,7 +103,7 @@ namespace bluegrass { namespace meta {
                                                                std::tuple<std::conditional_t<Decay, std::decay_t<Args>, Args>...>>;
       template <bool Decay, typename F>
       constexpr auto get_types(F&& fn) {
-         if constexpr (std::is_invocable<F>::value)
+         if constexpr (!std::is_function_v<F>)
             return get_types<Decay>(&F::operator());
          else
             return get_types<Decay>(fn);
@@ -128,6 +131,8 @@ namespace bluegrass { namespace meta {
 
       template <std::size_t N, typename R, typename... Args>
       constexpr auto parameters_from_impl(R(Args...)) ->  pack_from_t<N, Args...>;
+      template <std::size_t N, typename R, typename... Args>
+      constexpr auto parameters_from_impl(R(Args...) noexcept) ->  pack_from_t<N, Args...>;
       template <std::size_t N, typename R, typename Cls, typename... Args>
       constexpr auto parameters_from_impl(R(Cls::*)(Args...)) ->  pack_from_t<N, Args...>;
       template <std::size_t N, typename R, typename Cls, typename... Args>
@@ -142,7 +147,7 @@ namespace bluegrass { namespace meta {
       constexpr auto parameters_from_impl(R(Cls::*)(Args...)const &&) ->  pack_from_t<N, Args...>;
       template <std::size_t N, typename F>
       constexpr auto parameters_from_impl(F&& fn) {
-         if constexpr (std::is_invocable<F>::value)
+         if constexpr (!std::is_function_v<F>)
             return parameters_from_impl<N>(&F::operator());
          else
             return parameters_from_impl<N>(fn);

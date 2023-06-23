@@ -47,26 +47,17 @@ namespace eosio { namespace testing { namespace native {
     /// @brief native runner, loads shared object with contract, performs intrinsics setup and exposes interface to execute apply
     struct runner : testing::runner_interface<runner> {
         runner(const std::string& path) {
+            init_intrinsics();
             load(path);
+
+            //let library override neccesary intrinsics
+            exports.initialize();
         }
         void apply(eosio::name receiver, eosio::name code, eosio::name action) {
             exports.apply(receiver.value, code.value, action.value);
         }
         inline object_type get_type() {
             return object_type::shared_object;
-        }
-
-        void init() {
-            // this call assigns rpc handlers for every intrinsic
-            setup_rpc_intrinsics();
-
-            // this macro executes exports.register_intrinsic for every intrinsic
-            // we need this because of shared object has its own native library internal variables
-            // so this call is to supply current intrinsics pointers to shared object
-            INTRINSICS(REGISTER_LIB_INTRINSIC);
-
-            //let library override neccesary intrinsics
-            exports.initialize();
         }
     private:
         // if closing handle before main finishes, it gives segmentation fault
@@ -83,6 +74,20 @@ namespace eosio { namespace testing { namespace native {
         };
         exports      exports;
 
+        void init_intrinsics() {
+            static bool inited = false;
+            if (!inited) {
+                // this call assigns rpc handlers for every intrinsic
+                setup_rpc_intrinsics();
+
+                // this macro executes exports.register_intrinsic for every intrinsic
+                // we need this because of shared object has its own native library internal variables
+                // so this call is to supply current intrinsics pointers to shared object
+                INTRINSICS(REGISTER_LIB_INTRINSIC);
+
+                inited = true;
+            }
+        }
         void load(const std::string& path) {
             ANTLER_ASSERT(so_handle == nullptr, "object already loaded");
 

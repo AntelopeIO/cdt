@@ -172,8 +172,15 @@ intrinsic_macro(k1_recover) \
 intrinsic_macro(alt_bn128_add) \
 intrinsic_macro(alt_bn128_mul) \
 intrinsic_macro(alt_bn128_pair) \
-intrinsic_macro(mod_exp)
-
+intrinsic_macro(mod_exp) \
+intrinsic_macro(eosio_assert) \
+intrinsic_macro(eosio_assert_code) \
+intrinsic_macro(eosio_assert_message) \
+intrinsic_macro(abort) \
+intrinsic_macro(memcpy) \
+intrinsic_macro(memcmp) \
+intrinsic_macro(memmove) \
+intrinsic_macro(memset)
 
 
 #define CREATE_ENUM(name) \

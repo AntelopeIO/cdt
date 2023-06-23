@@ -5,6 +5,7 @@ set(EOSIO_VERSION_SOFT_MAX "4.0")
 #set(EOSIO_VERSION_HARD_MAX "")
 
 find_package(leap)
+find_package(Protobuf REQUIRED)
 
 find_path(GMP_INCLUDE_DIR NAMES gmp.h)
 find_library(GMP_LIBRARY gmp)
@@ -27,15 +28,30 @@ endif(VERSION_OUTPUT STREQUAL "MATCH")
 
 enable_testing()
 
-configure_file(${CMAKE_SOURCE_DIR}/contracts.hpp.in ${CMAKE_BINARY_DIR}/contracts.hpp)
+set(TOOLS_DIR ${CMAKE_SOURCE_DIR}/../../tools)
+set(TOOLS_BUILD_DIR ${CMAKE_BINARY_DIR}/../../tools)
+set(LIB_DIR ${CMAKE_SOURCE_DIR}/../../libraries)
 
-include_directories(${CMAKE_BINARY_DIR})
+configure_file(${CMAKE_SOURCE_DIR}/contracts.hpp.in ${CMAKE_BINARY_DIR}/contracts.hpp)
+configure_file(${TOOLS_DIR}/antler-run/version.hpp.in ${CMAKE_BINARY_DIR}/version.hpp)
+
+include_directories(${CMAKE_BINARY_DIR} ${LIB_DIR} ${TOOLS_BUILD_DIR} ${TOOLS_BUILD_DIR}/include ${Protobuf_INCLUDE_DIRS})
+link_directories(${TOOLS_BUILD_DIR}/native ${TOOLS_BUILD_DIR}/eosiolib ${TOOLS_BUILD_DIR}/external/antler-interfaces)
 
 file(GLOB INT_TESTS "*.cpp" "*.hpp")
 
 add_eosio_test_executable( integration_tests ${INT_TESTS} )
-
-target_link_libraries( integration_tests ${GMP_LIBRARY} )
+target_compile_definitions(integration_tests PUBLIC EOSIO_NATIVE EOSIOLIB_DISABLE_MALLOC)
+target_compile_options(integration_tests PUBLIC -ldl -fpermissive -ftemplate-backtrace-limit=0)
+target_include_directories( integration_tests PUBLIC  ${TOOLS_DIR}/external/spdlog/include
+                                                      ${TOOLS_DIR}/external/eos-vm/include
+                                                      ${LIB_DIR}/eosiolib/contracts
+                                                      ${LIB_DIR}/eosiolib/core
+                                                      ${LIB_DIR}/eosiolib/capi
+                                                      ${LIB_DIR}/eosiolib/native
+                                                      ${LIB_DIR}/native
+                                                      ${LIB_DIR}/meta_refl/include)
+target_link_libraries( integration_tests ${GMP_LIBRARY} native_eosio native antler_interfaces ${Protobuf_LIBRARIES})
 
 foreach(TEST_SUITE ${INT_TESTS}) # create an independent target for each test suite
   execute_process(COMMAND bash -c "grep -E 'BOOST_AUTO_TEST_SUITE\\s*[(]' ${TEST_SUITE} | grep -vE '//.*BOOST_AUTO_TEST_SUITE\\s*[(]' | cut -d ')' -f 1 | cut -d '(' -f 2" OUTPUT_VARIABLE SUITE_NAME OUTPUT_STRIP_TRAILING_WHITESPACE) # get the test suite name from the *.cpp file

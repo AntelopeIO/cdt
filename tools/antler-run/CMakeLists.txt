@@ -9,7 +9,6 @@ find_package(Protobuf REQUIRED)
 
 set(TOOLS_DIR ${CMAKE_SOURCE_DIR})
 set(LIB_DIR ${CMAKE_SOURCE_DIR}/../libraries)
-set(CDT_NO_START TRUE)
 
 include_directories(${LIB_DIR} ${CMAKE_BINARY_DIR}/include ${Protobuf_INCLUDE_DIRS})
 

@@ -21,8 +21,6 @@ void run(runner_interface<Impl>&& runner,
          const std::string&       host = "",
          const std::string&       port = "",
          eosio::name              register_account_name = {}) {
-
-    runner.init();
     // all calls to node_client are synchroneous, if error occurs exception is raised
     // init starts separate connection thread and returns after successful handshake with nodeos
     node_client::get().init(host, port);

@@ -55,9 +55,10 @@ namespace eosio { namespace testing { namespace wasm {
         using backend_t = eosio::vm::backend<rhf_t, eosio::vm::interpreter>;
 
         #define REGISTER_WASM_INTRINSIC(ID) \
-            rhf_t::add<&::ID>("host", #ID);
+            rhf_t::add<&::ID>("env", #ID);
 
         runner(const std::string& path) {
+            init_intrinsics();
             load(path);
         }
 
@@ -67,12 +68,16 @@ namespace eosio { namespace testing { namespace wasm {
         inline object_type get_type() {
             return object_type::wasm;
         }
-        void init() {
-            eosio::testing::native::setup_rpc_intrinsics();
-            
-            INTRINSICS(REGISTER_WASM_INTRINSIC);
-        }
     private:
+        void init_intrinsics() {
+            static bool inited = false;
+            if (!inited) {
+                eosio::testing::native::setup_rpc_intrinsics();
+                
+                INTRINSICS(REGISTER_WASM_INTRINSIC);
+                inited = true;
+            }
+        }
         eosio::vm::wasm_allocator wasm_allocator;
         std::unique_ptr<backend_t> backend;
 

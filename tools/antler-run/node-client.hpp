@@ -507,11 +507,17 @@ private:
 
     template<typename Ret>
     Ret deserialize_return_value(const std::string& serialized_data) {
-        eosio::datastream<const char*> ds(serialized_data.data(), serialized_data.size());
-        Ret ret_val;
-        ds >> ret_val;
+        if constexpr (!std::is_pointer_v<Ret>) {
+            eosio::datastream<const char*> ds(serialized_data.data(), serialized_data.size());
+            Ret ret_val;
+            ds >> ret_val;
 
-        return std::move(ret_val);
+            return std::move(ret_val);
+        } else {
+            //for memcpy, etc. returning null
+            //TODO: that might be a source of errors so check that later
+            return {};
+        }
     }
 };
 
