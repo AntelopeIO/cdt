@@ -43,64 +43,54 @@ namespace eosio {
         }
     }
 
-    void bls_g1_add(const uint8_t* op1, const uint8_t* op2, uint8_t* res)
+    int32_t bls_g1_add(const uint8_t* op1, const uint8_t* op2, uint8_t* res)
     {
-        int32_t ret = internal_use_do_not_use::bls_g1_add(reinterpret_cast<const char*>(op1), 144, reinterpret_cast<const char*>(op2), 144, reinterpret_cast<char*>(res), 144);
-        eosio::check(ret == 0, "internal_use_do_not_use::bls_g1_add failed");
+        return internal_use_do_not_use::bls_g1_add(reinterpret_cast<const char*>(op1), 144, reinterpret_cast<const char*>(op2), 144, reinterpret_cast<char*>(res), 144);
     }
 
-    void bls_g2_add(const uint8_t* op1, const uint8_t* op2, uint8_t* res)
+    int32_t bls_g2_add(const uint8_t* op1, const uint8_t* op2, uint8_t* res)
     {
-        int32_t ret = internal_use_do_not_use::bls_g2_add(reinterpret_cast<const char*>(op1), 288, reinterpret_cast<const char*>(op2), 288, reinterpret_cast<char*>(res), 288);
-        eosio::check(ret == 0, "internal_use_do_not_use::bls_g2_add failed");
+        return internal_use_do_not_use::bls_g2_add(reinterpret_cast<const char*>(op1), 288, reinterpret_cast<const char*>(op2), 288, reinterpret_cast<char*>(res), 288);
     }
 
-    void bls_g1_mul(const uint8_t* point, const uint8_t* scalar, uint8_t* res)
+    int32_t bls_g1_mul(const uint8_t* point, const uint8_t* scalar, uint8_t* res)
     {
-        int32_t ret = internal_use_do_not_use::bls_g1_mul(reinterpret_cast<const char*>(point), 144, reinterpret_cast<const char*>(scalar), 32, reinterpret_cast<char*>(res), 144);
-        eosio::check(ret == 0, "internal_use_do_not_use::bls_g1_mul failed");
+        return internal_use_do_not_use::bls_g1_mul(reinterpret_cast<const char*>(point), 144, reinterpret_cast<const char*>(scalar), 32, reinterpret_cast<char*>(res), 144);
     }
 
-    void bls_g2_mul(const uint8_t* point, const uint8_t* scalar, uint8_t* res)
+    int32_t bls_g2_mul(const uint8_t* point, const uint8_t* scalar, uint8_t* res)
     {
-        int32_t ret = internal_use_do_not_use::bls_g2_mul(reinterpret_cast<const char*>(point), 288, reinterpret_cast<const char*>(scalar), 32, reinterpret_cast<char*>(res), 288);
-        eosio::check(ret == 0, "internal_use_do_not_use::bls_g2_mul failed");
+        return internal_use_do_not_use::bls_g2_mul(reinterpret_cast<const char*>(point), 288, reinterpret_cast<const char*>(scalar), 32, reinterpret_cast<char*>(res), 288);
     }
 
-    void bls_g1_exp(const uint8_t* points, const uint8_t* scalars, const uint32_t num, uint8_t* res)
+    int32_t bls_g1_exp(const uint8_t* points, const uint8_t* scalars, const uint32_t num, uint8_t* res)
     {
-        int32_t ret = internal_use_do_not_use::bls_g1_exp(reinterpret_cast<const char*>(points), num * 144, reinterpret_cast<const char*>(scalars), num * 32, num, reinterpret_cast<char*>(res), 144);
-        eosio::check(ret == 0, "internal_use_do_not_use::bls_g1_exp failed");
+        return internal_use_do_not_use::bls_g1_exp(reinterpret_cast<const char*>(points), num * 144, reinterpret_cast<const char*>(scalars), num * 32, num, reinterpret_cast<char*>(res), 144);
     }
 
-    void bls_g2_exp(const uint8_t* points, const uint8_t* scalars, const uint32_t num, uint8_t* res)
+    int32_t bls_g2_exp(const uint8_t* points, const uint8_t* scalars, const uint32_t num, uint8_t* res)
     {
-        int32_t ret = internal_use_do_not_use::bls_g2_exp(reinterpret_cast<const char*>(points), num * 288, reinterpret_cast<const char*>(scalars), num * 32, num, reinterpret_cast<char*>(res), 288);
-        eosio::check(ret == 0, "internal_use_do_not_use::bls_g2_exp failed");
+        return internal_use_do_not_use::bls_g2_exp(reinterpret_cast<const char*>(points), num * 288, reinterpret_cast<const char*>(scalars), num * 32, num, reinterpret_cast<char*>(res), 288);
     }
 
-    void bls_pairing(const uint8_t* g1_points, const uint8_t* g2_points, const uint32_t num, uint8_t* res)
+    int32_t bls_pairing(const uint8_t* g1_points, const uint8_t* g2_points, const uint32_t num, uint8_t* res)
     {
-        int32_t ret = internal_use_do_not_use::bls_pairing(reinterpret_cast<const char*>(g1_points), num * 144, reinterpret_cast<const char*>(g2_points), num * 288, num, reinterpret_cast<char*>(res), 576);
-        eosio::check(ret == 0, "internal_use_do_not_use::bls_pairing failed");
+        return internal_use_do_not_use::bls_pairing(reinterpret_cast<const char*>(g1_points), num * 144, reinterpret_cast<const char*>(g2_points), num * 288, num, reinterpret_cast<char*>(res), 576);
     }
 
-    void bls_g1_map(const uint8_t* e, uint8_t* res)
+    int32_t bls_g1_map(const uint8_t* e, uint8_t* res)
     {
-        int32_t ret = internal_use_do_not_use::bls_g1_map(reinterpret_cast<const char*>(e), 48, reinterpret_cast<char*>(res), 144);
-        eosio::check(ret == 0, "internal_use_do_not_use::bls_g1_map failed");
+        return internal_use_do_not_use::bls_g1_map(reinterpret_cast<const char*>(e), 48, reinterpret_cast<char*>(res), 144);
     }
 
-    void bls_g2_map(const uint8_t* e, uint8_t* res)
+    int32_t bls_g2_map(const uint8_t* e, uint8_t* res)
     {
-        int32_t ret = internal_use_do_not_use::bls_g2_map(reinterpret_cast<const char*>(e), 96, reinterpret_cast<char*>(res), 288);
-        eosio::check(ret == 0, "internal_use_do_not_use::bls_g2_map failed");
+        return internal_use_do_not_use::bls_g2_map(reinterpret_cast<const char*>(e), 96, reinterpret_cast<char*>(res), 288);
     }
 
-    void bls_fp_mod(const uint8_t* s, uint8_t* res)
+    int32_t bls_fp_mod(const uint8_t* s, uint8_t* res)
     {
-        int32_t ret = internal_use_do_not_use::bls_fp_mod(reinterpret_cast<const char*>(s), 64, reinterpret_cast<char*>(res), 48);
-        eosio::check(ret == 0, "internal_use_do_not_use::bls_fp_mod failed");
+        return internal_use_do_not_use::bls_fp_mod(reinterpret_cast<const char*>(s), 64, reinterpret_cast<char*>(res), 48);
     }
 }
 
