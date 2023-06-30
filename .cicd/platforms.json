@@ -7,5 +7,8 @@
    },
    "ubuntu22": {
       "dockerfile": ".cicd/platforms/ubuntu22.Dockerfile"
+   },
+   "ubuntu22-llvm": {
+      "dockerfile": ".cicd/platforms/ubuntu22-llvm.Dockerfile"
    }
 }
