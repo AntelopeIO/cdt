@@ -205,85 +205,99 @@ class [[eosio::contract]] bls_primitives_tests : public contract{
         [[eosio::action]]
         void testg1add(const std::vector<uint8_t>& op1, const std::vector<uint8_t>& op2, const std::vector<uint8_t>& res)
         {
-            std::vector<uint8_t> r;
-            r.resize(144);
-            bls_g1_add(op1.data(), op2.data(), r.data());
-            check(r == res, "bls_g1_add test failed");
+            bls_g1 lhs, rhs, r;
+            memcpy(lhs, op1.data(), sizeof(bls_g1));
+            memcpy(rhs, op1.data(), sizeof(bls_g1));
+            bls_g1_add(lhs, rhs, r);
+            check(0 == memcmp(r, res.data(), sizeof(bls_g1)), "bls_g1_add test failed");
         }
 
         [[eosio::action]]
         void testg2add(const std::vector<uint8_t>& op1, const std::vector<uint8_t>& op2, const std::vector<uint8_t>& res)
         {
-            std::vector<uint8_t> r;
-            r.resize(288);
-            bls_g2_add(op1.data(), op2.data(), r.data());
-            check(r == res, "bls_g2_add test failed");
+            bls_g2 lhs, rhs, r;
+            memcpy(lhs, op1.data(), sizeof(bls_g2));
+            memcpy(rhs, op1.data(), sizeof(bls_g2));
+            bls_g2_add(lhs, rhs, r);
+            check(0 == memcmp(r, res.data(), sizeof(bls_g2)), "bls_g2_add test failed");
         }
 
         [[eosio::action]]
         void testg1mul(const std::vector<uint8_t>& point, const std::vector<uint8_t>& scalar, const std::vector<uint8_t>& res)
         {
-            std::vector<uint8_t> r;
-            r.resize(144);
-            bls_g1_mul(point.data(), scalar.data(), r.data());
-            check(r == res, "bls_g1_mul test failed");
+            bls_g1 p, r;
+            bls_scalar s;
+            memcpy(p, point.data(), sizeof(bls_g1));
+            memcpy(s, scalar.data(), sizeof(bls_scalar));
+            bls_g1_mul(p, s, r);
+            check(0 == memcmp(r, res.data(), sizeof(bls_g1)), "bls_g1_mul test failed");
         }
 
         [[eosio::action]]
         void testg2mul(const std::vector<uint8_t>& point, const std::vector<uint8_t>& scalar, const std::vector<uint8_t>& res)
         {
-            std::vector<uint8_t> r;
-            r.resize(288);
-            bls_g2_mul(point.data(), scalar.data(), r.data());
-            check(r == res, "bls_g2_mul test failed");
+            bls_g2 p, r;
+            bls_scalar s;
+            memcpy(p, point.data(), sizeof(bls_g2));
+            memcpy(s, scalar.data(), sizeof(bls_scalar));
+            bls_g2_mul(p, s, r);
+            check(0 == memcmp(r, res.data(), sizeof(bls_g2)), "bls_g2_mul test failed");
         }
 
         [[eosio::action]]
         void testg1exp(const std::vector<uint8_t>& points, const std::vector<uint8_t>& scalars, const std::vector<uint8_t>& res)
         {
-            check(points.size()/144 == scalars.size()/32, "number of elements in points and scalars must be equal");
-            std::vector<uint8_t> r;
-            r.resize(144);
-            bls_g1_exp(points.data(), scalars.data(), points.size()/144, r.data());
-            check(r == res, "bls_g1_exp test failed");
+            check(points.size()/sizeof(bls_g1) == scalars.size()/sizeof(bls_scalar), "number of elements in points and scalars must be equal");
+            uint32_t num = scalars.size()/sizeof(bls_scalar);
+            const bls_g1* pp = reinterpret_cast<const bls_g1*>(points.data());
+            const bls_scalar* ps = reinterpret_cast<const bls_scalar*>(scalars.data());
+            bls_g1 r;
+            bls_g1_exp(pp, ps, num, r);
+            check(0 == memcmp(r, res.data(), sizeof(bls_g1)), "bls_g1_exp test failed");
         }
 
         [[eosio::action]]
         void testg2exp(const std::vector<uint8_t>& points, const std::vector<uint8_t>& scalars, const std::vector<uint8_t>& res)
         {
-            check(points.size()/288 == scalars.size()/32, "number of elements in points and scalars must be equal");
-            std::vector<uint8_t> r;
-            r.resize(288);
-            bls_g2_exp(points.data(), scalars.data(), points.size()/288, r.data());
-            check(r == res, "bls_g2_exp test failed");
+            check(points.size()/sizeof(bls_g2) == scalars.size()/sizeof(bls_scalar), "number of elements in points and scalars must be equal");
+            uint32_t num = scalars.size()/sizeof(bls_scalar);
+            const bls_g2* pp = reinterpret_cast<const bls_g2*>(points.data());
+            const bls_scalar* ps = reinterpret_cast<const bls_scalar*>(scalars.data());
+            bls_g2 r;
+            bls_g2_exp(pp, ps, num, r);
+            check(0 == memcmp(r, res.data(), sizeof(bls_g2)), "bls_g2_exp test failed");
         }
 
         [[eosio::action]]
         void testpairing(const std::vector<uint8_t>& g1_points, const std::vector<uint8_t>& g2_points, const std::vector<uint8_t>& res)
         {
-            check(g1_points.size()/144 == g2_points.size()/288, "number of elements in g1_points and g2_points must be equal");
-            std::vector<uint8_t> r;
-            r.resize(576);
-            bls_pairing(g1_points.data(), g2_points.data(), g1_points.size()/144, r.data());
-            check(r == res, "bls_pairing test failed");
+            check(g1_points.size()/sizeof(bls_g1) == g2_points.size()/sizeof(bls_g2), "number of elements in g1_points and g2_points must be equal");
+            uint32_t num = g1_points.size()/sizeof(bls_g1);
+            const bls_g1* pp1 = reinterpret_cast<const bls_g1*>(g1_points.data());
+            const bls_g2* pp2 = reinterpret_cast<const bls_g2*>(g2_points.data());
+            bls_gt r;
+            bls_pairing(pp1, pp2, num, r);
+            check(0 == memcmp(r, res.data(), sizeof(bls_gt)), "bls_pairing test failed");
         }
 
         [[eosio::action]]
         void testg1map(const std::vector<uint8_t>& e, const std::vector<uint8_t>& res)
         {
-            std::vector<uint8_t> r;
-            r.resize(144);
-            bls_g1_map(e.data(), r.data());
-            check(r == res, "bls_g1_map test failed");
+            bls_fp element;
+            memcpy(element, e.data(), sizeof(bls_fp));
+            bls_g1 r;
+            bls_g1_map(element, r);
+            check(0 == memcmp(r, res.data(), sizeof(bls_g1)), "bls_g1_map test failed");
         }
 
         [[eosio::action]]
         void testg2map(const std::vector<uint8_t>& e, const std::vector<uint8_t>& res)
         {
-            std::vector<uint8_t> r;
-            r.resize(288);
-            bls_g2_map(e.data(), r.data());
-            check(r == res, "bls_g2_map test failed");
+            bls_fp2 element;
+            memcpy(element, e.data(), sizeof(bls_fp2));
+            bls_g2 r;
+            bls_g2_map(element, r);
+            check(0 == memcmp(r, res.data(), sizeof(bls_g2)), "bls_g2_map test failed");
         }
 
         // Construct an extensible-output function based on SHA256
@@ -353,35 +367,29 @@ class [[eosio::contract]] bls_primitives_tests : public contract{
             return out;
         }
 
-        std::vector<uint8_t> g2_fromMessage(const std::vector<uint8_t>& msg, const std::string& dst)
+        void g2_fromMessage(const std::vector<uint8_t>& msg, const std::string& dst, bls_g2& res)
         {
             uint8_t buf[4 * 64];
             xmd_sh256(buf, 4 * 64, msg.data(), msg.size(), reinterpret_cast<const uint8_t*>(dst.c_str()), dst.length());
 
             std::array<uint64_t, 8> k;
-            std::vector<uint8_t> t;
-            t.resize(96);
-            std::vector<uint8_t> p, q, res;
-            p.resize(288);
-            q.resize(288);
-            res.resize(288);
+            bls_fp t[2];
+            bls_g2 p, q;
 
             k = scalar_fromBytesBE(*reinterpret_cast<std::array<uint8_t, 64>*>(buf));
-            bls_fp_mod(reinterpret_cast<uint8_t*>(&k[0]), reinterpret_cast<uint8_t*>(&t[0]));
+            bls_fp_mod(reinterpret_cast<uint8_t*>(&k[0]), t[0]);
             k = scalar_fromBytesBE(*reinterpret_cast<std::array<uint8_t, 64>*>(buf + 64));
-            bls_fp_mod(reinterpret_cast<uint8_t*>(&k[0]), reinterpret_cast<uint8_t*>(&t[48]));
+            bls_fp_mod(reinterpret_cast<uint8_t*>(&k[0]), t[1]);
 
-            bls_g2_map(t.data(), p.data());
+            bls_g2_map(*reinterpret_cast<bls_fp2*>(t), p);
 
             k = scalar_fromBytesBE(*reinterpret_cast<std::array<uint8_t, 64>*>(buf + 2*64));
-            bls_fp_mod(reinterpret_cast<uint8_t*>(&k[0]), reinterpret_cast<uint8_t*>(&t[0]));
+            bls_fp_mod(reinterpret_cast<uint8_t*>(&k[0]), t[0]);
             k = scalar_fromBytesBE(*reinterpret_cast<std::array<uint8_t, 64>*>(buf + 3*64));
-            bls_fp_mod(reinterpret_cast<uint8_t*>(&k[0]), reinterpret_cast<uint8_t*>(&t[48]));
+            bls_fp_mod(reinterpret_cast<uint8_t*>(&k[0]), t[1]);
 
-            bls_g2_map(t.data(), q.data());
-            bls_g2_add(p.data(), q.data(), res.data());
-
-            return res;
+            bls_g2_map(*reinterpret_cast<bls_fp2*>(t), q);
+            bls_g2_add(p, q, res);
         }
 
         const std::string CIPHERSUITE_ID = "BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_NUL_";
@@ -393,18 +401,19 @@ class [[eosio::contract]] bls_primitives_tests : public contract{
         [[eosio::action]]
         void verify(const std::vector<uint8_t>& pk, const std::vector<uint8_t>& sig)
         {
-            uint8_t g1_points[2 * 144];
-            uint8_t g2_points[2 * 288];
+            bls_g1 g1_points[2];
+            bls_g2 g2_points[2];
 
-            memcpy(g1_points, G1_ONE_NEG.data(), 144);
-            memcpy(g2_points, sig.data(), 288);
+            memcpy(&g1_points[0], G1_ONE_NEG.data(), sizeof(bls_g1));
+            memcpy(&g2_points[0], sig.data(), sizeof(bls_g2));
 
-            memcpy(&g1_points[144], pk.data(), 144);
-            memcpy(&g2_points[288], g2_fromMessage(msg, CIPHERSUITE_ID).data(), 288);
+            bls_g2 p_msg;
+            g2_fromMessage(msg, CIPHERSUITE_ID, p_msg);
+            memcpy(&g1_points[1], pk.data(), sizeof(bls_g1));
+            memcpy(&g2_points[1], p_msg, sizeof(bls_g2));
 
-            std::vector<uint8_t> r;
-            r.resize(576);
-            bls_pairing(g1_points, g2_points, 2, r.data());
-            check(r == GT_ONE, "bls signature verify failed");
+            bls_gt r;
+            bls_pairing(g1_points, g2_points, 2, r);
+            check(0 == memcmp(r, GT_ONE.data(), sizeof(bls_gt)), "bls signature verify failed");
         }
 };
