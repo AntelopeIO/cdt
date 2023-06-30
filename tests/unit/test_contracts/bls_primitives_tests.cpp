@@ -373,7 +373,7 @@ class [[eosio::contract]] bls_primitives_tests : public contract{
             xmd_sh256(buf, 4 * 64, msg.data(), msg.size(), reinterpret_cast<const uint8_t*>(dst.c_str()), dst.length());
 
             std::array<uint64_t, 8> k;
-            bls_fp t[2];
+            bls_fp2 t;
             bls_g2 p, q;
 
             k = scalar_fromBytesBE(*reinterpret_cast<std::array<uint8_t, 64>*>(buf));
@@ -381,14 +381,14 @@ class [[eosio::contract]] bls_primitives_tests : public contract{
             k = scalar_fromBytesBE(*reinterpret_cast<std::array<uint8_t, 64>*>(buf + 64));
             bls_fp_mod(reinterpret_cast<uint8_t*>(&k[0]), t[1]);
 
-            bls_g2_map(*reinterpret_cast<bls_fp2*>(t), p);
+            bls_g2_map(t, p);
 
             k = scalar_fromBytesBE(*reinterpret_cast<std::array<uint8_t, 64>*>(buf + 2*64));
             bls_fp_mod(reinterpret_cast<uint8_t*>(&k[0]), t[0]);
             k = scalar_fromBytesBE(*reinterpret_cast<std::array<uint8_t, 64>*>(buf + 3*64));
             bls_fp_mod(reinterpret_cast<uint8_t*>(&k[0]), t[1]);
 
-            bls_g2_map(*reinterpret_cast<bls_fp2*>(t), q);
+            bls_g2_map(t, q);
             bls_g2_add(p, q, res);
         }
 
