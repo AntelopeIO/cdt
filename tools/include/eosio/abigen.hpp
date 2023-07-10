@@ -787,7 +787,7 @@ namespace eosio { namespace cdt {
                ag.add_contracts(ag.parse_contracts());
                has_added_clauses = true;
             }
-            if ((decl->isEosioAction() || decl->isEosioTable()) && ag.is_eosio_contract(decl, ag.get_contract_name())) {
+            if (decl->isEosioAction() || decl->isEosioTable()) {
                ag.add_struct(decl);
                if (decl->isEosioAction())
                   ag.add_action(decl);
