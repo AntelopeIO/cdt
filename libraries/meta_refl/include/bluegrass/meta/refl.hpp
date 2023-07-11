@@ -68,7 +68,7 @@ namespace bluegrass { namespace meta {
 
    } // ns bluegrass::meta::detail
 
-   template <typename C>
+   template <typename C, typename=void>
    struct meta_object {
       constexpr static inline std::string_view name = type_name<C>();
 
