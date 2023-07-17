@@ -243,8 +243,8 @@ namespace eosio { namespace cdt {
          ctables.insert(t);
       }
 
-      void add_table( uint64_t name, const clang::CXXRecordDecl* decl, bool force=false ) {
-         if (force || decl->isEosioTable() && abigen::is_eosio_contract(decl, get_contract_name())) {
+      void add_table( uint64_t name, const clang::CXXRecordDecl* decl, bool is_singleton=false ) {
+         if ((is_singleton && !decl->isEosioTable()) || (decl->isEosioTable() && abigen::is_eosio_contract(decl, get_contract_name()))) {
             abi_table t;
             t.type = decl->getNameAsString();
             t.name = name_to_string(name);
