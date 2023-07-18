@@ -284,4 +284,53 @@ namespace eosio {
       );
    }
 
+   /**
+    * Set the fees parameters
+    *
+    * @ingroup privileged
+    * @param cpu_fee_scaler - cpu fee scaler
+    * @param free_block_cpu_threshold - the cpu threshold to start charge fee
+    * @param net_fee_scaler - net fee scaler
+    * @param free_block_net_threshold - the net threshold to start charge fee
+    * @pre `threshold` must be smaller than maximum resource limit
+    */
+   inline void set_fee_parameters(uint64_t cpu_fee_scaler, uint64_t free_block_cpu_threshold, uint64_t net_fee_scaler, uint64_t free_block_net_threshold) {
+      internal_use_do_not_use::set_fee_parameters( cpu_fee_scaler, free_block_cpu_threshold, net_fee_scaler, free_block_net_threshold);
+   }
+
+   /**
+    * Configure the maximum fees for an account.
+    *
+    * @ingroup privileged
+    * @param account - name of the account whose resource limit to be set.
+    * @param tx_fee_limit - the maximum fee limit per transaction for the account.
+    * @param account_fee_limit - the maximum fee limit for the account.
+    */
+   inline void config_fee_limits(name account, int64_t tx_fee_limit, int64_t account_fee_limit) {
+      internal_use_do_not_use::config_fee_limits(account.value, tx_fee_limit, account_fee_limit);
+   }
+
+   /**
+    * Set the fee limits for an account.
+    *
+    * @ingroup privileged
+    * @param account - name of the account whose resource limit to be set.
+    * @param net_weight_limit - The limit on NET weight for the account.
+    * @param cpu_weight_limit - The limit on CPU weight for the account.
+    */
+   inline void set_fee_limits( name account, int64_t net_weight_limit, int64_t cpu_weight_limit) {
+      internal_use_do_not_use::set_fee_limits(account.value, net_weight_limit, cpu_weight_limit);
+   }
+
+    /**
+    * Get the fee consumption for an account.
+    *
+    * @ingroup privileged
+    * @param account - name of the account whose resource limit to get
+    * @param net_weight_consumption - pointer to `int64_t` to hold net weight consumption
+    * @param cpu_weight_consumption - pointer to `int64_t` to hold cpu weight consumption
+    */
+   inline void get_fee_consumption( name account, int64_t& net_weight_consumption, int64_t& cpu_weight_consumption) {
+      internal_use_do_not_use::get_fee_consumption(account.value, &net_weight_consumption, &cpu_weight_consumption);
+   }
 }
