@@ -37,6 +37,13 @@
             "index_type": "i64",
             "key_names": [],
             "key_types": []
+        },
+        {
+            "name": "smpl.config",
+            "type": "name",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
         }
     ],
     "ricardian_clauses": [],
