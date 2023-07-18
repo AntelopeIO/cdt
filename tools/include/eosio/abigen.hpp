@@ -755,6 +755,7 @@ namespace eosio { namespace cdt {
       private:
          bool has_added_clauses = false;
          abigen& ag = abigen::get();
+         const clang::CXXRecordDecl* contract_class = NULL;
 
       public:
          explicit eosio_abigen_visitor(CompilerInstance *CI) {
@@ -787,7 +788,7 @@ namespace eosio { namespace cdt {
                ag.add_contracts(ag.parse_contracts());
                has_added_clauses = true;
             }
-            if (decl->isEosioAction() || decl->isEosioTable()) {
+            if ((decl->isEosioAction() || decl->isEosioTable()) && ag.is_eosio_contract(decl, ag.get_contract_name())) {
                ag.add_struct(decl);
                if (decl->isEosioAction())
                   ag.add_action(decl);
@@ -799,10 +800,95 @@ namespace eosio { namespace cdt {
             }
             return true;
          }
+
+         const clang::CXXRecordDecl* find_contract_class(const clang::Decl* decl) const {
+            const auto* translation_unit = decl->getASTContext().getTranslationUnitDecl();
+
+            for (clang::Decl* cur_decl : translation_unit->decls()) {
+               if (const auto* cxx_decl = llvm::dyn_cast<clang::CXXRecordDecl>(cur_decl)) {
+                  
+                  if (cxx_decl->isEosioContract()) {
+                     auto attr_name = cxx_decl->getEosioContractAttr()->getName().str();
+                     auto name = attr_name.empty() ? cxx_decl->getName().str() : attr_name;
+                     if (name == ag.get_contract_name())
+                        return cxx_decl;
+                  }
+                  else {
+                     auto pd = llvm::dyn_cast<clang::CXXRecordDecl>(cxx_decl->getParent());
+                     if (pd && pd->isEosioContract()) {
+                        auto attr_name = pd->getEosioContractAttr()->getName().str();
+                        auto name = attr_name.empty() ? pd->getName().str() : attr_name;
+                        if (name == ag.get_contract_name())
+                           return pd;
+                     }
+                  }
+               }
+            }
+
+            return NULL;
+         }
+
+         bool is_same_type(const clang::Decl* decl1, const clang::CXXRecordDecl* decl2) const {
+            if (decl1 == decl2)
+               return true;
+            
+            if (const clang::TypedefNameDecl* typedef_decl = llvm::dyn_cast<clang::TypedefNameDecl>(decl1)) {
+               if (const auto* cxx_rec1 = typedef_decl->getUnderlyingType()->getAsCXXRecordDecl()) {
+                  if (cxx_rec1 == decl2)
+                     return true;
+               }
+            }
+
+            return false;
+         }
+
+         bool aliased_in_contract(const clang::Decl* decl) const {
+            for (const auto* contract_decl : contract_class->decls()) {
+               if (const auto* cur_contract_decl = llvm::dyn_cast<clang::TypedefNameDecl>(contract_decl)) {
+                  if (const auto* cur_contract_rec = cur_contract_decl->getUnderlyingType()->getAsCXXRecordDecl()) {
+                     if (cur_contract_rec == decl)
+                        return true;
+                  }
+               }
+            }
+         }
+
+         // recursively check all declarations from declaration context if any of them is equal to decl
+         bool is_decl_in_contract(const clang::Decl* cur_decl, const clang::CXXRecordDecl* decl) {
+            if (is_same_type(cur_decl, decl) && aliased_in_contract(decl))
+               return true;
+            
+            if (const auto* decl_ctx = llvm::dyn_cast<clang::DeclContext>(cur_decl)) {
+               // The Decl is also a DeclContext, so it might contain other Decls.
+               for (const auto* child_decl : decl_ctx->decls()) {
+                  if(is_decl_in_contract(child_decl, decl))
+                     return true;
+               }
+            }
+
+            return false;
+         }
+
+         bool defined_in_contract(const clang::ClassTemplateSpecializationDecl* decl) {
+
+            if (!contract_class)
+               contract_class = find_contract_class(decl);
+            if (!contract_class) CDT_ERROR("abigen_error", decl->getLocation(), "contract class not found");
+            
+            const auto* translation_unit = decl->getASTContext().getTranslationUnitDecl();
+
+            for (const auto* cur_decl : translation_unit->decls()) {
+               // Recursively traverse the AST.
+               if (is_decl_in_contract(cur_decl, decl))
+                  return true;
+            }
+            return false;
+         }
+
          virtual bool VisitDecl(clang::Decl* decl) {
             if (const auto* d = dyn_cast<clang::ClassTemplateSpecializationDecl>(decl)) {
                bool is_singleton = d->getName() == "singleton";
-               if (d->getName() == "multi_index" || is_singleton) {
+               if ((d->getName() == "multi_index" || is_singleton) && defined_in_contract(d)) {
                   ag.add_table(d->getTemplateArgs()[0].getAsIntegral().getExtValue(),
                                d->getTemplateArgs()[1].getAsType().getTypePtr()->getAsCXXRecordDecl(), is_singleton);
                }
