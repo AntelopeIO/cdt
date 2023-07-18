@@ -37,4 +37,6 @@ class [[eosio::contract("singleton_contract")]] singleton_contract : public cont
     
     typedef eosio::singleton<"config"_n, tbl_config>    config;
     typedef eosio::singleton<"smpl.config"_n, name>     smpl_config;
+    using smpl_config2 = smpl_config5;
+    typedef config551 config2; //from exclude_from_abi.hpp
 };
