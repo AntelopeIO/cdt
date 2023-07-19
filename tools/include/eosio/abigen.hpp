@@ -861,7 +861,7 @@ namespace eosio { namespace cdt {
             if (const auto* decl_ctx = llvm::dyn_cast<clang::DeclContext>(cur_decl)) {
                // The Decl is also a DeclContext, so it might contain other Decls.
                for (const auto* child_decl : decl_ctx->decls()) {
-                  if(is_decl_in_contract(child_decl, decl))
+                  if(child_decl && is_decl_in_contract(child_decl, decl))
                      return true;
                }
             }
@@ -875,14 +875,15 @@ namespace eosio { namespace cdt {
                contract_class = find_contract_class(decl);
             if (!contract_class) CDT_ERROR("abigen_error", decl->getLocation(), "contract class not found");
             
-            const auto* translation_unit = decl->getASTContext().getTranslationUnitDecl();
+            return aliased_in_contract(decl);
+            // const auto* translation_unit = decl->getASTContext().getTranslationUnitDecl();
 
-            for (const auto* cur_decl : translation_unit->decls()) {
-               // Recursively traverse the AST.
-               if (is_decl_in_contract(cur_decl, decl))
-                  return true;
-            }
-            return false;
+            // for (const auto* cur_decl : translation_unit->decls()) {
+            //    // Recursively traverse the AST.
+            //    if (is_decl_in_contract(cur_decl, decl))
+            //       return true;
+            // }
+            // return false;
          }
 
          virtual bool VisitDecl(clang::Decl* decl) {
