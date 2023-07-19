@@ -845,9 +845,11 @@ namespace eosio { namespace cdt {
          bool aliased_in_contract(const clang::Decl* decl) const {
             for (const auto* contract_decl : contract_class->decls()) {
                if (const auto* cur_contract_decl = llvm::dyn_cast<clang::TypedefNameDecl>(contract_decl)) {
-                  if (const auto* cur_contract_rec = cur_contract_decl->getUnderlyingType()->getAsCXXRecordDecl()) {
-                     if (cur_contract_rec == decl)
-                        return true;
+                  if (const auto* cur_type = cur_contract_decl->getUnderlyingType().getTypePtrOrNull()) {
+                     if (const auto* cur_contract_rec = cur_type->getAsCXXRecordDecl()) {
+                        if (cur_contract_rec == decl)
+                           return true;
+                     }
                   }
                }
             }
