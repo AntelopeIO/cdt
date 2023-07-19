@@ -829,13 +829,17 @@ namespace eosio { namespace cdt {
          }
 
          bool is_same_type(const clang::Decl* decl1, const clang::CXXRecordDecl* decl2) const {
+            if (!decl1 || !decl2)
+               return false;
             if (decl1 == decl2)
                return true;
             
-            if (const clang::TypedefNameDecl* typedef_decl = llvm::dyn_cast<clang::TypedefNameDecl>(decl1)) {
-               if (const auto* cxx_rec1 = typedef_decl->getUnderlyingType()->getAsCXXRecordDecl()) {
-                  if (cxx_rec1 == decl2)
-                     return true;
+            if (const clang::TypedefNameDecl* typedef_decl = llvm::dyn_cast_or_null<clang::TypedefNameDecl>(decl1)) {
+               if (const auto* cur_type = typedef_decl->getUnderlyingType().getTypePtrOrNull()) {
+                  if (const auto* cxx_rec1 = cur_type->getAsCXXRecordDecl()) {
+                     if (cxx_rec1 == decl2)
+                        return true;
+                  }
                }
             }
 
@@ -844,7 +848,7 @@ namespace eosio { namespace cdt {
 
          bool aliased_in_contract(const clang::Decl* decl) const {
             for (const auto* contract_decl : contract_class->decls()) {
-               if (const auto* cur_contract_decl = llvm::dyn_cast<clang::TypedefNameDecl>(contract_decl)) {
+               if (const auto* cur_contract_decl = llvm::dyn_cast_or_null<clang::TypedefNameDecl>(contract_decl)) {
                   if (const auto* cur_type = cur_contract_decl->getUnderlyingType().getTypePtrOrNull()) {
                      if (const auto* cur_contract_rec = cur_type->getAsCXXRecordDecl()) {
                         if (cur_contract_rec == decl)
