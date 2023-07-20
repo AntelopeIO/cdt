@@ -848,8 +848,11 @@ namespace eosio { namespace cdt {
 
          bool aliased_in_contract(const clang::Decl* decl) const {
             for (const auto decl_iter : contract_class->decls()) {
-               if (llvm::isa<clang::TypedefNameDecl>(&*decl_iter)) {
-                  if (const auto* cur_contract_decl = llvm::dyn_cast_or_null<clang::TypedefNameDecl>(&*decl_iter)) {
+               const clang::Decl* decl_ptr = &*decl_iter;
+               llvm::errs() << "before llvm::isa<clang::TypedefNameDecl>(decl_ptr)\n";
+               if (decl_ptr && llvm::isa<clang::TypedefNameDecl>(decl_ptr)) {
+                  llvm::errs() << "after llvm::isa<clang::TypedefNameDecl>(decl_ptr)\n";
+                  if (const auto* cur_contract_decl = llvm::dyn_cast_or_null<clang::TypedefNameDecl>(decl_ptr)) {
                      if (const auto* cur_type = cur_contract_decl->getUnderlyingType().getTypePtrOrNull()) {
                         if (const auto* cur_contract_rec = cur_type->getAsCXXRecordDecl()) {
                            if (cur_contract_rec == decl)
