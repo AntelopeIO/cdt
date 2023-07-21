@@ -825,7 +825,7 @@ namespace eosio { namespace cdt {
                }
             }
 
-            return NULL;
+            return nullptr;
          }
 
          bool is_same_type(const clang::Decl* decl1, const clang::CXXRecordDecl* decl2) const {
@@ -858,6 +858,8 @@ namespace eosio { namespace cdt {
                if (is_same_type(cur_decl, decl))
                   return true;
             }
+
+            return false;
          }
 
          virtual bool VisitDecl(clang::Decl* decl) {
