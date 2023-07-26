@@ -851,7 +851,7 @@ namespace eosio { namespace cdt {
             if (!contract_class) {
                contract_class = find_contract_class(decl->getASTContext());
                if (!contract_class) 
-                  CDT_ERROR("abigen_error", decl->getLocation(), "contract class not found");
+                  CDT_INTERNAL_ERROR("contract class not found");
             }
             
             for (const clang::Decl* cur_decl : contract_class->decls()) {
