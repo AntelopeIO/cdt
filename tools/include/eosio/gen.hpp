@@ -155,7 +155,7 @@ struct generation_utils {
 
 
    inline void set_contract_name( const std::string& cn ) { contract_name = cn; }
-   inline std::string get_contract_name()const { return contract_name; }
+   inline const std::string& get_contract_name()const { return contract_name; }
    static inline std::string get_parsed_contract_name() { return parsed_contract_name; }
    inline void set_resource_dirs( const std::vector<std::string>& rd ) {
       llvm::SmallString<128> cwd;
@@ -274,30 +274,30 @@ struct generation_utils {
    }
 
    static inline bool is_eosio_contract( const clang::CXXMethodDecl* decl, const std::string& cn ) {
-      std::string name = "";
+      llvm::StringRef name;
       if (decl->isEosioContract())
          name = decl->getEosioContractAttr()->getName();
       else if (decl->getParent()->isEosioContract())
          name = decl->getParent()->getEosioContractAttr()->getName();
       if (name.empty()) {
-         name = decl->getParent()->getName().str();
+         name = decl->getParent()->getName();
       }
-      parsed_contract_name = name;
+      parsed_contract_name = name.str();
       return cn == parsed_contract_name;
    }
 
    static inline bool is_eosio_contract( const clang::CXXRecordDecl* decl, const std::string& cn ) {
-      std::string name = "";
+      llvm::StringRef name;
       auto pd = llvm::dyn_cast<clang::CXXRecordDecl>(decl->getParent());
       if (decl->isEosioContract()) {
-         auto nm = decl->getEosioContractAttr()->getName().str();
-         name = nm.empty() ? decl->getName().str() : nm;
+         auto nm = decl->getEosioContractAttr()->getName();
+         name = nm.empty() ? decl->getName() : nm;
       }
       else if (pd && pd->isEosioContract()) {
-         auto nm = pd->getEosioContractAttr()->getName().str();
-         name = nm.empty() ? pd->getName().str() : nm;
+         auto nm = pd->getEosioContractAttr()->getName();
+         name = nm.empty() ? pd->getName() : nm;
       }
-      parsed_contract_name = name;
+      parsed_contract_name = name.str();
       return cn == parsed_contract_name;
    }
 

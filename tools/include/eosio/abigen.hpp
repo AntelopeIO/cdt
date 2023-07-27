@@ -808,19 +808,10 @@ namespace eosio { namespace cdt {
                if (const auto* cxx_decl = llvm::dyn_cast<clang::CXXRecordDecl>(cur_decl)) {
                   
                   if (cxx_decl->isEosioContract()) {
-                     auto attr_name = cxx_decl->getEosioContractAttr()->getName().str();
-                     auto name = attr_name.empty() ? cxx_decl->getName().str() : attr_name;
-                     if (name == ag.get_contract_name())
+                     auto attr_name = cxx_decl->getEosioContractAttr()->getName();
+                     auto name = attr_name.empty() ? cxx_decl->getName() : attr_name;
+                     if (name == llvm::StringRef(ag.get_contract_name()))
                         return cxx_decl;
-                  }
-                  else {
-                     const auto* parent_decl = llvm::dyn_cast<clang::CXXRecordDecl>(cxx_decl->getParent());
-                     if (parent_decl && parent_decl->isEosioContract()) {
-                        auto attr_name = parent_decl->getEosioContractAttr()->getName().str();
-                        auto name = attr_name.empty() ? parent_decl->getName().str() : attr_name;
-                        if (name == ag.get_contract_name())
-                           return parent_decl;
-                     }
                   }
                }
             }
