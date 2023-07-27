@@ -61,6 +61,8 @@ namespace eosio { namespace cdt {
 #define CDT_ERROR(e, l, s) \
    get_error_emitter().emit_error(l, get_error_emitter().diags.get(e), s);
 
-#define CDT_INTERNAL_ERROR(s) \
-   std::cerr << s << "\n";    \
-   throw internal_error_ex;
+#define CDT_INTERNAL_ERROR(s)    \
+   do {                          \
+      std::cerr << s << "\n";    \
+      throw internal_error_ex;   \
+   } while (false)
