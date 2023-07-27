@@ -841,8 +841,11 @@ namespace eosio { namespace cdt {
 
             if (!contract_class) {
                contract_class = find_contract_class(decl->getASTContext());
-               if (!contract_class) 
-                  CDT_INTERNAL_ERROR("contract class not found");
+               if (!contract_class) {
+                  // currently this is unreachable as we do not traverse non-main file translation units
+                  CDT_WARN("codegen_warning", decl->getLocation(), "contract class not found");
+                  return false;
+               }
             }
             
             for (const clang::Decl* cur_decl : contract_class->decls()) {
@@ -880,7 +883,6 @@ namespace eosio { namespace cdt {
             auto& f_mgr = src_mgr.getFileManager();
             auto main_fe = f_mgr.getFile(main_file);
             if (main_fe) {
-               auto fid = src_mgr.getOrCreateFileID(f_mgr.getFile(main_file), SrcMgr::CharacteristicKind::C_User);
                visitor->TraverseDecl(Context.getTranslationUnitDecl());
             }
          }
