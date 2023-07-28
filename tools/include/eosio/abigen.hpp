@@ -755,6 +755,7 @@ namespace eosio { namespace cdt {
       private:
          bool has_added_clauses = false;
          abigen& ag = abigen::get();
+         const clang::CXXRecordDecl* contract_class = NULL;
 
       public:
          explicit eosio_abigen_visitor(CompilerInstance *CI) {
@@ -799,10 +800,66 @@ namespace eosio { namespace cdt {
             }
             return true;
          }
+
+         const clang::CXXRecordDecl* find_contract_class(const clang::ASTContext &ctx) const {
+            const auto* translation_unit = ctx.getTranslationUnitDecl();
+            // scanning entire translation unit to find contract class
+            for (const clang::Decl* cur_decl : translation_unit->decls()) {
+               if (const auto* cxx_decl = llvm::dyn_cast<clang::CXXRecordDecl>(cur_decl)) {
+                  
+                  if (cxx_decl->isEosioContract()) {
+                     auto attr_name = cxx_decl->getEosioContractAttr()->getName();
+                     auto name = attr_name.empty() ? cxx_decl->getName() : attr_name;
+                     if (name == llvm::StringRef(ag.get_contract_name()))
+                        return cxx_decl;
+                  }
+               }
+            }
+
+            return nullptr;
+         }
+
+         bool is_same_type(const clang::Decl* decl1, const clang::CXXRecordDecl* decl2) const {
+            if (!decl1 || !decl2)
+               return false;
+            if (decl1 == decl2)
+               return true;
+            
+            // checking if declaration is a typedef or using
+            if (const clang::TypedefNameDecl* typedef_decl = llvm::dyn_cast<clang::TypedefNameDecl>(decl1)) {
+               if (const auto* cur_type = typedef_decl->getUnderlyingType().getTypePtrOrNull()) {
+                  if (decl2 == cur_type->getAsCXXRecordDecl()) {
+                        return true;
+                  }
+               }
+            }
+
+            return false;
+         }
+         
+         bool defined_in_contract(const clang::ClassTemplateSpecializationDecl* decl) {
+
+            if (!contract_class) {
+               contract_class = find_contract_class(decl->getASTContext());
+               if (!contract_class) {
+                  // currently this is unreachable as we do not traverse non-main file translation units
+                  CDT_WARN("codegen_warning", decl->getLocation(), "contract class not found");
+                  return false;
+               }
+            }
+            
+            for (const clang::Decl* cur_decl : contract_class->decls()) {
+               if (is_same_type(cur_decl, decl))
+                  return true;
+            }
+
+            return false;
+         }
+
          virtual bool VisitDecl(clang::Decl* decl) {
             if (const auto* d = dyn_cast<clang::ClassTemplateSpecializationDecl>(decl)) {
                bool is_singleton = d->getName() == "singleton";
-               if (d->getName() == "multi_index" || is_singleton) {
+               if ((d->getName() == "multi_index" || is_singleton) && defined_in_contract(d)) {
                   ag.add_table(d->getTemplateArgs()[0].getAsIntegral().getExtValue(),
                                d->getTemplateArgs()[1].getAsType().getTypePtr()->getAsCXXRecordDecl(), is_singleton);
                }
@@ -826,7 +883,6 @@ namespace eosio { namespace cdt {
             auto& f_mgr = src_mgr.getFileManager();
             auto main_fe = f_mgr.getFile(main_file);
             if (main_fe) {
-               auto fid = src_mgr.getOrCreateFileID(f_mgr.getFile(main_file), SrcMgr::CharacteristicKind::C_User);
                visitor->TraverseDecl(Context.getTranslationUnitDecl());
             }
          }

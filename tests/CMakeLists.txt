@@ -21,7 +21,7 @@ add_unit_test( system_tests )
 add_unit_test( time_tests )
 add_unit_test( varint_tests )
 
-add_test( NAME toolchain_tests COMMAND ${CMAKE_BINARY_DIR}/tools/toolchain-tester/toolchain-tester ${CMAKE_SOURCE_DIR}/tests/toolchain --cdt ${CMAKE_BINARY_DIR}/bin )
+add_test( NAME toolchain_tests COMMAND ${CMAKE_BINARY_DIR}/tools/toolchain-tester/toolchain-tester ${CMAKE_SOURCE_DIR}/tests/toolchain --cdt ${CMAKE_BINARY_DIR}/bin --verbose )
 set_property(TEST toolchain_tests PROPERTY LABELS toolchain_tests)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/unit/version_tests.sh ${CMAKE_BINARY_DIR}/tests/unit/version_tests.sh COPYONLY)

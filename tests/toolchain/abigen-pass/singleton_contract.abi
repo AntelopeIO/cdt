@@ -37,6 +37,27 @@
             "index_type": "i64",
             "key_names": [],
             "key_types": []
+        },
+        {
+            "name": "config55",
+            "type": "out_of_class",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "smpl.conf5",
+            "type": "name",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "smpl.config",
+            "type": "name",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
         }
     ],
     "ricardian_clauses": [],
