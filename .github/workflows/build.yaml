@@ -74,7 +74,7 @@ jobs:
             owner: AntelopeIO
             repo: leap
             file: 'leap-dev.*(x86_64|amd64).deb'
-            target: 8e63f2c047507184b4b37d6f942b2ecfdb70f950
+            target: bls_integration
             artifact-name: leap-dev-ubuntu20-amd64
             container-package: experimental-binaries
             token: ${{github.token}}
