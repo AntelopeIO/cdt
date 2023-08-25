@@ -186,28 +186,28 @@ class [[eosio::contract]] bls_primitives_tests : public contract{
             check(op1.size() == std::tuple_size<bls_g1>::value, "wrong op1 size passed");
             check(op2.size() == std::tuple_size<bls_g1>::value, "wrong op2 size passed");
             bls_g1 r;
-            bls_g1_add(reinterpret_cast<const bls_g1&>(op1[0]), reinterpret_cast<const bls_g1&>(op2[0]), r);
+            bls_g1_add(*reinterpret_cast<const bls_g1*>(op1.data()), *reinterpret_cast<const bls_g1*>(op2.data()), r);
             check(std::equal(res.begin(), res.end(), r.begin()), "bls_g1_add test failed");
         }
 
         [[eosio::action]]
         void testg2add(const std::vector<char>& op1, const std::vector<char>& op2, const std::vector<char>& res) {
             bls_g2 r;
-            bls_g2_add(reinterpret_cast<const bls_g2&>(op1[0]), reinterpret_cast<const bls_g2&>(op2[0]), r);
+            bls_g2_add(*reinterpret_cast<const bls_g2*>(op1.data()), *reinterpret_cast<const bls_g2*>(op2.data()), r);
             check(std::equal(res.begin(), res.end(), r.begin()), "bls_g2_add test failed");
         }
 
         [[eosio::action]]
         void testg1mul(const std::vector<char>& point, const std::vector<char>& scalar, const std::vector<char>& res) {
             bls_g1 r;
-            bls_g1_mul(reinterpret_cast<const bls_g1&>(point[0]), reinterpret_cast<const bls_scalar&>(scalar[0]), r);
+            bls_g1_mul(*reinterpret_cast<const bls_g1*>(point.data()), *reinterpret_cast<const bls_scalar*>(scalar.data()), r);
             check(std::equal(res.begin(), res.end(), r.begin()), "bls_g1_mul test failed");
         }
 
         [[eosio::action]]
         void testg2mul(const std::vector<char>& point, const std::vector<char>& scalar, const std::vector<char>& res) {
             bls_g2 r;
-            bls_g2_mul(reinterpret_cast<const bls_g2&>(point[0]), reinterpret_cast<const bls_scalar&>(scalar[0]), r);
+            bls_g2_mul(*reinterpret_cast<const bls_g2*>(point.data()), *reinterpret_cast<const bls_scalar*>(scalar.data()), r);
             check(std::equal(res.begin(), res.end(), r.begin()), "bls_g2_mul test failed");
         }
 
@@ -216,7 +216,7 @@ class [[eosio::contract]] bls_primitives_tests : public contract{
             auto num = scalars.size()/sizeof(bls_scalar);
             check(points.size()/sizeof(bls_g1) == num, "number of elements in points and scalars must be equal");
             bls_g1 r;
-            bls_g1_exp(reinterpret_cast<const bls_g1*>(&points[0]), reinterpret_cast<const bls_scalar*>(&scalars[0]), num, r);
+            bls_g1_exp(reinterpret_cast<const bls_g1*>(points.data()), reinterpret_cast<const bls_scalar*>(scalars.data()), num, r);
             check(std::equal(res.begin(), res.end(), r.begin()), "bls_g1_exp test failed");
         }
 
@@ -225,7 +225,7 @@ class [[eosio::contract]] bls_primitives_tests : public contract{
             auto num = scalars.size()/sizeof(bls_scalar);
             check(points.size()/sizeof(bls_g2) == num, "number of elements in points and scalars must be equal");
             bls_g2 r;
-            bls_g2_exp(reinterpret_cast<const bls_g2*>(&points[0]), reinterpret_cast<const bls_scalar*>(&scalars[0]), num, r);
+            bls_g2_exp(reinterpret_cast<const bls_g2*>(points.data()), reinterpret_cast<const bls_scalar*>(scalars.data()), num, r);
             check(std::equal(res.begin(), res.end(), r.begin()), "bls_g2_exp test failed");
         }
 
@@ -234,21 +234,21 @@ class [[eosio::contract]] bls_primitives_tests : public contract{
             auto num = g2_points.size()/sizeof(bls_g2);
             check(g1_points.size()/sizeof(bls_g1) == num, "number of elements in g1_points and g2_points must be equal");
             bls_gt r;
-            bls_pairing(reinterpret_cast<const bls_g1*>(&g1_points[0]), reinterpret_cast<const bls_g2*>(&g2_points[0]), num, r);
+            bls_pairing(reinterpret_cast<const bls_g1*>(g1_points.data()), reinterpret_cast<const bls_g2*>(g2_points.data()), num, r);
             check(std::equal(res.begin(), res.end(), r.begin()), "bls_pairing test failed");
         }
 
         [[eosio::action]]
         void testg1map(const std::vector<char>& e, const std::vector<char>& res) {
             bls_g1 r;
-            bls_g1_map(reinterpret_cast<const bls_fp&>(e[0]), r);
+            bls_g1_map(*reinterpret_cast<const bls_fp*>(e.data()), r);
             check(std::equal(res.begin(), res.end(), r.begin()), "bls_g1_map test failed");
         }
 
         [[eosio::action]]
         void testg2map(const std::vector<char>& e, const std::vector<char>& res) {
             bls_g2 r;
-            bls_g2_map(reinterpret_cast<const bls_fp2&>(e[0]), r);
+            bls_g2_map(*reinterpret_cast<const bls_fp2*>(e.data()), r);
             check(std::equal(res.begin(), res.end(), r.begin()), "bls_g2_map test failed");
         }
 
