@@ -3,15 +3,14 @@
 #include <eosio/crypto_ext.hpp>
 #include <eosio/crypto_bls_ext.hpp>
 
+#include <endian.h>
+
 using namespace eosio;
 
-namespace bls12_381
-{
-class sha256
-{
+namespace bls12_381 {
+class sha256 {
 public:
-    sha256(): m_blocklen(0), m_bitlen(0)
-    {
+    sha256(): m_blocklen(0), m_bitlen(0) {
         m_state[0] = 0x6a09e667;
         m_state[1] = 0xbb67ae85;
         m_state[2] = 0x3c6ef372;
@@ -21,13 +20,10 @@ public:
         m_state[6] = 0x1f83d9ab;
         m_state[7] = 0x5be0cd19;
     }
-    void update(const uint8_t * data, size_t length)
-    {
-        for(size_t i = 0 ; i < length ; i++)
-        {
+    void update(const uint8_t * data, size_t length) {
+        for(size_t i = 0 ; i < length ; i++) {
             m_data[m_blocklen++] = data[i];
-            if (m_blocklen == 64)
-            {
+            if (m_blocklen == 64) {
                 transform();
 
                 // End of the block
@@ -36,12 +32,13 @@ public:
             }
         }
     }
-    void update(const std::string &data)
-    {
-        update(reinterpret_cast<const uint8_t*> (data.c_str()), data.size());
+    inline void update(const char* data, size_t length) {
+        update(reinterpret_cast<const uint8_t*>(data), length);
     }
-    std::array<uint8_t, 32> digest()
-    {
+    inline void update(const std::string &data) {
+        update(reinterpret_cast<const char*>(data.data()), data.size());
+    }
+    std::array<uint8_t, 32> digest() {
         std::array<uint8_t, 32> hash;
 
         pad();
@@ -49,8 +46,7 @@ public:
 
         return hash;
     }
-    void digest(uint8_t* dst)
-    {
+    void digest(uint8_t* dst) {
         std::array<uint8_t, 32>* phash = reinterpret_cast<std::array<uint8_t, 32>*>(dst);
 
         pad();
@@ -84,50 +80,40 @@ private:
         0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2
     };
 
-    static uint32_t rotr(uint32_t x, uint32_t n)
-    {
+    static uint32_t rotr(uint32_t x, uint32_t n) {
         return (x >> n) | (x << (32 - n));
     }
-    static uint32_t choose(uint32_t e, uint32_t f, uint32_t g)
-    {
+    static uint32_t choose(uint32_t e, uint32_t f, uint32_t g) {
         return (e & f) ^ (~e & g);
     }
-    static uint32_t majority(uint32_t a, uint32_t b, uint32_t c)
-    {
+    static uint32_t majority(uint32_t a, uint32_t b, uint32_t c) {
         return (a & (b | c)) | (b & c);
     }
-    static uint32_t sig0(uint32_t x)
-    {
+    static uint32_t sig0(uint32_t x) {
         return sha256::rotr(x, 7) ^ sha256::rotr(x, 18) ^ (x >> 3);
     }
-    static uint32_t sig1(uint32_t x)
-    {
+    static uint32_t sig1(uint32_t x) {
         return sha256::rotr(x, 17) ^ sha256::rotr(x, 19) ^ (x >> 10);
     }
-    void transform()
-    {
+    void transform() {
         uint32_t maj, xorA, ch, xorE, sum, newA, newE, m[64];
         uint32_t state[8];
 
-        for(uint8_t i = 0, j = 0; i < 16; i++, j += 4)
-        {
+        for(uint8_t i = 0, j = 0; i < 16; i++, j += 4) {
             // Split data in 32 bit blocks for the 16 first words
             m[i] = (m_data[j] << 24) | (m_data[j + 1] << 16) | (m_data[j + 2] << 8) | (m_data[j + 3]);
         }
 
-        for(uint8_t k = 16 ; k < 64; k++)
-        {
+        for(uint8_t k = 16 ; k < 64; k++) {
             // Remaining 48 blocks
             m[k] = sha256::sig1(m[k - 2]) + m[k - 7] + sha256::sig0(m[k - 15]) + m[k - 16];
         }
 
-        for(uint8_t i = 0 ; i < 8 ; i++)
-        {
+        for(uint8_t i = 0 ; i < 8 ; i++) {
             state[i] = m_state[i];
         }
 
-        for(uint8_t i = 0; i < 64; i++)
-        {
+        for(uint8_t i = 0; i < 64; i++) {
             maj   = sha256::majority(state[0], state[1], state[2]);
             xorA  = sha256::rotr(state[0], 2) ^ sha256::rotr(state[0], 13) ^ sha256::rotr(state[0], 22);
 
@@ -149,24 +135,20 @@ private:
             state[0] = newA;
         }
 
-        for(uint8_t i = 0 ; i < 8 ; i++)
-        {
+        for(uint8_t i = 0 ; i < 8 ; i++) {
             m_state[i] += state[i];
         }
     }
-    void pad()
-    {
+    void pad() {
         uint64_t i = m_blocklen;
         uint8_t end = m_blocklen < 56 ? 56 : 64;
 
         m_data[i++] = 0x80; // Append a bit 1
-        while(i < end)
-        {
+        while(i < end) {
             m_data[i++] = 0x00; // Pad with zeros
         }
 
-        if(m_blocklen >= 56)
-        {
+        if(m_blocklen >= 56) {
             transform();
             memset(m_data, 0, 56);
         }
@@ -183,14 +165,11 @@ private:
         m_data[56] = m_bitlen >> 56;
         transform();
     }
-    void revert(std::array<uint8_t, 32>& hash)
-    {
+    void revert(std::array<uint8_t, 32>& hash) {
         // SHA uses big endian byte ordering
         // Revert all bytes
-        for(uint8_t i = 0 ; i < 4 ; i++)
-        {
-            for(uint8_t j = 0 ; j < 8 ; j++)
-            {
+        for(uint8_t i = 0 ; i < 4 ; i++) {
+            for(uint8_t j = 0 ; j < 8 ; j++) {
                 hash[i + (j * 4)] = (m_state[j] >> (24 - i * 8)) & 0x000000ff;
             }
         }
@@ -203,118 +182,89 @@ class [[eosio::contract]] bls_primitives_tests : public contract{
         using contract::contract;
 
         [[eosio::action]]
-        void testg1add(const std::vector<uint8_t>& op1, const std::vector<uint8_t>& op2, const std::vector<uint8_t>& res)
-        {
-            bls_g1 lhs, rhs, r;
-            memcpy(lhs, op1.data(), sizeof(bls_g1));
-            memcpy(rhs, op1.data(), sizeof(bls_g1));
-            bls_g1_add(lhs, rhs, r);
-            check(0 == memcmp(r, res.data(), sizeof(bls_g1)), "bls_g1_add test failed");
-        }
-
-        [[eosio::action]]
-        void testg2add(const std::vector<uint8_t>& op1, const std::vector<uint8_t>& op2, const std::vector<uint8_t>& res)
-        {
-            bls_g2 lhs, rhs, r;
-            memcpy(lhs, op1.data(), sizeof(bls_g2));
-            memcpy(rhs, op1.data(), sizeof(bls_g2));
-            bls_g2_add(lhs, rhs, r);
-            check(0 == memcmp(r, res.data(), sizeof(bls_g2)), "bls_g2_add test failed");
-        }
-
-        [[eosio::action]]
-        void testg1mul(const std::vector<uint8_t>& point, const std::vector<uint8_t>& scalar, const std::vector<uint8_t>& res)
-        {
-            bls_g1 p, r;
-            bls_scalar s;
-            memcpy(p, point.data(), sizeof(bls_g1));
-            memcpy(s, scalar.data(), sizeof(bls_scalar));
-            bls_g1_mul(p, s, r);
-            check(0 == memcmp(r, res.data(), sizeof(bls_g1)), "bls_g1_mul test failed");
-        }
-
-        [[eosio::action]]
-        void testg2mul(const std::vector<uint8_t>& point, const std::vector<uint8_t>& scalar, const std::vector<uint8_t>& res)
-        {
-            bls_g2 p, r;
-            bls_scalar s;
-            memcpy(p, point.data(), sizeof(bls_g2));
-            memcpy(s, scalar.data(), sizeof(bls_scalar));
-            bls_g2_mul(p, s, r);
-            check(0 == memcmp(r, res.data(), sizeof(bls_g2)), "bls_g2_mul test failed");
-        }
-
-        [[eosio::action]]
-        void testg1exp(const std::vector<uint8_t>& points, const std::vector<uint8_t>& scalars, const std::vector<uint8_t>& res)
-        {
-            check(points.size()/sizeof(bls_g1) == scalars.size()/sizeof(bls_scalar), "number of elements in points and scalars must be equal");
-            uint32_t num = scalars.size()/sizeof(bls_scalar);
-            const bls_g1* pp = reinterpret_cast<const bls_g1*>(points.data());
-            const bls_scalar* ps = reinterpret_cast<const bls_scalar*>(scalars.data());
+        void testg1add(const std::vector<char>& op1, const std::vector<char>& op2, const std::vector<char>& res) {
+            check(op1.size() == std::tuple_size<bls_g1>::value, "wrong op1 size passed");
+            check(op2.size() == std::tuple_size<bls_g1>::value, "wrong op2 size passed");
             bls_g1 r;
-            bls_g1_exp(pp, ps, num, r);
-            check(0 == memcmp(r, res.data(), sizeof(bls_g1)), "bls_g1_exp test failed");
+            bls_g1_add(reinterpret_cast<const bls_g1&>(op1[0]), reinterpret_cast<const bls_g1&>(op2[0]), r);
+            check(std::equal(res.begin(), res.end(), r.begin()), "bls_g1_add test failed");
         }
 
         [[eosio::action]]
-        void testg2exp(const std::vector<uint8_t>& points, const std::vector<uint8_t>& scalars, const std::vector<uint8_t>& res)
-        {
-            check(points.size()/sizeof(bls_g2) == scalars.size()/sizeof(bls_scalar), "number of elements in points and scalars must be equal");
-            uint32_t num = scalars.size()/sizeof(bls_scalar);
-            const bls_g2* pp = reinterpret_cast<const bls_g2*>(points.data());
-            const bls_scalar* ps = reinterpret_cast<const bls_scalar*>(scalars.data());
+        void testg2add(const std::vector<char>& op1, const std::vector<char>& op2, const std::vector<char>& res) {
             bls_g2 r;
-            bls_g2_exp(pp, ps, num, r);
-            check(0 == memcmp(r, res.data(), sizeof(bls_g2)), "bls_g2_exp test failed");
+            bls_g2_add(reinterpret_cast<const bls_g2&>(op1[0]), reinterpret_cast<const bls_g2&>(op2[0]), r);
+            check(std::equal(res.begin(), res.end(), r.begin()), "bls_g2_add test failed");
         }
 
         [[eosio::action]]
-        void testpairing(const std::vector<uint8_t>& g1_points, const std::vector<uint8_t>& g2_points, const std::vector<uint8_t>& res)
-        {
-            check(g1_points.size()/sizeof(bls_g1) == g2_points.size()/sizeof(bls_g2), "number of elements in g1_points and g2_points must be equal");
-            uint32_t num = g1_points.size()/sizeof(bls_g1);
-            const bls_g1* pp1 = reinterpret_cast<const bls_g1*>(g1_points.data());
-            const bls_g2* pp2 = reinterpret_cast<const bls_g2*>(g2_points.data());
+        void testg1mul(const std::vector<char>& point, const std::vector<char>& scalar, const std::vector<char>& res) {
+            bls_g1 r;
+            bls_g1_mul(reinterpret_cast<const bls_g1&>(point[0]), reinterpret_cast<const bls_scalar&>(scalar[0]), r);
+            check(std::equal(res.begin(), res.end(), r.begin()), "bls_g1_mul test failed");
+        }
+
+        [[eosio::action]]
+        void testg2mul(const std::vector<char>& point, const std::vector<char>& scalar, const std::vector<char>& res) {
+            bls_g2 r;
+            bls_g2_mul(reinterpret_cast<const bls_g2&>(point[0]), reinterpret_cast<const bls_scalar&>(scalar[0]), r);
+            check(std::equal(res.begin(), res.end(), r.begin()), "bls_g2_mul test failed");
+        }
+
+        [[eosio::action]]
+        void testg1exp(const std::vector<char>& points, const std::vector<char>& scalars, const std::vector<char>& res) {
+            auto num = scalars.size()/sizeof(bls_scalar);
+            check(points.size()/sizeof(bls_g1) == num, "number of elements in points and scalars must be equal");
+            bls_g1 r;
+            bls_g1_exp(reinterpret_cast<const bls_g1*>(&points[0]), reinterpret_cast<const bls_scalar*>(&scalars[0]), num, r);
+            check(std::equal(res.begin(), res.end(), r.begin()), "bls_g1_exp test failed");
+        }
+
+        [[eosio::action]]
+        void testg2exp(const std::vector<char>& points, const std::vector<char>& scalars, const std::vector<char>& res) {
+            auto num = scalars.size()/sizeof(bls_scalar);
+            check(points.size()/sizeof(bls_g2) == num, "number of elements in points and scalars must be equal");
+            bls_g2 r;
+            bls_g2_exp(reinterpret_cast<const bls_g2*>(&points[0]), reinterpret_cast<const bls_scalar*>(&scalars[0]), num, r);
+            check(std::equal(res.begin(), res.end(), r.begin()), "bls_g2_exp test failed");
+        }
+
+        [[eosio::action]]
+        void testpairing(const std::vector<char>& g1_points, const std::vector<char>& g2_points, const std::vector<char>& res) {
+            auto num = g2_points.size()/sizeof(bls_g2);
+            check(g1_points.size()/sizeof(bls_g1) == num, "number of elements in g1_points and g2_points must be equal");
             bls_gt r;
-            bls_pairing(pp1, pp2, num, r);
-            check(0 == memcmp(r, res.data(), sizeof(bls_gt)), "bls_pairing test failed");
+            bls_pairing(reinterpret_cast<const bls_g1*>(&g1_points[0]), reinterpret_cast<const bls_g2*>(&g2_points[0]), num, r);
+            check(std::equal(res.begin(), res.end(), r.begin()), "bls_pairing test failed");
         }
 
         [[eosio::action]]
-        void testg1map(const std::vector<uint8_t>& e, const std::vector<uint8_t>& res)
-        {
-            bls_fp element;
-            memcpy(element, e.data(), sizeof(bls_fp));
+        void testg1map(const std::vector<char>& e, const std::vector<char>& res) {
             bls_g1 r;
-            bls_g1_map(element, r);
-            check(0 == memcmp(r, res.data(), sizeof(bls_g1)), "bls_g1_map test failed");
+            bls_g1_map(reinterpret_cast<const bls_fp&>(e[0]), r);
+            check(std::equal(res.begin(), res.end(), r.begin()), "bls_g1_map test failed");
         }
 
         [[eosio::action]]
-        void testg2map(const std::vector<uint8_t>& e, const std::vector<uint8_t>& res)
-        {
-            bls_fp2 element;
-            memcpy(element, e.data(), sizeof(bls_fp2));
+        void testg2map(const std::vector<char>& e, const std::vector<char>& res) {
             bls_g2 r;
-            bls_g2_map(element, r);
-            check(0 == memcmp(r, res.data(), sizeof(bls_g2)), "bls_g2_map test failed");
+            bls_g2_map(reinterpret_cast<const bls_fp2&>(e[0]), r);
+            check(std::equal(res.begin(), res.end(), r.begin()), "bls_g2_map test failed");
         }
 
         // Construct an extensible-output function based on SHA256
         void xmd_sh256(
-            uint8_t *buf,
+            char *buf,
             int buf_len,
             const uint8_t *in,
             int in_len,
-            const uint8_t *dst,
+            const char *dst,
             int dst_len
-        )
-        {
+        ) {
             const unsigned int SHA256HashSize = 32;
             const unsigned int SHA256_Message_Block_Size = 64;
             const unsigned ell = (buf_len + SHA256HashSize - 1) / SHA256HashSize;
-            if (buf_len < 0 || ell > 255 || dst_len > 255)
-            {
+            if (buf_len < 0 || ell > 255 || dst_len > 255) {
                 return;
             }
             const uint8_t Z_pad[SHA256_Message_Block_Size] = { 0, };
@@ -334,10 +284,8 @@ class [[eosio::contract]] bls_primitives_tests : public contract{
             sha.update(dstlen_str, 1);
             sha.digest(b_0);
             uint8_t b_i[SHA256HashSize + 1] = { 0, };
-            for (unsigned i = 1; i <= ell; ++i)
-            {
-                for (unsigned j = 0; j < SHA256HashSize; ++j)
-                {
+            for (unsigned i = 1; i <= ell; ++i) {
+                for (unsigned j = 0; j < SHA256HashSize; ++j) {
                     b_i[j] = b_0[j] ^ b_i[j];
                 }
                 b_i[SHA256HashSize] = i;
@@ -352,11 +300,9 @@ class [[eosio::contract]] bls_primitives_tests : public contract{
             }
         }
 
-        std::array<uint64_t, 8> scalar_fromBytesBE(const std::array<uint8_t, 8*8>& in)
-        {
+        bls_s scalar_fromBE(const bls_s& in) {
             std::array<uint64_t, 8> out;
-            for(uint64_t i = 0; i < 8; i++)
-            {
+            for(uint64_t i = 0; i < 8; i++) {
                 int64_t a = 8*8 - i*8;
                 out[i] =
                     static_cast<uint64_t>(in[a-1])       | static_cast<uint64_t>(in[a-2]) <<  8 |
@@ -364,29 +310,29 @@ class [[eosio::contract]] bls_primitives_tests : public contract{
                     static_cast<uint64_t>(in[a-5]) << 32 | static_cast<uint64_t>(in[a-6]) << 40 |
                     static_cast<uint64_t>(in[a-7]) << 48 | static_cast<uint64_t>(in[a-8]) << 56;
             }
-            return out;
+            return reinterpret_cast<bls_s&&>(std::move(out));
         }
 
-        void g2_fromMessage(const std::vector<uint8_t>& msg, const std::string& dst, bls_g2& res)
-        {
-            uint8_t buf[4 * 64];
-            xmd_sh256(buf, 4 * 64, msg.data(), msg.size(), reinterpret_cast<const uint8_t*>(dst.c_str()), dst.length());
+        void g2_fromMessage(const std::vector<uint8_t>& msg, const std::string& dst, bls_g2& res) {
 
-            std::array<uint64_t, 8> k;
+            std::array<bls_s, 4> buf;
+            xmd_sh256(buf.data()->data(), sizeof(buf), msg.data(), msg.size(), dst.data(), dst.length());
+
+            bls_s k;
             bls_fp2 t;
             bls_g2 p, q;
 
-            k = scalar_fromBytesBE(*reinterpret_cast<std::array<uint8_t, 64>*>(buf));
-            bls_fp_mod(reinterpret_cast<uint8_t*>(&k[0]), t[0]);
-            k = scalar_fromBytesBE(*reinterpret_cast<std::array<uint8_t, 64>*>(buf + 64));
-            bls_fp_mod(reinterpret_cast<uint8_t*>(&k[0]), t[1]);
+            k = scalar_fromBE(buf[0]);
+            bls_fp_mod(k, t[0]);
+            k = scalar_fromBE(buf[1]);
+            bls_fp_mod(k, t[1]);
 
             bls_g2_map(t, p);
 
-            k = scalar_fromBytesBE(*reinterpret_cast<std::array<uint8_t, 64>*>(buf + 2*64));
-            bls_fp_mod(reinterpret_cast<uint8_t*>(&k[0]), t[0]);
-            k = scalar_fromBytesBE(*reinterpret_cast<std::array<uint8_t, 64>*>(buf + 3*64));
-            bls_fp_mod(reinterpret_cast<uint8_t*>(&k[0]), t[1]);
+            k = scalar_fromBE(buf[2]);
+            bls_fp_mod(k, t[0]);
+            k = scalar_fromBE(buf[3]);
+            bls_fp_mod(k, t[1]);
 
             bls_g2_map(t, q);
             bls_g2_add(p, q, res);
@@ -399,21 +345,20 @@ class [[eosio::contract]] bls_primitives_tests : public contract{
         std::vector<uint8_t> msg = {51, 23, 56, 93, 212, 129, 128, 27, 251, 12, 42, 129, 210, 9, 34, 98};
 
         [[eosio::action]]
-        void verify(const std::vector<uint8_t>& pk, const std::vector<uint8_t>& sig)
-        {
+        void verify(const std::vector<char>& pk, const std::vector<char>& sig) {
             bls_g1 g1_points[2];
             bls_g2 g2_points[2];
 
-            memcpy(&g1_points[0], G1_ONE_NEG.data(), sizeof(bls_g1));
-            memcpy(&g2_points[0], sig.data(), sizeof(bls_g2));
+            memcpy(g1_points[0].data(), G1_ONE_NEG.data(), sizeof(bls_g1));
+            memcpy(g2_points[0].data(), sig.data(), sizeof(bls_g2));
 
             bls_g2 p_msg;
             g2_fromMessage(msg, CIPHERSUITE_ID, p_msg);
-            memcpy(&g1_points[1], pk.data(), sizeof(bls_g1));
-            memcpy(&g2_points[1], p_msg, sizeof(bls_g2));
+            memcpy(g1_points[1].data(), pk.data(), sizeof(bls_g1));
+            memcpy(g2_points[1].data(), p_msg.data(), sizeof(bls_g2));
 
             bls_gt r;
             bls_pairing(g1_points, g2_points, 2, r);
-            check(0 == memcmp(r, GT_ONE.data(), sizeof(bls_gt)), "bls signature verify failed");
+            check(0 == memcmp(r.data(), GT_ONE.data(), sizeof(bls_gt)), "bls signature verify failed");
         }
 };

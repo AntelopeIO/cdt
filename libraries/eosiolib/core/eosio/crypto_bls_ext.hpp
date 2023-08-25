@@ -43,126 +43,117 @@ namespace eosio {
         }
     }
 
-    using bls_scalar = uint8_t[32];
-    using bls_fp = uint8_t[48];
-    using bls_fp2 = bls_fp[2];
-    using bls_g1 = uint8_t[144];
-    using bls_g2 = uint8_t[288];
-    using bls_gt = uint8_t[576];
+    using bls_scalar = std::array<char, 32>;
+    using bls_fp     = std::array<char, 48>;
+    using bls_s      = std::array<char, 64>;
+    using bls_fp2    = std::array<bls_fp, 2>;
+    using bls_g1     = std::array<char, 144>;
+    using bls_g2     = std::array<char, 288>;
+    using bls_gt     = std::array<char, 576>;
 
-    int32_t bls_g1_add(const bls_g1& op1, const bls_g1& op2, bls_g1& res)
-    {
+    int32_t bls_g1_add(const bls_g1& op1, const bls_g1& op2, bls_g1& res) {
         return internal_use_do_not_use::bls_g1_add(
-            reinterpret_cast<const char*>(op1),
+            op1.data(),
             sizeof(bls_g1),
-            reinterpret_cast<const char*>(op2),
+            op2.data(),
             sizeof(bls_g1),
-            reinterpret_cast<char*>(res),
+            res.data(),
             sizeof(bls_g1)
         );
     }
 
-    int32_t bls_g2_add(const bls_g2& op1, const bls_g2& op2, bls_g2& res)
-    {
+    int32_t bls_g2_add(const bls_g2& op1, const bls_g2& op2, bls_g2& res) {
         return internal_use_do_not_use::bls_g2_add(
-            reinterpret_cast<const char*>(op1),
+            op1.data(),
             sizeof(bls_g2),
-            reinterpret_cast<const char*>(op2),
+            op2.data(),
             sizeof(bls_g2),
-            reinterpret_cast<char*>(res),
+            res.data(),
             sizeof(bls_g2)
         );
     }
 
-    int32_t bls_g1_mul(const bls_g1& point, const bls_scalar& scalar, bls_g1& res)
-    {
+    int32_t bls_g1_mul(const bls_g1& point, const bls_scalar& scalar, bls_g1& res) {
         return internal_use_do_not_use::bls_g1_mul(
-            reinterpret_cast<const char*>(point),
+            point.data(),
             sizeof(bls_g1),
-            reinterpret_cast<const char*>(scalar),
+            scalar.data(),
             sizeof(bls_scalar),
-            reinterpret_cast<char*>(res),
+            res.data(),
             sizeof(bls_g1)
         );
     }
 
-    int32_t bls_g2_mul(const bls_g2& point, const bls_scalar& scalar, bls_g2& res)
-    {
+    int32_t bls_g2_mul(const bls_g2& point, const bls_scalar& scalar, bls_g2& res) {
         return internal_use_do_not_use::bls_g2_mul(
-            reinterpret_cast<const char*>(point),
+            point.data(),
             sizeof(bls_g2),
-            reinterpret_cast<const char*>(scalar),
+            scalar.data(),
             sizeof(bls_scalar),
-            reinterpret_cast<char*>(res),
+            res.data(),
             sizeof(bls_g2)
         );
     }
 
-    int32_t bls_g1_exp(const bls_g1* points, const bls_scalar* scalars, const uint32_t num, bls_g1& res)
-    {
+    int32_t bls_g1_exp(const bls_g1 points[], const bls_scalar scalars[], const uint32_t num, bls_g1& res) {
         return internal_use_do_not_use::bls_g1_exp(
-            reinterpret_cast<const char*>(points),
+            num ? points[0].data() : nullptr,
             num * sizeof(bls_g1),
-            reinterpret_cast<const char*>(scalars),
+            num ? scalars[0].data() : nullptr,
             num * sizeof(bls_scalar),
             num,
-            reinterpret_cast<char*>(res),
+            res.data(),
             sizeof(bls_g1)
         );
     }
 
-    int32_t bls_g2_exp(const bls_g2* points, const bls_scalar* scalars, const uint32_t num, bls_g2& res)
-    {
+    int32_t bls_g2_exp(const bls_g2 points[], const bls_scalar scalars[], const uint32_t num, bls_g2& res) {
         return internal_use_do_not_use::bls_g2_exp(
-            reinterpret_cast<const char*>(points),
+            num ? points[0].data() : nullptr,
             num * sizeof(bls_g2),
-            reinterpret_cast<const char*>(scalars),
+            num ? scalars[0].data() : nullptr,
             num * sizeof(bls_scalar),
             num,
-            reinterpret_cast<char*>(res),
+            res.data(),
             sizeof(bls_g2)
         );
     }
 
-    int32_t bls_pairing(const bls_g1* g1_points, const bls_g2* g2_points, const uint32_t num, bls_gt& res)
-    {
+    int32_t bls_pairing(const bls_g1 g1_points[], const bls_g2 g2_points[], const uint32_t num, bls_gt& res) {
         return internal_use_do_not_use::bls_pairing(
-            reinterpret_cast<const char*>(g1_points),
+            num ? g1_points[0].data() : nullptr,
             num * sizeof(bls_g1),
-            reinterpret_cast<const char*>(g2_points),
+            num ? g2_points[0].data() : nullptr,
             num * sizeof(bls_g2),
             num,
-            reinterpret_cast<char*>(res),
+            res.data(),
             sizeof(bls_gt)
         );
     }
 
-    int32_t bls_g1_map(const bls_fp& e, bls_g1& res)
-    {
+    int32_t bls_g1_map(const bls_fp& e, bls_g1& res) {
         return internal_use_do_not_use::bls_g1_map(
-            reinterpret_cast<const char*>(e),
+            e.data(),
             sizeof(bls_fp),
-            reinterpret_cast<char*>(res),
+            res.data(),
             sizeof(bls_g1)
         );
     }
 
-    int32_t bls_g2_map(const bls_fp2& e, bls_g2& res)
-    {
+    int32_t bls_g2_map(const bls_fp2& e, bls_g2& res) {
         return internal_use_do_not_use::bls_g2_map(
-            reinterpret_cast<const char*>(e),
+            e[0].data(),
             sizeof(bls_fp2),
-            reinterpret_cast<char*>(res),
+            res.data(),
             sizeof(bls_g2)
         );
     }
 
-    int32_t bls_fp_mod(const uint8_t* s, bls_fp& res)
-    {
+    int32_t bls_fp_mod(const bls_s& s, bls_fp& res) {
         return internal_use_do_not_use::bls_fp_mod(
-            reinterpret_cast<const char*>(s),
-            64,
-            reinterpret_cast<char*>(res),
+            s.data(),
+            sizeof(bls_s),
+            res.data(),
             sizeof(bls_fp)
         );
     }
