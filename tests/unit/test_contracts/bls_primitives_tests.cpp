@@ -303,12 +303,9 @@ class [[eosio::contract]] bls_primitives_tests : public contract{
         bls_s scalar_fromBE(const bls_s& in) {
             std::array<uint64_t, 8> out;
             for(uint64_t i = 0; i < 8; i++) {
-                int64_t a = 8*8 - i*8;
-                out[i] =
-                    static_cast<uint64_t>(in[a-1])       | static_cast<uint64_t>(in[a-2]) <<  8 |
-                    static_cast<uint64_t>(in[a-3]) << 16 | static_cast<uint64_t>(in[a-4]) << 24 |
-                    static_cast<uint64_t>(in[a-5]) << 32 | static_cast<uint64_t>(in[a-6]) << 40 |
-                    static_cast<uint64_t>(in[a-7]) << 48 | static_cast<uint64_t>(in[a-8]) << 56;
+                uint64_t temp;
+                memcpy(&temp, &in[in.size() - i*8 - 8], sizeof(uint64_t));
+                out[i] = htobe64(temp);
             }
             return reinterpret_cast<bls_s&&>(std::move(out));
         }
