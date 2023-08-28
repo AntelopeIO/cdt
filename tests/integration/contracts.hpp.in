@@ -23,6 +23,9 @@ namespace eosio::testing {
       static std::vector<uint8_t> crypto_primitives_test_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../unit/test_contracts/crypto_primitives_tests.wasm"); }
       static std::vector<char>    crypto_primitives_test_abi() { return read_abi("${CMAKE_BINARY_DIR}/../unit/test_contracts/crypto_primitives_tests.abi"); }
 
+      static std::vector<uint8_t> bls_primitives_test_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../unit/test_contracts/bls_primitives_tests.wasm"); }
+      static std::vector<char>    bls_primitives_test_abi() { return read_abi("${CMAKE_BINARY_DIR}/../unit/test_contracts/bls_primitives_tests.abi"); }
+
       static std::vector<uint8_t> get_code_hash_write_test_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../unit/test_contracts/get_code_hash_write.wasm"); }
       static std::vector<char>    get_code_hash_write_test_abi() { return read_abi("${CMAKE_BINARY_DIR}/../unit/test_contracts/get_code_hash_write.abi"); }
       static std::vector<uint8_t> get_code_hash_read_test_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../unit/test_contracts/get_code_hash_read.wasm"); }
