@@ -113,7 +113,6 @@ jobs:
             prereleases: ${{fromJSON(needs.versions.outputs.leap-dev-prerelease)}}
             artifact-name: leap-dev-ubuntu20-amd64
             container-package: experimental-binaries
-            token: ${{github.token}}
         - name: Install leap-dev.deb (Ubuntu 20 only)
           if: matrix.platform == 'ubuntu20'
           run: |
