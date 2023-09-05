@@ -1,0 +1,6 @@
+{
+    "leap-dev":{
+       "target":"main",
+       "prerelease":false
+    }
+ }
