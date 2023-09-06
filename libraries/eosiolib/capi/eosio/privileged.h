@@ -123,6 +123,16 @@ void set_kv_parameters_packed( const char* data, uint32_t datalen );
 __attribute__((eosio_wasm_import))
 void preactivate_feature( const struct capi_checksum256* feature_digest );
 
+/**
+ * Submits a finalizer set change to Hotstuff
+ * 
+ * @param data - pointer finalizer_set object packed as bytes
+ * @param len  - size of packed finalazer_set object
+ * @pre `data` is a valid pointer to a range of memory at least `len` bytes long that contains packed abi_finalizer_set data
+ */
+__attribute__((eosio_wasm_import))
+void set_finalizers( const char* data, uint32_t len );
+
 #ifdef __cplusplus
 }
 #endif

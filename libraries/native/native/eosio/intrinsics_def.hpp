@@ -183,7 +183,8 @@ intrinsic_macro(bls_g2_exp) \
 intrinsic_macro(bls_pairing) \
 intrinsic_macro(bls_g1_map) \
 intrinsic_macro(bls_g2_map) \
-intrinsic_macro(bls_fp_mod)
+intrinsic_macro(bls_fp_mod) \
+intrinsic_macro(set_finalizers)
 
 
 
