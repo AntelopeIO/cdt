@@ -109,7 +109,7 @@ jobs:
             owner: AntelopeIO
             repo: leap
             file: 'leap-dev.*(x86_64|amd64).deb'
-            target: hotstuff_integration
+            target: '${{needs.versions.outputs.leap-dev-target}}'
             prereleases: ${{fromJSON(needs.versions.outputs.leap-dev-prerelease)}}
             artifact-name: leap-dev-ubuntu20-amd64
             container-package: experimental-binaries
