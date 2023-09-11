@@ -43,13 +43,14 @@ namespace eosio {
         }
     }
 
-    using bls_scalar = std::array<char, 32>;
-    using bls_fp     = std::array<char, 48>;
-    using bls_s      = std::array<char, 64>;
-    using bls_fp2    = std::array<bls_fp, 2>;
-    using bls_g1     = std::array<char, 144>;
-    using bls_g2     = std::array<char, 288>;
-    using bls_gt     = std::array<char, 576>;
+    using bls_scalar    = std::array<char, 32>;
+    using bls_fp        = std::array<char, 48>;
+    using bls_s         = std::array<char, 64>;
+    using bls_fp2       = std::array<bls_fp, 2>;
+    using bls_g1        = std::array<char, 144>;
+    using bls_g1_affine = std::array<char, 96>;
+    using bls_g2        = std::array<char, 288>;
+    using bls_gt        = std::array<char, 576>;
 
     int32_t bls_g1_add(const bls_g1& op1, const bls_g1& op2, bls_g1& res) {
         return internal_use_do_not_use::bls_g1_add(
