@@ -1,11 +1,186 @@
 #pragma once
 
+#include "crypto.hpp"
+
 #include "fixed_bytes.hpp"
 #include "varint.hpp"
 #include "serialize.hpp"
+#include "base64.hpp"
 
 #include <array>
 #include <vector>
+
+#include <endian.h>
+
+namespace bls12_381 {
+class sha256 {
+public:
+    sha256(): m_blocklen(0), m_bitlen(0) {
+        m_state[0] = 0x6a09e667;
+        m_state[1] = 0xbb67ae85;
+        m_state[2] = 0x3c6ef372;
+        m_state[3] = 0xa54ff53a;
+        m_state[4] = 0x510e527f;
+        m_state[5] = 0x9b05688c;
+        m_state[6] = 0x1f83d9ab;
+        m_state[7] = 0x5be0cd19;
+    }
+    void update(const uint8_t * data, size_t length) {
+        for(size_t i = 0 ; i < length ; i++) {
+            m_data[m_blocklen++] = data[i];
+            if (m_blocklen == 64) {
+                transform();
+
+                // End of the block
+                m_bitlen += 512;
+                m_blocklen = 0;
+            }
+        }
+    }
+    inline void update(const char* data, size_t length) {
+        update(reinterpret_cast<const uint8_t*>(data), length);
+    }
+    inline void update(const std::string &data) {
+        update(reinterpret_cast<const char*>(data.data()), data.size());
+    }
+    std::array<uint8_t, 32> digest() {
+        std::array<uint8_t, 32> hash;
+
+        pad();
+        revert(hash);
+
+        return hash;
+    }
+    void digest(uint8_t* dst) {
+        std::array<uint8_t, 32>* phash = reinterpret_cast<std::array<uint8_t, 32>*>(dst);
+
+        pad();
+        revert(*phash);
+    }
+
+    //static string toString(const array<uint8_t, 32>& digest);
+
+private:
+    uint8_t  m_data[64];
+    uint32_t m_blocklen;
+    uint64_t m_bitlen;
+    uint32_t m_state[8]; //A, B, C, D, E, F, G, H
+
+    static constexpr std::array<uint32_t, 64> K = {
+        0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,
+        0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
+        0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,
+        0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+        0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,
+        0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
+        0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,
+        0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+        0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,
+        0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
+        0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,
+        0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+        0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,
+        0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
+        0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,
+        0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2
+    };
+
+    static uint32_t rotr(uint32_t x, uint32_t n) {
+        return (x >> n) | (x << (32 - n));
+    }
+    static uint32_t choose(uint32_t e, uint32_t f, uint32_t g) {
+        return (e & f) ^ (~e & g);
+    }
+    static uint32_t majority(uint32_t a, uint32_t b, uint32_t c) {
+        return (a & (b | c)) | (b & c);
+    }
+    static uint32_t sig0(uint32_t x) {
+        return sha256::rotr(x, 7) ^ sha256::rotr(x, 18) ^ (x >> 3);
+    }
+    static uint32_t sig1(uint32_t x) {
+        return sha256::rotr(x, 17) ^ sha256::rotr(x, 19) ^ (x >> 10);
+    }
+    void transform() {
+        uint32_t maj, xorA, ch, xorE, sum, newA, newE, m[64];
+        uint32_t state[8];
+
+        for(uint8_t i = 0, j = 0; i < 16; i++, j += 4) {
+            // Split data in 32 bit blocks for the 16 first words
+            m[i] = (m_data[j] << 24) | (m_data[j + 1] << 16) | (m_data[j + 2] << 8) | (m_data[j + 3]);
+        }
+
+        for(uint8_t k = 16 ; k < 64; k++) {
+            // Remaining 48 blocks
+            m[k] = sha256::sig1(m[k - 2]) + m[k - 7] + sha256::sig0(m[k - 15]) + m[k - 16];
+        }
+
+        for(uint8_t i = 0 ; i < 8 ; i++) {
+            state[i] = m_state[i];
+        }
+
+        for(uint8_t i = 0; i < 64; i++) {
+            maj   = sha256::majority(state[0], state[1], state[2]);
+            xorA  = sha256::rotr(state[0], 2) ^ sha256::rotr(state[0], 13) ^ sha256::rotr(state[0], 22);
+
+            ch = choose(state[4], state[5], state[6]);
+
+            xorE  = sha256::rotr(state[4], 6) ^ sha256::rotr(state[4], 11) ^ sha256::rotr(state[4], 25);
+
+            sum  = m[i] + K[i] + state[7] + ch + xorE;
+            newA = xorA + maj + sum;
+            newE = state[3] + sum;
+
+            state[7] = state[6];
+            state[6] = state[5];
+            state[5] = state[4];
+            state[4] = newE;
+            state[3] = state[2];
+            state[2] = state[1];
+            state[1] = state[0];
+            state[0] = newA;
+        }
+
+        for(uint8_t i = 0 ; i < 8 ; i++) {
+            m_state[i] += state[i];
+        }
+    }
+    void pad() {
+        uint64_t i = m_blocklen;
+        uint8_t end = m_blocklen < 56 ? 56 : 64;
+
+        m_data[i++] = 0x80; // Append a bit 1
+        while(i < end) {
+            m_data[i++] = 0x00; // Pad with zeros
+        }
+
+        if(m_blocklen >= 56) {
+            transform();
+            memset(m_data, 0, 56);
+        }
+
+        // Append to the padding the total message's length in bits and transform.
+        m_bitlen += m_blocklen * 8;
+        m_data[63] = m_bitlen;
+        m_data[62] = m_bitlen >> 8;
+        m_data[61] = m_bitlen >> 16;
+        m_data[60] = m_bitlen >> 24;
+        m_data[59] = m_bitlen >> 32;
+        m_data[58] = m_bitlen >> 40;
+        m_data[57] = m_bitlen >> 48;
+        m_data[56] = m_bitlen >> 56;
+        transform();
+    }
+    void revert(std::array<uint8_t, 32>& hash) {
+        // SHA uses big endian byte ordering
+        // Revert all bytes
+        for(uint8_t i = 0 ; i < 4 ; i++) {
+            for(uint8_t j = 0 ; j < 8 ; j++) {
+                hash[i + (j * 4)] = (m_state[j] >> (24 - i * 8)) & 0x000000ff;
+            }
+        }
+    }
+};
+} // namespace bls12_381
 
 namespace eosio {
 
@@ -43,13 +218,15 @@ namespace eosio {
         }
     }
 
-    using bls_scalar = std::array<char, 32>;
-    using bls_fp     = std::array<char, 48>;
-    using bls_s      = std::array<char, 64>;
-    using bls_fp2    = std::array<bls_fp, 2>;
-    using bls_g1     = std::array<char, 144>;
-    using bls_g2     = std::array<char, 288>;
-    using bls_gt     = std::array<char, 576>;
+    using bls_scalar     = std::array<char, 32>;
+    using bls_fp         = std::array<char, 48>;
+    using bls_s          = std::array<char, 64>;
+    using bls_fp2        = std::array<bls_fp, 2>;
+    using bls_g1         = std::array<char, 144>;
+    using bls_g1_affine  = std::array<char, 96>;
+    using bls_g2         = std::array<char, 288>;
+    using bls_g2_affine  = std::array<char, 192>;
+    using bls_gt         = std::array<char, 576>;
 
     int32_t bls_g1_add(const bls_g1& op1, const bls_g1& op2, bls_g1& res) {
         return internal_use_do_not_use::bls_g1_add(
@@ -157,5 +334,259 @@ namespace eosio {
             sizeof(bls_fp)
         );
     }
+
+    const inline std::string bls_public_key_prefix = "PUB_BLS_";
+    const inline uint32_t bls_publick_key_checksum_size = sizeof(uint32_t);
+    const inline std::string bls_signature_prefix = "SIG_BLS_";
+
+    template<typename T, const std::string& Prefix>
+    std::string bls_type_to_base64(const T& g1) {
+        std::array<char, sizeof(T) + bls_publick_key_checksum_size> g1_with_checksum;
+        auto it = std::copy(g1.begin(), g1.end(), g1_with_checksum.begin());
+        
+        auto csum = ripemd160(g1.data(), g1.size()).extract_as_byte_array();
+        std::copy(reinterpret_cast<const char*>(csum.data()), 
+                  reinterpret_cast<const char*>(csum.data())+bls_publick_key_checksum_size, 
+                  it);
+        
+        return Prefix + base64_encode(g1_with_checksum.data(), g1_with_checksum.size());
+    }
+    inline std::string bls_g1_affine_to_base64(const bls_g1_affine& g1) {
+        return bls_type_to_base64<bls_g1_affine, bls_public_key_prefix>(g1);
+    }
+    template<typename T, const std::string& Prefix>
+    T bls_base64_to_type(const char* data, size_t size) {
+        eosio::check(size > Prefix.size(), "encoded base64 key is too short");
+        eosio::check(0 == memcmp(data, Prefix.data(), Prefix.size()), "base64 encoded type must begin from corresponding prefix");
+
+        std::string decoded = base64_decode({data+Prefix.size(), size - Prefix.size()});
+        T ret;
+        eosio::check(decoded.size() == ret.size() + bls_publick_key_checksum_size, "decoded size " + std::to_string(decoded.size()) + 
+                                                                                   " doesn't match structure size " + std::to_string(ret.size()) + 
+                                                                                   " + checksum " + std::to_string(bls_publick_key_checksum_size));
+        
+        auto it = decoded.end();
+        std::advance(it, -bls_publick_key_checksum_size);
+        std::copy(decoded.begin(), it, ret.begin());
+        
+        auto csum = ripemd160(ret.data(), ret.size()).extract_as_byte_array();
+        eosio::check(0 == memcmp(&*it, csum.data(), bls_publick_key_checksum_size), "checksum of structure doesn't match");
+
+        return ret;
+    }
+    inline bls_g1_affine bls_base64_to_g1_affine(const char* data, size_t size) {
+        return bls_base64_to_type<bls_g1_affine, bls_public_key_prefix>(data, size);
+    }
+    inline std::string bls_sig_to_base64_affine(const bls_g2_affine& g2) {
+        return bls_type_to_base64<bls_g2_affine, bls_signature_prefix>(g2);
+    }
+    inline bls_g2_affine bls_base64_to_sig_affine(const char* data, size_t size) {
+        return bls_base64_to_type<bls_g2_affine, bls_signature_prefix>(data, size);
+    }
+
+    const inline std::string POP_CIPHERSUITE_ID = "BLS_POP_BLS12381G2_XMD:SHA-256_SSWU_RO_POP_";
+    const inline std::vector<uint8_t> G1_ONE_NEG = {0x16, 0x0c, 0x53, 0xfd, 0x90, 0x87, 0xb3, 0x5c, 
+                                                    0xf5, 0xff, 0x76, 0x99, 0x67, 0xfc, 0x17, 0x78, 
+                                                    0xc1, 0xa1, 0x3b, 0x14, 0xc7, 0x95, 0x4f, 0x15, 
+                                                    0x47, 0xe7, 0xd0, 0xf3, 0xcd, 0x6a, 0xae, 0xf0, 
+                                                    0x40, 0xf4, 0xdb, 0x21, 0xcc, 0x6e, 0xce, 0xed, 
+                                                    0x75, 0xfb, 0x0b, 0x9e, 0x41, 0x77, 0x01, 0x12, 
+                                                    0x3a, 0x88, 0x18, 0xf3, 0x2a, 0x6c, 0x52, 0xff, 
+                                                    0x70, 0x02, 0x3b, 0x38, 0xe4, 0x9c, 0x89, 0x92, 
+                                                    0x55, 0xd0, 0xa9, 0x9f, 0x8d, 0x73, 0xd7, 0x89, 
+                                                    0x2a, 0xc1, 0x44, 0xa3, 0x5b, 0xf3, 0xca, 0x12, 
+                                                    0x17, 0x53, 0x4b, 0x96, 0x76, 0x1b, 0xff, 0x3c, 
+                                                    0x30, 0x44, 0x77, 0xe9, 0xed, 0xd2, 0x44, 0x0e, 
+                                                    0xfd, 0xff, 0x02, 0x00, 0x00, 0x00, 0x09, 0x76, 
+                                                    0x02, 0x00, 0x0c, 0xc4, 0x0b, 0x00, 0xf4, 0xeb, 
+                                                    0xba, 0x58, 0xc7, 0x53, 0x57, 0x98, 0x48, 0x5f, 
+                                                    0x45, 0x57, 0x52, 0x70, 0x53, 0x58, 0xce, 0x77, 
+                                                    0x6d, 0xec, 0x56, 0xa2, 0x97, 0x1a, 0x07, 0x5c, 
+                                                    0x93, 0xe4, 0x80, 0xfa, 0xc3, 0x5e, 0xf6, 0x15}; //18x8 = 144 bytes
+    const inline std::vector<uint8_t> GT_ONE = {0xfd, 0xff, 0x02, 0x00, 0x00, 0x00, 0x09, 0x76, 
+                                                0x02, 0x00, 0x0c, 0xc4, 0x0b, 0x00, 0xf4, 0xeb, 
+                                                0xba, 0x58, 0xc7, 0x53, 0x57, 0x98, 0x48, 0x5f, 
+                                                0x45, 0x57, 0x52, 0x70, 0x53, 0x58, 0xce, 0x77, 
+                                                0x6d, 0xec, 0x56, 0xa2, 0x97, 0x1a, 0x07, 0x5c, 
+                                                0x93, 0xe4, 0x80, 0xfa, 0xc3, 0x5e, 0xf6, 0x15, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}; // 73x8 = 584 bytes
+    const inline std::vector<uint8_t> R1 =     {0xfd, 0xff, 0x02, 0x00, 0x00, 0x00, 0x09, 0x76, 
+                                                0x02, 0x00, 0x0c, 0xc4, 0x0b, 0x00, 0xf4, 0xeb, 
+                                                0xba, 0x58, 0xc7, 0x53, 0x57, 0x98, 0x48, 0x5f, 
+                                                0x45, 0x57, 0x52, 0x70, 0x53, 0x58, 0xce, 0x77, 
+                                                0x6d, 0xec, 0x56, 0xa2, 0x97, 0x1a, 0x07, 0x5c, 
+                                                0x93, 0xe4, 0x80, 0xfa, 0xc3, 0x5e, 0xf6, 0x15}; // 6x8 = 48 bytes
+
+    // Construct an extensible-output function based on SHA256
+    void xmd_sh256(
+        char *buf,
+        int buf_len,
+        const char *in,
+        int in_len,
+        const char *dst,
+        int dst_len
+    ) {
+        const unsigned int SHA256HashSize = 32;
+        const unsigned int SHA256_Message_Block_Size = 64;
+        const unsigned ell = (buf_len + SHA256HashSize - 1) / SHA256HashSize;
+        if (buf_len < 0 || ell > 255 || dst_len > 255) {
+            return;
+        }
+        const uint8_t Z_pad[SHA256_Message_Block_Size] = { 0, };
+        const uint8_t l_i_b_0_str[] = {
+            static_cast<uint8_t>(buf_len >> 8),
+            static_cast<uint8_t>(buf_len & 0xff),
+            0,
+            static_cast<uint8_t>(dst_len)
+        };
+        const uint8_t *dstlen_str = l_i_b_0_str + 3;
+        uint8_t b_0[SHA256HashSize];
+        bls12_381::sha256 sha;
+        sha.update(Z_pad, SHA256_Message_Block_Size);
+        sha.update(in, in_len);
+        sha.update(l_i_b_0_str, 3);
+        sha.update(dst, dst_len);
+        sha.update(dstlen_str, 1);
+        sha.digest(b_0);
+        uint8_t b_i[SHA256HashSize + 1] = { 0, };
+        for (unsigned i = 1; i <= ell; ++i) {
+            for (unsigned j = 0; j < SHA256HashSize; ++j) {
+                b_i[j] = b_0[j] ^ b_i[j];
+            }
+            b_i[SHA256HashSize] = i;
+            bls12_381::sha256 s;
+            s.update(b_i, SHA256HashSize + 1);
+            s.update(dst, dst_len);
+            s.update(dstlen_str, 1);
+            s.digest(b_i);
+            const int rem_after = buf_len - i * SHA256HashSize;
+            const int copy_len = SHA256HashSize + (rem_after < 0 ? rem_after : 0);
+            memcpy(buf + (i - 1) * SHA256HashSize, b_i, copy_len);
+        }
+    }
+    bls_s scalar_fromBE(const bls_s& in) {
+        std::array<uint64_t, 8> out;
+        for(uint64_t i = 0; i < 8; i++) {
+            uint64_t temp;
+            memcpy(&temp, &in[in.size() - i*8 - 8], sizeof(uint64_t));
+            out[i] = htobe64(temp);
+        }
+        return reinterpret_cast<bls_s&&>(std::move(out));
+    }
+    void g2_fromMessage(const bls_g1_affine& msg, const std::string& dst, bls_g2& res) {
+
+        std::array<bls_s, 4> buf;
+        xmd_sh256(buf.data()->data(), sizeof(buf), msg.data(), msg.size(), dst.data(), dst.length());
+
+        bls_s k;
+        bls_fp2 t;
+        bls_g2 p, q;
+
+        k = scalar_fromBE(buf[0]);
+        bls_fp_mod(k, t[0]);
+        k = scalar_fromBE(buf[1]);
+        bls_fp_mod(k, t[1]);
+
+        bls_g2_map(t, p);
+
+        k = scalar_fromBE(buf[2]);
+        bls_fp_mod(k, t[0]);
+        k = scalar_fromBE(buf[3]);
+        bls_fp_mod(k, t[1]);
+
+        bls_g2_map(t, q);
+        bls_g2_add(p, q, res);
+    }
+
+    // pubkey and signature are assumed to be in RAW affine little-endian bytes
+    bool bls_pop_verify(const bls_g1_affine& pubkey, const bls_g2_affine& signature_proof) {
+        bls_g1 g1_points[2] = {0};
+        bls_g2 g2_points[2] = {0};
+
+        // add z coordinate (R1) to pubkey and signature_proof
+        std::vector<uint8_t> pubkey_ex(sizeof(bls_g1_affine) + R1.size(), 0);
+        auto insert_it = std::copy(pubkey.begin(), pubkey.end(), pubkey_ex.begin());
+        std::copy(R1.begin(), R1.end(), insert_it);
+
+        std::vector<uint8_t> sig_ex(sizeof(bls_g2), 0);
+        insert_it = std::copy(signature_proof.begin(), signature_proof.end(), sig_ex.begin());
+        std::copy(R1.begin(), R1.end(), insert_it);
+
+        memcpy(&g1_points[0], G1_ONE_NEG.data(), G1_ONE_NEG.size());
+        memcpy(&g2_points[0], sig_ex.data(), sig_ex.size());
+
+        memcpy(&g1_points[1], pubkey_ex.data(), pubkey_ex.size());
+        g2_fromMessage(pubkey, POP_CIPHERSUITE_ID, g2_points[1]);
+
+        bls_gt r;
+        bls_pairing(g1_points, g2_points, 2, r);
+        return 0 == std::memcmp(r.data(), GT_ONE.data(), sizeof(bls_gt));
+    }
+
 }
 
