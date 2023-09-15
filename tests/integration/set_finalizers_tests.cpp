@@ -12,17 +12,6 @@ using namespace fc;
 
 using mvo = fc::mutable_variant_object;
 
-namespace eosio::chain {
-struct finalizer_authority {
-
-    std::string   description;
-    uint64_t      fweight = 0; // weight that this finalizer's vote has for meeting fthreshold
-    std::array<uint8_t, 96> public_key;
-
-};
-
-} // eosio::chain
-
 BOOST_AUTO_TEST_SUITE(set_finalizers_tests)
 
 BOOST_FIXTURE_TEST_CASE(set_finalizers_test, tester) try {
@@ -32,9 +21,7 @@ BOOST_FIXTURE_TEST_CASE(set_finalizers_test, tester) try {
     set_code( config::system_account_name,  contracts::set_finalizers_test_wasm() );
     set_abi(  config::system_account_name,  contracts::set_finalizers_test_abi().data() );
 
-    signed_block_ptr cur_block = produce_block();
-    std::optional<block_header_extension> ext = cur_block->extract_header_extension(hs_finalizer_set_extension::extension_id());
-    BOOST_CHECK(!ext);
+    produce_block();
 
     const std::vector<uint8_t> G1 = {0x22, 0x0e, 0xf5, 0xc4, 0x9c, 0x18, 0x68, 0xe8,
                                      0x5b, 0x82, 0x65, 0x8d, 0xf9, 0x76, 0x6f, 0xc2,
@@ -55,12 +42,16 @@ BOOST_FIXTURE_TEST_CASE(set_finalizers_test, tester) try {
                                         ("description", "test_desc")
                                         ("fweight", 1)
                                         ("public_key_g1_affine_le", *reinterpret_cast<const std::vector<char>*>(&G1))})));
-    cur_block = produce_block();
-    ext = cur_block->extract_header_extension(hs_finalizer_set_extension::extension_id());
-    BOOST_CHECK(ext);
-    auto finalizers = std::get<hs_finalizer_set_extension>(*ext).finalizers;
-    BOOST_CHECK(finalizers.size() == 1 );
-    BOOST_CHECK(finalizers[0].description == "test_desc" );
+    signed_block_ptr cur_block = produce_block();
+    fc::variant pretty_output;
+    abi_serializer::to_variant( *cur_block, pretty_output, get_resolver(), fc::microseconds::maximum() );
+    BOOST_ASSERT(pretty_output.get_object().contains("proposed_finalizer_set"));
+    BOOST_ASSERT(pretty_output["proposed_finalizer_set"]["generation"] == 1);
+    BOOST_ASSERT(pretty_output["proposed_finalizer_set"]["fthreshold"] == 1);
+    BOOST_ASSERT(pretty_output["proposed_finalizer_set"]["finalizers"].size() == 1);
+    BOOST_ASSERT(pretty_output["proposed_finalizer_set"]["finalizers"][size_t(0)]["description"] == "test_desc");
+    BOOST_ASSERT(pretty_output["proposed_finalizer_set"]["finalizers"][size_t(0)]["fweight"] == 1);
+    //TODO: add key check here after base64 support will be added
 
     // testing wrong public key size
     BOOST_CHECK_THROW(push_action(config::system_account_name, "setfinal"_n, "test"_n, mvo()
