@@ -228,7 +228,7 @@ namespace eosio {
     using bls_g2_affine  = std::array<char, 192>;
     using bls_gt         = std::array<char, 576>;
 
-    int32_t bls_g1_add(const bls_g1& op1, const bls_g1& op2, bls_g1& res) {
+    inline int32_t bls_g1_add(const bls_g1& op1, const bls_g1& op2, bls_g1& res) {
         return internal_use_do_not_use::bls_g1_add(
             op1.data(),
             sizeof(bls_g1),
@@ -239,7 +239,7 @@ namespace eosio {
         );
     }
 
-    int32_t bls_g2_add(const bls_g2& op1, const bls_g2& op2, bls_g2& res) {
+    inline int32_t bls_g2_add(const bls_g2& op1, const bls_g2& op2, bls_g2& res) {
         return internal_use_do_not_use::bls_g2_add(
             op1.data(),
             sizeof(bls_g2),
@@ -250,7 +250,7 @@ namespace eosio {
         );
     }
 
-    int32_t bls_g1_mul(const bls_g1& point, const bls_scalar& scalar, bls_g1& res) {
+    inline int32_t bls_g1_mul(const bls_g1& point, const bls_scalar& scalar, bls_g1& res) {
         return internal_use_do_not_use::bls_g1_mul(
             point.data(),
             sizeof(bls_g1),
@@ -261,7 +261,7 @@ namespace eosio {
         );
     }
 
-    int32_t bls_g2_mul(const bls_g2& point, const bls_scalar& scalar, bls_g2& res) {
+    inline int32_t bls_g2_mul(const bls_g2& point, const bls_scalar& scalar, bls_g2& res) {
         return internal_use_do_not_use::bls_g2_mul(
             point.data(),
             sizeof(bls_g2),
@@ -272,7 +272,7 @@ namespace eosio {
         );
     }
 
-    int32_t bls_g1_exp(const bls_g1 points[], const bls_scalar scalars[], const uint32_t num, bls_g1& res) {
+    inline int32_t bls_g1_exp(const bls_g1 points[], const bls_scalar scalars[], const uint32_t num, bls_g1& res) {
         return internal_use_do_not_use::bls_g1_exp(
             num ? points[0].data() : nullptr,
             num * sizeof(bls_g1),
@@ -284,7 +284,7 @@ namespace eosio {
         );
     }
 
-    int32_t bls_g2_exp(const bls_g2 points[], const bls_scalar scalars[], const uint32_t num, bls_g2& res) {
+    inline int32_t bls_g2_exp(const bls_g2 points[], const bls_scalar scalars[], const uint32_t num, bls_g2& res) {
         return internal_use_do_not_use::bls_g2_exp(
             num ? points[0].data() : nullptr,
             num * sizeof(bls_g2),
@@ -296,7 +296,7 @@ namespace eosio {
         );
     }
 
-    int32_t bls_pairing(const bls_g1 g1_points[], const bls_g2 g2_points[], const uint32_t num, bls_gt& res) {
+    inline int32_t bls_pairing(const bls_g1 g1_points[], const bls_g2 g2_points[], const uint32_t num, bls_gt& res) {
         return internal_use_do_not_use::bls_pairing(
             num ? g1_points[0].data() : nullptr,
             num * sizeof(bls_g1),
@@ -308,7 +308,7 @@ namespace eosio {
         );
     }
 
-    int32_t bls_g1_map(const bls_fp& e, bls_g1& res) {
+    inline int32_t bls_g1_map(const bls_fp& e, bls_g1& res) {
         return internal_use_do_not_use::bls_g1_map(
             e.data(),
             sizeof(bls_fp),
@@ -317,7 +317,7 @@ namespace eosio {
         );
     }
 
-    int32_t bls_g2_map(const bls_fp2& e, bls_g2& res) {
+    inline int32_t bls_g2_map(const bls_fp2& e, bls_g2& res) {
         return internal_use_do_not_use::bls_g2_map(
             e[0].data(),
             sizeof(bls_fp2),
@@ -326,7 +326,7 @@ namespace eosio {
         );
     }
 
-    int32_t bls_fp_mod(const bls_s& s, bls_fp& res) {
+    inline int32_t bls_fp_mod(const bls_s& s, bls_fp& res) {
         return internal_use_do_not_use::bls_fp_mod(
             s.data(),
             sizeof(bls_s),
@@ -335,6 +335,7 @@ namespace eosio {
         );
     }
 
+namespace detail {
     const inline std::string bls_public_key_prefix = "PUB_BLS_";
     const inline uint32_t bls_publick_key_checksum_size = sizeof(uint32_t);
     const inline std::string bls_signature_prefix = "SIG_BLS_";
@@ -349,17 +350,14 @@ namespace eosio {
                   reinterpret_cast<const char*>(csum.data())+bls_publick_key_checksum_size, 
                   it);
         
-        return Prefix + base64_encode(g1_with_checksum.data(), g1_with_checksum.size());
-    }
-    inline std::string bls_g1_affine_to_base64(const bls_g1_affine& g1) {
-        return bls_type_to_base64<bls_g1_affine, bls_public_key_prefix>(g1);
+        return Prefix + eosio::base64_encode(g1_with_checksum.data(), g1_with_checksum.size());
     }
     template<typename T, const std::string& Prefix>
     T bls_base64_to_type(const char* data, size_t size) {
         eosio::check(size > Prefix.size(), "encoded base64 key is too short");
         eosio::check(0 == memcmp(data, Prefix.data(), Prefix.size()), "base64 encoded type must begin from corresponding prefix");
 
-        std::string decoded = base64_decode({data+Prefix.size(), size - Prefix.size()});
+        std::string decoded = eosio::base64_decode({data+Prefix.size(), size - Prefix.size()});
         T ret;
         eosio::check(decoded.size() == ret.size() + bls_publick_key_checksum_size, "decoded size " + std::to_string(decoded.size()) + 
                                                                                    " doesn't match structure size " + std::to_string(ret.size()) + 
@@ -373,15 +371,6 @@ namespace eosio {
         eosio::check(0 == memcmp(&*it, csum.data(), bls_publick_key_checksum_size), "checksum of structure doesn't match");
 
         return ret;
-    }
-    inline bls_g1_affine bls_base64_to_g1_affine(const char* data, size_t size) {
-        return bls_base64_to_type<bls_g1_affine, bls_public_key_prefix>(data, size);
-    }
-    inline std::string bls_sig_to_base64_affine(const bls_g2_affine& g2) {
-        return bls_type_to_base64<bls_g2_affine, bls_signature_prefix>(g2);
-    }
-    inline bls_g2_affine bls_base64_to_sig_affine(const char* data, size_t size) {
-        return bls_base64_to_type<bls_g2_affine, bls_signature_prefix>(data, size);
     }
 
     const inline std::string POP_CIPHERSUITE_ID = "BLS_POP_BLS12381G2_XMD:SHA-256_SSWU_RO_POP_";
@@ -562,9 +551,25 @@ namespace eosio {
         bls_g2_map(t, q);
         bls_g2_add(p, q, res);
     }
+}
+
+    inline std::string bls_g1_affine_to_base64(const bls_g1_affine& g1) {
+        return detail::bls_type_to_base64<bls_g1_affine, detail::bls_public_key_prefix>(g1);
+    }
+    inline bls_g1_affine bls_base64_to_g1_affine(const char* data, size_t size) {
+        return detail::bls_base64_to_type<bls_g1_affine, detail::bls_public_key_prefix>(data, size);
+    }
+    inline std::string bls_sig_to_base64_affine(const bls_g2_affine& g2) {
+        return detail::bls_type_to_base64<bls_g2_affine, detail::bls_signature_prefix>(g2);
+    }
+    inline bls_g2_affine bls_base64_to_sig_affine(const char* data, size_t size) {
+        return detail::bls_base64_to_type<bls_g2_affine, detail::bls_signature_prefix>(data, size);
+    }
 
     // pubkey and signature are assumed to be in RAW affine little-endian bytes
     bool bls_pop_verify(const bls_g1_affine& pubkey, const bls_g2_affine& signature_proof) {
+        using namespace detail;
+
         bls_g1 g1_points[2] = {0};
         bls_g2 g2_points[2] = {0};
 
@@ -587,6 +592,5 @@ namespace eosio {
         bls_pairing(g1_points, g2_points, 2, r);
         return 0 == std::memcmp(r.data(), GT_ONE.data(), sizeof(bls_gt));
     }
-
 }
 
