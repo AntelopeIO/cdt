@@ -15,7 +15,7 @@ We lack the resources to complete the Antler project and support it going forwar
 Allow contracts to compile C++20. In addition to the benefits from the latest language features. Currently, ENF maintains an additional fork of one of our upstream dependencies for EOS EVM simply to get around the fact that the upstream assumes C++20 but we cannot build C++20 code in our contracts.
 
 ## Vanilla Clang/LLVM
-Try eosio extension free llvm and if it works with no issues then remove extensions to Clang/LLVM. This hope we will enable us to use Vanilla versions of the packages. This will allow us to use the latest, and will lead to improvements in functionality and performance.
+Try eosio extension free llvm and if it works with no issues then remove extensions to Clang/LLVM. The hope we will enable us to use Vanilla versions of the packages. This will allow us to use the latest, and will lead to improvements in functionality and performance.
 
 ## Upgrade to LLVM 16
 Upgrade to the latest
