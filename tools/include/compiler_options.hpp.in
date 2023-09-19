@@ -548,19 +548,19 @@ static void GetLdDefaults(std::vector<std::string>& ldopts) {
 #ifdef __APPLE__
       ldopts.insert(ldopts.end(), {"-arch", "x86_64", "-macosx_version_min", "10.13", "-framework", "Foundation", "-framework", "System"});
 
-      llvm::SmallString<256> Output;
-      if(llvm::sys::fs::createTemporaryFile("cdtsdkroot", ".path", Output))
+      llvm::SmallString<256> output;
+      if(llvm::sys::fs::createTemporaryFile("cdtsdkroot", ".path", output))
          throw std::runtime_error("Failed to create tmp file");
-      auto DeleteOutput = llvm::make_scope_exit([&](){ llvm::sys::fs::remove(Output); });
+      auto delete_output = llvm::make_scope_exit([&](){ llvm::sys::fs::remove(output); });
 
-      if(!eosio::cdt::environment::exec_subprogram("xcrun", {"--show-sdk-path"}, true, llvm::None, {Output.str()}))
+      if(!eosio::cdt::environment::exec_subprogram("xcrun", {"--show-sdk-path"}, true, llvm::None, {output.str()}))
          throw std::runtime_error("Failed to run xcrun --show-sdk-path");
 
-      auto Buf = llvm::MemoryBuffer::getFile(Output);
-      if(!Buf)
+      auto buf = llvm::MemoryBuffer::getFile(output);
+      if(!buf)
          throw std::runtime_error("Failed to open tmp file");
 
-      std::string sdkpath = Buf.get()->getBuffer();
+      std::string sdkpath = buf.get()->getBuffer();
       //remove newline
       sdkpath.resize(sdkpath.size()-1);
       ldopts.insert(ldopts.end(), {"-syslibroot", sdkpath});
