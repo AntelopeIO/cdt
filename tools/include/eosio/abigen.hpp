@@ -841,12 +841,14 @@ namespace eosio { namespace cdt {
                   if ((table_type->isEosioTable() && ag.is_eosio_contract(table_type, ag.get_contract_name())) || defined_in_contract(d)) {
                      // first parameter is table name
                      ag.add_table(d->getTemplateArgs()[0].getAsIntegral().getExtValue(), table_type);
+                     if (table_type->isEosioTable())
+                        ag.add_struct(table_type);
                   }
                }
             }
             return true;
          }
-         void set_contract_class(const CXXRecordDecl* decl) {
+         inline void set_contract_class(const CXXRecordDecl* decl) {
             contract_class = decl;
          }
    };
@@ -882,10 +884,10 @@ namespace eosio { namespace cdt {
 
          return true;
       }
-      bool contract_found() const {
+      inline bool contract_found() const {
          return contract_class != nullptr;
       }
-      const clang::CXXRecordDecl* get_contract() const {
+      inline const clang::CXXRecordDecl* get_contract() const {
          return contract_class;
       }
    };
