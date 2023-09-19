@@ -4,6 +4,16 @@
     "types": [],
     "structs": [
         {
+           "name": "out_of_class3",
+           "base": "",
+           "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
             "name": "tbl_config",
             "base": "",
             "fields": [
@@ -45,6 +55,13 @@
             "key_names": [],
             "key_types": []
         },
+        {
+            "name": "mi.config52",
+            "type": "out_of_class3",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },            
         {
             "name": "smpl.conf5",
             "type": "name",
