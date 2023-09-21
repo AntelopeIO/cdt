@@ -18,7 +18,7 @@
    bluegrass::meta::overloaded {                       \
         [](auto&& f, std::enable_if_t<std::is_class_v<std::decay_t<decltype(f)>> && \
                         bluegrass::meta::detail::pass_type<    \
-                            decltype(&std::decay_t<decltype(f)>::type::NAME)>::value, int> = 0) constexpr { \
+                            decltype(&std::decay_t<decltype(f)>::type::NAME)>(), int> = 0) constexpr { \
                             return true;                       \
        }, [](...) constexpr { return false; }                  \
     }(bluegrass::meta::detail::wrapper_t<decltype(ARG)>{})
@@ -27,7 +27,7 @@
    bluegrass::meta::overloaded {                             \
         [](auto&& f, std::enable_if_t<std::is_class_v<TY> &&   \
                         bluegrass::meta::detail::pass_type<          \
-                            decltype(&std::decay_t<decltype(f)>::type::NAME)>::value, int> = 0) constexpr { \
+                            decltype(&std::decay_t<decltype(f)>::type::NAME)>(), int> = 0) constexpr { \
                             return true;                       \
        }, [](...) constexpr { return false; }                  \
     }(bluegrass::meta::detail::wrapper_t<TY>{})
@@ -36,7 +36,7 @@
    bluegrass::meta::overloaded {                             \
         [](auto&& f, std::enable_if_t<std::is_class_v<std::decay_t<decltype(f)>> && \
                         bluegrass::meta::detail::pass_type<          \
-                            decltype(&std::decay_t<decltype(f)>::type::template NAME)>::value, int> = 0) constexpr { \
+                            decltype(&std::decay_t<decltype(f)>::type::template NAME)>(), int> = 0) constexpr { \
                             return true;                       \
        }, [](...) constexpr { return false; }                  \
     }(bluegrass::meta::detail::wrapper_t<decltype(ARG)>{})
@@ -45,7 +45,7 @@
    bluegrass::meta::overloaded {                             \
         [](auto&& f, std::enable_if_t<std::is_class_v<TY> &&   \
                         bluegrass::meta::detail::pass_type<          \
-                            decltype(&std::decay_t<decltype(f)>::type::template NAME)>::value, int> = 0) constexpr { \
+                            decltype(&std::decay_t<decltype(f)>::type::template NAME)>(), int> = 0) constexpr { \
                             return true;                       \
        }, [](...) constexpr { return false; }                  \
     }(bluegrass::meta::detail::wrapper_t<TY>{})
@@ -63,9 +63,7 @@ namespace bluegrass { namespace meta {
 
    namespace detail {
       template <typename T>
-      struct pass_type {
-         enum { value = 1 };
-      };
+      constexpr bool pass_type() { return true; }
 
       template <typename T>
       struct wrapper_t {
