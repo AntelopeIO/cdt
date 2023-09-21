@@ -20,7 +20,7 @@ enum class file_type {
     wasm
 };
 
-inline file_type get_file_type(const char* path) {
+file_type get_file_type(const char* path) {
     std::fstream file;
     file.open(path, std::fstream::in | std::fstream::binary);
     assert(file.is_open());
@@ -55,7 +55,7 @@ inline file_type get_file_type(const char* path) {
     return file_type::uninitialized;
 }
 
-inline std::string file_type_str(file_type t) {
+std::string file_type_str(file_type t) {
     switch (t) {
         case file_type::non_elf_other:
         return "non elf";
