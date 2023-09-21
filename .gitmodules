@@ -12,7 +12,7 @@
 	url = https://github.com/AntelopeIO/berkeley-softfloat-3
 [submodule "tools/external/eos-vm"]
 	path = tools/external/eos-vm
-	url = https://github.com/AntelopeIO/eos-vm
+	url = git@github.com:AntelopeIO/eos-vm
 [submodule "tools/external/antler-proj"]
 	path = tools/external/antler-proj
 	url = https://github.com/AntelopeIO/antler-proj
