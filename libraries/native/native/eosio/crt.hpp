@@ -3,16 +3,7 @@
 
 #include <string>
 
-
-#ifdef NATIVELIB_ENABLE_EXCEPTIONS
-#include <stdexcept>
 namespace eosio { namespace cdt {
-   using assert_exception = std::runtime_error;
-}} //ns eosio::cdt 
-#endif
-
-namespace eosio { namespace cdt {
-
    enum output_stream_kind {
       std_out,
       std_err,
@@ -36,9 +27,6 @@ extern eosio::cdt::output_stream std_out;
 extern eosio::cdt::output_stream std_err;
 extern "C" jmp_buf* ___env_ptr;
 extern "C" char*    ___heap_ptr;
-extern "C" bool ___disable_output;
-extern "C" bool ___has_failed;
-extern "C" bool ___earlier_unit_test_has_failed;
 
 extern "C" {
    void __set_env_test();
