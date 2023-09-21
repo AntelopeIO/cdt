@@ -132,11 +132,6 @@ static cl::opt<bool> fnative_opt(
     cl::desc("Compile and link for x86-64"),
     cl::ZeroOrMore,
     cl::cat(LD_CAT));
-static cl::opt<bool> fshared_opt(
-    "shared",
-    cl::desc("Make shared object native library"),
-    cl::ZeroOrMore,
-    cl::cat(LD_CAT));
 static cl::opt<bool> fuse_main_opt(
     "fuse-main",
     cl::desc("Use main as entry"),
@@ -361,11 +356,6 @@ static cl::opt<bool> warn_action_read_only_opt(
     "warn-action-read-only",
     cl::desc("Issue a warning if a read-only action uses a write API and continue compilation"),
     cl::cat(EosioCompilerToolCategory));
-static cl::opt<bool> fPIC_opt(
-   "fPIC",
-    cl::desc("Generate position independent code. This option is used for shared libraries"),
-    cl::Optional,
-    cl::cat(LD_CAT));
 /// end c/c++ options
 
 /// begin c++ options
@@ -402,7 +392,6 @@ struct Options {
    std::vector<std::string> abigen_resources;
    bool debug;
    bool native;
-   bool shared_lib;
    std::pair<int, int> abi_version;
    bool has_o_opt;
    bool has_contract_opt;
@@ -416,7 +405,7 @@ static void GetCompDefaults(std::vector<std::string>& copts) {
    copts.emplace_back(std::string("-D__eosio_cdt_major__=")+"${VERSION_MAJOR}");
    copts.emplace_back(std::string("-D__eosio_cdt_minor__=")+"${VERSION_MINOR}");
    copts.emplace_back(std::string("-D__eosio_cdt_patchlevel__=")+"${VERSION_PATCH}");
-   if (!fnative_opt && !fshared_opt) {
+   if (!fnative_opt) {
       copts.emplace_back("--target=wasm32");
       copts.emplace_back("-ffreestanding");
       copts.emplace_back("-nostdlib");
@@ -451,7 +440,7 @@ static void GetCompDefaults(std::vector<std::string>& copts) {
       copts.emplace_back("-DBOOST_DISABLE_ASSERTS");
       copts.emplace_back("-DBOOST_EXCEPTION_DISABLE");
       copts.emplace_back("-U__APPLE__");
-      if (!fnative_opt && !fshared_opt) {
+      if (!fnative_opt) {
          copts.emplace_back("-Xclang");
          copts.emplace_back("-load");
          copts.emplace_back("-Xclang");
@@ -478,7 +467,7 @@ static void GetCompDefaults(std::vector<std::string>& copts) {
 
 #ifdef ONLY_LD
 static void GetLdDefaults(std::vector<std::string>& ldopts) {
-   if (!fnative_opt && !fshared_opt) {
+   if (!fnative_opt) {
       if (!allow_names_opt) {
          ldopts.emplace_back("--gc-sections");
          ldopts.emplace_back("--strip-all");
@@ -565,22 +554,13 @@ static void GetLdDefaults(std::vector<std::string>& ldopts) {
       sdkpath.resize(sdkpath.size()-1);
       ldopts.insert(ldopts.end(), {"-syslibroot", sdkpath});
 #endif
-      if (fshared_opt) {
-         ldopts.emplace_back("-shared");
-      }
-      else {
-         ldopts.emplace_back("-static");
-      }
+      ldopts.emplace_back("-static");
       ldopts.insert(ldopts.end(), {"-lnative_c++", "-lnative_c", "-lnative_eosio", "-lnative", "-lnative_rt"});
    }
 }
 #endif
 
 static Options CreateOptions(bool add_defaults=true) {
-   if (fshared_opt && fnative_opt) {
-         throw std::runtime_error("Both -fnative and -fshared was specified. Only one of them should be present.");
-   }
-
    std::string output_fn;
    std::vector<std::string> inputs;
    std::vector<std::string> agresources;
@@ -760,7 +740,7 @@ static Options CreateOptions(bool add_defaults=true) {
       copts.emplace_back("-I"+sysroot_opt+"/include/libc");
 
       // only allow capi for native builds and for eosio-cc
-      if (fnative_opt || fshared_opt) {
+      if (fnative_opt) {
         copts.emplace_back("-I"+sysroot_opt+"/include/eosiolib/capi");
         copts.emplace_back("-I"+sysroot_opt+"/include/eosiolib/native");
       }
@@ -786,7 +766,7 @@ static Options CreateOptions(bool add_defaults=true) {
       agopts.emplace_back("--sysroot="+eosio::cdt::whereami::where()+"/../");
       ldopts.emplace_back("-L"+eosio::cdt::whereami::where()+"/../lib");
 
-      if (fnative_opt || fshared_opt) {
+      if (fnative_opt) {
         copts.emplace_back("-I"+eosio::cdt::whereami::where()+"/../include/eosiolib/capi");
         copts.emplace_back("-I"+eosio::cdt::whereami::where()+"/../include/eosiolib/native");
       }
@@ -825,12 +805,8 @@ static Options CreateOptions(bool add_defaults=true) {
       copts.emplace_back("-W"+warn);
    }
 
-   if (fPIC_opt) {
-      copts.emplace_back("-fPIC");
-   }
-
 #endif
-   if (!fnative_opt && !fshared_opt) {
+   if (!fnative_opt) {
 #ifdef ONLY_LD
       if (stack_canary_opt) {
          ldopts.emplace_back("--stack-canary");
@@ -870,22 +846,11 @@ static Options CreateOptions(bool add_defaults=true) {
    for ( auto library : l_opt ) {
       ldopts.emplace_back("-l"+library);
    }
-   auto replace_extension = [&](auto& str){
-      if (fnative_opt) {
-         llvm::sys::path::replace_extension(str, "");
-      }
-      else if (fshared_opt) {
-         llvm::sys::path::replace_extension(str, ".so");
-      }
-      else {
-         llvm::sys::path::replace_extension(str, ".wasm");
-      }
-   };
    if (o_opt.empty()) {
 #ifndef ONLY_LD
       if (inputs.size() == 1) {
          llvm::SmallString<256> fn  = llvm::sys::path::filename(inputs[0]);
-         replace_extension(fn);
+         llvm::sys::path::replace_extension(fn, fnative_opt ? "" : ".wasm");
          output_fn = fn.str();
       } else {
          output_fn = "a.out";
@@ -896,7 +861,7 @@ static Options CreateOptions(bool add_defaults=true) {
       if (inputs.size() == 1) {
          llvm::SmallString<256> fn = llvm::sys::path::filename(inputs[0]);
          llvm::sys::path::replace_extension(fn, "");
-         replace_extension(fn);
+         llvm::sys::path::replace_extension(fn, fnative_opt ? "" : ".wasm");
          output_fn = fn.str();
          ldopts.emplace_back("-o"+output_fn);
       } else {
@@ -913,7 +878,7 @@ static Options CreateOptions(bool add_defaults=true) {
       has_o_opt = true;
    }
 
-   if (!fnative_opt && !fshared_opt) {
+   if (!fnative_opt) {
 #ifndef ONLY_LD
       if (!imports_opt.empty()) {
          ldopts.emplace_back("-imports="+imports_opt);
@@ -970,9 +935,6 @@ static Options CreateOptions(bool add_defaults=true) {
    }
    if (fnative_opt)
       ldopts.emplace_back("-fnative");
-   else if (fshared_opt) {
-      ldopts.emplace_back("-shared");
-   }
    if (fuse_main_opt)
       ldopts.emplace_back("-fuse-main");
    
@@ -995,8 +957,8 @@ static Options CreateOptions(bool add_defaults=true) {
    }
 
 #ifndef ONLY_LD
-   return {output_fn, inputs, link, abigen, no_missing_ricardian_clause_opt, pp_only, pp_dir, abigen_output, abigen_contract, copts, ldopts, agopts, agresources, debug, fnative_opt, fshared_opt, {abi_version_major, abi_version_minor}, has_o_opt, has_contract_opt, warn_action_read_only};
+   return {output_fn, inputs, link, abigen, no_missing_ricardian_clause_opt, pp_only, pp_dir, abigen_output, abigen_contract, copts, ldopts, agopts, agresources, debug, fnative_opt, {abi_version_major, abi_version_minor}, has_o_opt, has_contract_opt, warn_action_read_only};
 #else
-   return {output_fn, {}, link, abigen, no_missing_ricardian_clause_opt, pp_only, pp_dir, abigen_output, abigen_contract, copts, ldopts, agopts, agresources, debug, fnative_opt, fshared_opt, {abi_version_major, abi_version_minor}, has_o_opt, has_contract_opt, warn_action_read_only};
+   return {output_fn, {}, link, abigen, no_missing_ricardian_clause_opt, pp_only, pp_dir, abigen_output, abigen_contract, copts, ldopts, agopts, agresources, debug, fnative_opt, {abi_version_major, abi_version_minor}, has_o_opt, has_contract_opt, warn_action_read_only};
 #endif
 }
