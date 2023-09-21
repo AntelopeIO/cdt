@@ -26,15 +26,13 @@ namespace eosio { namespace cdt {
 
 extern eosio::cdt::output_stream std_out;
 extern eosio::cdt::output_stream std_err;
+extern "C" jmp_buf* ___env_ptr;
+extern "C" char*    ___heap_ptr;
+extern "C" bool ___disable_output;
+extern "C" bool ___has_failed;
+extern "C" bool ___earlier_unit_test_has_failed;
 
 extern "C" {
-   extern jmp_buf* ___env_ptr;
-   extern char*    ___heap_ptr;
-   extern bool ___disable_output;
-   extern bool ___has_failed;
-   extern bool ___earlier_unit_test_has_failed;
-
-   jmp_buf* __get_jmp_buf();
    void __set_env_test();
    void __reset_env();
    void _prints_l(const char* cstr, uint32_t len, uint8_t which);
