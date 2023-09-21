@@ -3,6 +3,14 @@
 
 #include <string>
 
+
+#ifdef NATIVELIB_ENABLE_EXCEPTIONS
+#include <stdexcept>
+namespace eosio { namespace cdt {
+   using assert_exception = std::runtime_error;
+}} //ns eosio::cdt 
+#endif
+
 namespace eosio { namespace cdt {
 
    enum output_stream_kind {
