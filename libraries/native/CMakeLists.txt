@@ -4,8 +4,10 @@ project(native LANGUAGES CXX ASM)
 
 if (NOT __APPLE)
    set(CRT_ASM elf_crt.s)
+   set(UTILS_ASM utils.s)
 else()
    set(CRT_ASM macho_crt.s)
+   set(UTILS_ASM mac_utils.s)
 endif()
 
 if (NOT ${PARENT_PROJECT_NAME} MATCHES "cdt_tools")
@@ -337,9 +339,12 @@ add_library ( sf STATIC ${softfloat_sources} )
 target_include_directories( sf PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/softfloat/source/include" "${CMAKE_CURRENT_SOURCE_DIR}/softfloat/source/8086-SSE" "${CMAKE_CURRENT_SOURCE_DIR}/softfloat/build/Linux-x86_64-GCC" ${CMAKE_SOURCE_DIR})
 
 if (${PARENT_PROJECT_NAME} STREQUAL "cdt_tools")
-   add_library(${PROJECT_NAME} STATIC ${softfloat_sources} intrinsics.cpp crt_lib.cpp)
+   # TODO: we need crt.cpp and assembly only for _prints_l and _prints
+   #       we unlikely need those implementations for antler-run so
+   #       we may need to add some code (macroses, etc) to crt.cpp and/or intrinsics.cpp so
+   #       we can revert assembly changes and build only *.cpp without ${UTILS_ASM} 
+   add_library(${PROJECT_NAME} STATIC ${softfloat_sources} intrinsics.cpp crt.cpp ${UTILS_ASM})
 
-   target_compile_definitions(${PROJECT_NAME} PUBLIC NATIVELIB_ENABLE_EXCEPTIONS)
    target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/../libraries/eosiolib/core
                                                      ${CMAKE_SOURCE_DIR}/../libraries/eosiolib/contracts
                                                      ${CMAKE_SOURCE_DIR}/../libraries/eosiolib/capi
@@ -347,7 +352,7 @@ if (${PARENT_PROJECT_NAME} STREQUAL "cdt_tools")
    # suppress executable stack warning. this is due to absence of .note.GNU-stack
    target_link_libraries(${PROJECT_NAME} PUBLIC "-Wl,-z,noexecstack")
 else()
-   add_native_library ( native STATIC ${softfloat_sources} intrinsics.cpp crt.cpp ${CRT_ASM})
+   add_native_library ( native STATIC ${softfloat_sources} intrinsics.cpp crt.cpp ${CRT_ASM} ${UTILS_ASM})
 endif()
 
 target_include_directories( native PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/softfloat/source/include" "${CMAKE_CURRENT_SOURCE_DIR}/softfloat/source/8086-SSE" "${CMAKE_CURRENT_SOURCE_DIR}/softfloat/build/Linux-x86_64-GCC" ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/eosiolib/capi ${CMAKE_SOURCE_DIR}/eosiolib/contracts ${CMAKE_SOURCE_DIR}/eosiolib/core)
