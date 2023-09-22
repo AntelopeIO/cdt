@@ -10,8 +10,6 @@
 #include <array>
 #include <vector>
 
-#include <endian.h>
-
 namespace bls12_381 {
 class sha256 {
 public:
@@ -337,20 +335,20 @@ namespace eosio {
 
 namespace detail {
     const inline std::string bls_public_key_prefix = "PUB_BLS_";
-    const inline uint32_t bls_publick_key_checksum_size = sizeof(uint32_t);
+    constexpr inline uint32_t bls_checksum_size = sizeof(uint32_t);
     const inline std::string bls_signature_prefix = "SIG_BLS_";
 
     template<typename T, const std::string& Prefix>
     std::string bls_type_to_base64(const T& g1) {
-        std::array<char, sizeof(T) + bls_publick_key_checksum_size> g1_with_checksum;
+        std::array<char, sizeof(T) + bls_checksum_size> g1_with_checksum;
         auto it = std::copy(g1.begin(), g1.end(), g1_with_checksum.begin());
         
         auto csum = ripemd160(g1.data(), g1.size()).extract_as_byte_array();
         std::copy(reinterpret_cast<const char*>(csum.data()), 
-                  reinterpret_cast<const char*>(csum.data())+bls_publick_key_checksum_size, 
+                  reinterpret_cast<const char*>(csum.data())+bls_checksum_size, 
                   it);
         
-        return Prefix + eosio::base64_encode(g1_with_checksum.data(), g1_with_checksum.size());
+        return Prefix + eosio::base64_encode({g1_with_checksum.data(), g1_with_checksum.size()});
     }
     template<typename T, const std::string& Prefix>
     T bls_base64_to_type(const char* data, size_t size) {
@@ -359,16 +357,16 @@ namespace detail {
 
         std::string decoded = eosio::base64_decode({data+Prefix.size(), size - Prefix.size()});
         T ret;
-        eosio::check(decoded.size() == ret.size() + bls_publick_key_checksum_size, "decoded size " + std::to_string(decoded.size()) + 
+        eosio::check(decoded.size() == ret.size() + bls_checksum_size, "decoded size " + std::to_string(decoded.size()) + 
                                                                                    " doesn't match structure size " + std::to_string(ret.size()) + 
-                                                                                   " + checksum " + std::to_string(bls_publick_key_checksum_size));
+                                                                                   " + checksum " + std::to_string(bls_checksum_size));
         
         auto it = decoded.end();
-        std::advance(it, -bls_publick_key_checksum_size);
+        std::advance(it, -bls_checksum_size);
         std::copy(decoded.begin(), it, ret.begin());
         
         auto csum = ripemd160(ret.data(), ret.size()).extract_as_byte_array();
-        eosio::check(0 == memcmp(&*it, csum.data(), bls_publick_key_checksum_size), "checksum of structure doesn't match");
+        eosio::check(0 == memcmp(&*it, csum.data(), bls_checksum_size), "checksum of structure doesn't match");
 
         return ret;
     }
@@ -464,7 +462,7 @@ namespace detail {
                                                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
                                                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
                                                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}; // 73x8 = 584 bytes
-    const inline std::vector<uint8_t> R1 =     {0xfd, 0xff, 0x02, 0x00, 0x00, 0x00, 0x09, 0x76, 
+    const inline std::array<uint8_t, 48> R1 =  {0xfd, 0xff, 0x02, 0x00, 0x00, 0x00, 0x09, 0x76, 
                                                 0x02, 0x00, 0x0c, 0xc4, 0x0b, 0x00, 0xf4, 0xeb, 
                                                 0xba, 0x58, 0xc7, 0x53, 0x57, 0x98, 0x48, 0x5f, 
                                                 0x45, 0x57, 0x52, 0x70, 0x53, 0x58, 0xce, 0x77, 
@@ -519,13 +517,13 @@ namespace detail {
         }
     }
     bls_s scalar_fromBE(const bls_s& in) {
-        std::array<uint64_t, 8> out;
-        for(uint64_t i = 0; i < 8; i++) {
-            uint64_t temp;
-            memcpy(&temp, &in[in.size() - i*8 - 8], sizeof(uint64_t));
-            out[i] = htobe64(temp);
+        bls_s out;
+        constexpr size_t last_index = sizeof(out) - 1;
+        for(size_t i = 0; i <= last_index; ++i)
+        {
+            out[i] = in[last_index - i];
         }
-        return reinterpret_cast<bls_s&&>(std::move(out));
+        return out;
     }
     void g2_fromMessage(const bls_g1_affine& msg, const std::string& dst, bls_g2& res) {
 
@@ -553,17 +551,39 @@ namespace detail {
     }
 }
 
-    inline std::string bls_g1_affine_to_base64(const bls_g1_affine& g1) {
+    inline std::string encode_g1_to_bls_public_key(const bls_g1_affine& g1) {
         return detail::bls_type_to_base64<bls_g1_affine, detail::bls_public_key_prefix>(g1);
     }
-    inline bls_g1_affine bls_base64_to_g1_affine(const char* data, size_t size) {
-        return detail::bls_base64_to_type<bls_g1_affine, detail::bls_public_key_prefix>(data, size);
+    inline bls_g1_affine decode_bls_public_key_to_g1(std::string_view public_key) {
+        return detail::bls_base64_to_type<bls_g1_affine, detail::bls_public_key_prefix>(public_key.data(), public_key.size());
     }
-    inline std::string bls_sig_to_base64_affine(const bls_g2_affine& g2) {
+    inline std::string encode_g2_to_bls_signature(const bls_g2_affine& g2) {
         return detail::bls_type_to_base64<bls_g2_affine, detail::bls_signature_prefix>(g2);
     }
-    inline bls_g2_affine bls_base64_to_sig_affine(const char* data, size_t size) {
-        return detail::bls_base64_to_type<bls_g2_affine, detail::bls_signature_prefix>(data, size);
+    inline bls_g2_affine decode_bls_signature_to_g2(std::string_view public_key) {
+        return detail::bls_base64_to_type<bls_g2_affine, detail::bls_signature_prefix>(public_key.data(), public_key.size());
+    }
+
+    inline bls_g1 g1_affine_to_jacobian(const bls_g1_affine& pubkey) {
+        using namespace detail;
+
+        static_assert(sizeof(bls_g1_affine) + sizeof(R1) == sizeof(bls_g1));
+        // add z coordinate (R1) to pubkey and signature_proof
+        bls_g1 pubkey_jacobian;
+        auto insert_it = std::copy(pubkey.begin(), pubkey.end(), pubkey_jacobian.begin());
+        std::copy(R1.begin(), R1.end(), insert_it);
+
+        return pubkey_jacobian;
+    }
+
+    inline bls_g2 g2_affine_to_jacobian(const bls_g2_affine& signature_proof) {
+        using namespace detail;
+        
+        bls_g2 sig_ex = {0};
+        auto insert_it = std::copy(signature_proof.begin(), signature_proof.end(), sig_ex.begin());
+        std::copy(R1.begin(), R1.end(), insert_it);
+
+        return sig_ex;
     }
 
     // pubkey and signature are assumed to be in RAW affine little-endian bytes
@@ -573,14 +593,8 @@ namespace detail {
         bls_g1 g1_points[2] = {0};
         bls_g2 g2_points[2] = {0};
 
-        // add z coordinate (R1) to pubkey and signature_proof
-        std::vector<uint8_t> pubkey_ex(sizeof(bls_g1_affine) + R1.size(), 0);
-        auto insert_it = std::copy(pubkey.begin(), pubkey.end(), pubkey_ex.begin());
-        std::copy(R1.begin(), R1.end(), insert_it);
-
-        std::vector<uint8_t> sig_ex(sizeof(bls_g2), 0);
-        insert_it = std::copy(signature_proof.begin(), signature_proof.end(), sig_ex.begin());
-        std::copy(R1.begin(), R1.end(), insert_it);
+        bls_g1 pubkey_ex = g1_affine_to_jacobian(pubkey);
+        bls_g2 sig_ex = g2_affine_to_jacobian(signature_proof);
 
         memcpy(&g1_points[0], G1_ONE_NEG.data(), G1_ONE_NEG.size());
         memcpy(&g2_points[0], sig_ex.data(), sig_ex.size());

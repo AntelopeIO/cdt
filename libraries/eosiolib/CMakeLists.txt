@@ -26,6 +26,7 @@ else()
    add_library(eosio
                eosiolib.cpp
                crypto.cpp
+               base64.cpp
                ${HEADERS})
 
    add_library(eosio_malloc
@@ -62,6 +63,7 @@ else()
                         eosiolib.cpp
                         crypto.cpp
                         malloc.cpp
+                        base64.cpp
                         ${HEADERS})
 
       add_dependencies( native_eosio eosio )

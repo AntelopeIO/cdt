@@ -63,7 +63,7 @@ EOSIO_TEST_BEGIN(base64_cpp_base64_tests)
       "http://www.renenyffenegger.ch\n"
       "passion for data\n";
 
-   std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(orig.c_str()), orig.length());
+   std::string encoded = base64_encode({orig.c_str(), orig.length()});
    std::string decoded = base64_decode(encoded);
 
    CHECK_EQUAL(encoded, "UmVuw6kgTnlmZmVuZWdnZXIKaHR0cDovL3d3dy5yZW5lbnlmZmVuZWdnZXIuY2gKcGFzc2lvbiBmb3IgZGF0YQo=");
@@ -75,8 +75,7 @@ EOSIO_TEST_BEGIN(base64_cpp_base64_tests)
    std::string rest0_original = "abc";
    std::string rest0_reference = "YWJj";
 
-   std::string rest0_encoded = base64_encode(reinterpret_cast<const unsigned char*>(rest0_original.c_str()),
-                                             rest0_original.length());
+   std::string rest0_encoded = base64_encode({rest0_original.c_str(),rest0_original.length()});
    std::string rest0_decoded = base64_decode(rest0_encoded);
 
    CHECK_EQUAL(rest0_decoded, rest0_original);
@@ -85,8 +84,7 @@ EOSIO_TEST_BEGIN(base64_cpp_base64_tests)
    std::string rest1_original = "abcd";
    std::string rest1_reference = "YWJjZA==";
 
-   std::string rest1_encoded = base64_encode(reinterpret_cast<const unsigned char*>(rest1_original.c_str()),
-                                             rest1_original.length());
+   std::string rest1_encoded = base64_encode({rest1_original.c_str(), rest1_original.length()});
    std::string rest1_decoded = base64_decode(rest1_encoded);
 
    CHECK_EQUAL(rest1_decoded, rest1_original);
@@ -95,8 +93,7 @@ EOSIO_TEST_BEGIN(base64_cpp_base64_tests)
    std::string rest2_original = "abcde";
    std::string rest2_reference = "YWJjZGU=";
 
-   std::string rest2_encoded = base64_encode(reinterpret_cast<const unsigned char*>(rest2_original.c_str()),
-                                             rest2_original.length());
+   std::string rest2_encoded = base64_encode({rest2_original.c_str(),rest2_original.length()});
    std::string rest2_decoded = base64_decode(rest2_encoded);
 
    CHECK_EQUAL(rest2_decoded, rest2_original);

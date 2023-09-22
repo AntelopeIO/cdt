@@ -89,22 +89,22 @@ class [[eosio::contract]] bls_primitives_tests : public contract{
 
         [[eosio::action]]
         void popverify(const std::string& pk, const std::string& sig) {
-            check(bls_pop_verify(bls_base64_to_g1_affine(pk.data(), pk.size()), bls_base64_to_sig_affine(sig.data(), sig.size())), "pop verify failed");
+            check(bls_pop_verify(decode_bls_public_key_to_g1(pk), decode_bls_signature_to_g2(sig)), "pop verify failed");
         }
 
         [[eosio::action]]
         void g1baseb4enc(const std::vector<char>& g1, const std::string& base64 ) {
             check(g1.size() == std::tuple_size<bls_g1_affine>::value, "wrong g1 size passed");
 
-            check(bls_g1_affine_to_base64(*reinterpret_cast<const bls_g1_affine*>(g1.data())) == base64, "g1 to base64 encoding doesn't match" );
-            check(bls_base64_to_g1_affine(base64.data(), base64.size()) == *reinterpret_cast<const bls_g1_affine*>(g1.data()), "base64 to g1 decoding doesn't match" );
+            check(encode_g1_to_bls_public_key(*reinterpret_cast<const bls_g1_affine*>(g1.data())) == base64, "g1 to base64 encoding doesn't match" );
+            check(decode_bls_public_key_to_g1(base64) == *reinterpret_cast<const bls_g1_affine*>(g1.data()), "base64 to g1 decoding doesn't match" );
         }
 
         [[eosio::action]]
         void sigbaseb4enc(const std::vector<char>& g2, const std::string& base64) {
             check(g2.size() == std::tuple_size<bls_g2_affine>::value, "wrong g2 size passed");
 
-            check(bls_sig_to_base64_affine(*reinterpret_cast<const bls_g2_affine*>(g2.data())) == base64, "g2 to base64 encoding doesn't match" );
-            check(bls_base64_to_sig_affine(base64.data(), base64.size()) == *reinterpret_cast<const bls_g2_affine*>(g2.data()), "base64 to g2 decoding doesn't match" );
+            check(encode_g2_to_bls_signature(*reinterpret_cast<const bls_g2_affine*>(g2.data())) == base64, "g2 to base64 encoding doesn't match" );
+            check(decode_bls_signature_to_g2(base64) == *reinterpret_cast<const bls_g2_affine*>(g2.data()), "base64 to g2 decoding doesn't match" );
         }
 };
