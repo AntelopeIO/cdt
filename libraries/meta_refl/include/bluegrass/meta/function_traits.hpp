@@ -81,9 +81,6 @@ namespace bluegrass { namespace meta {
       inline constexpr U&& make_dependent(U&& u) { return static_cast<U&&>(u); }
    }
 
-   template <auto FN>
-   inline constexpr static bool is_callable_v = BLUEGRASS_HAS_MEMBER(AUTO_PARAM_WORKAROUND(FN), operator());
-
    template <typename F>
    constexpr bool is_callable(F&& fn) { return BLUEGRASS_HAS_MEMBER(fn, operator()); }
 
@@ -111,7 +108,7 @@ namespace bluegrass { namespace meta {
                                                                std::tuple<std::conditional_t<Decay, std::decay_t<Args>, Args>...>>;
       template <bool Decay, typename F>
       constexpr auto get_types(F&& fn) {
-         if constexpr (is_callable_v<decltype(fn)>)
+         if constexpr (is_callable(fn))
             return get_types<Decay>(&F::operator());
          else
             return get_types<Decay>(fn);
@@ -153,7 +150,7 @@ namespace bluegrass { namespace meta {
       constexpr auto parameters_from_impl(R(Cls::*)(Args...)const &&) ->  pack_from_t<N, Args...>;
       template <std::size_t N, typename F>
       constexpr auto parameters_from_impl(F&& fn) {
-         if constexpr (is_callable_v<decltype(fn)>)
+         if constexpr (is_callable(fn))
             return parameters_from_impl<N>(&F::operator());
          else
             return parameters_from_impl<N>(fn);
