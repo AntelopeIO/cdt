@@ -243,13 +243,11 @@ namespace eosio { namespace cdt {
          ctables.insert(t);
       }
 
-      void add_table( uint64_t name, const clang::CXXRecordDecl* decl, bool force=false ) {
-         if (force || decl->isEosioTable() && abigen::is_eosio_contract(decl, get_contract_name())) {
-            abi_table t;
-            t.type = decl->getNameAsString();
-            t.name = name_to_string(name);
-            _abi.tables.insert(t);
-         }
+      void add_table( uint64_t name, const clang::CXXRecordDecl* decl ) {
+         abi_table t;
+         t.type = decl->getNameAsString();
+         t.name = name_to_string(name);
+         _abi.tables.insert(t);
       }
 
       void add_clauses( const std::vector<std::pair<std::string, std::string>>& clauses ) {
@@ -801,24 +799,6 @@ namespace eosio { namespace cdt {
             return true;
          }
 
-         const clang::CXXRecordDecl* find_contract_class(const clang::ASTContext &ctx) const {
-            const auto* translation_unit = ctx.getTranslationUnitDecl();
-            // scanning entire translation unit to find contract class
-            for (const clang::Decl* cur_decl : translation_unit->decls()) {
-               if (const auto* cxx_decl = llvm::dyn_cast<clang::CXXRecordDecl>(cur_decl)) {
-                  
-                  if (cxx_decl->isEosioContract()) {
-                     auto attr_name = cxx_decl->getEosioContractAttr()->getName();
-                     auto name = attr_name.empty() ? cxx_decl->getName() : attr_name;
-                     if (name == llvm::StringRef(ag.get_contract_name()))
-                        return cxx_decl;
-                  }
-               }
-            }
-
-            return nullptr;
-         }
-
          bool is_same_type(const clang::Decl* decl1, const clang::CXXRecordDecl* decl2) const {
             if (!decl1 || !decl2)
                return false;
@@ -840,12 +820,9 @@ namespace eosio { namespace cdt {
          bool defined_in_contract(const clang::ClassTemplateSpecializationDecl* decl) {
 
             if (!contract_class) {
-               contract_class = find_contract_class(decl->getASTContext());
-               if (!contract_class) {
                   // currently this is unreachable as we do not traverse non-main file translation units
-                  CDT_WARN("codegen_warning", decl->getLocation(), "contract class not found");
+                  CDT_WARN("codegen_warning", decl->getLocation(), "contract class not found: " + ag.get_contract_name());
                   return false;
-               }
             }
             
             for (const clang::Decl* cur_decl : contract_class->decls()) {
@@ -858,16 +835,62 @@ namespace eosio { namespace cdt {
 
          virtual bool VisitDecl(clang::Decl* decl) {
             if (const auto* d = dyn_cast<clang::ClassTemplateSpecializationDecl>(decl)) {
-               bool is_singleton = d->getName() == "singleton";
-               if ((d->getName() == "multi_index" || is_singleton) && defined_in_contract(d)) {
-                  ag.add_table(d->getTemplateArgs()[0].getAsIntegral().getExtValue(),
-                               d->getTemplateArgs()[1].getAsType().getTypePtr()->getAsCXXRecordDecl(), is_singleton);
+               if (d->getName() == "multi_index" || d->getName() == "singleton") {
+                  // second template parameter is table type
+                  const auto* table_type = d->getTemplateArgs()[1].getAsType().getTypePtr()->getAsCXXRecordDecl();
+                  if ((table_type->isEosioTable() && ag.is_eosio_contract(table_type, ag.get_contract_name())) || defined_in_contract(d)) {
+                     // first parameter is table name
+                     ag.add_table(d->getTemplateArgs()[0].getAsIntegral().getExtValue(), table_type);
+                     if (table_type->isEosioTable())
+                        ag.add_struct(table_type);
+                  }
                }
             }
             return true;
          }
+         inline void set_contract_class(const CXXRecordDecl* decl) {
+            contract_class = decl;
+         }
    };
+   class contract_class_finder : public RecursiveASTVisitor<contract_class_finder> {
+   private:
+      abigen& ag = abigen::get();
+      const clang::CXXRecordDecl* contract_class = nullptr;
+   public:
+      virtual bool VisitCXXRecordDecl(clang::CXXRecordDecl* cxx_decl) {
+         if (cxx_decl->isEosioContract()) {
+            bool is_eosio_contract = false;
+            // on this point it could be just an attribute so let's check base classes
+            for (const auto& base : cxx_decl->bases()) {
+               if (const clang::Type *base_type = base.getType().getTypePtrOrNull()) {
+                  if (const auto* cur_cxx_decl = base_type->getAsCXXRecordDecl()) {
+                     if (cur_cxx_decl->getQualifiedNameAsString() == "eosio::contract") {
+                        is_eosio_contract = true;
+                        break;
+                     }
+                  }
+               }
+            }
+            if (!is_eosio_contract)
+               return true;
+            
+            auto attr_name = cxx_decl->getEosioContractAttr()->getName();
+            auto name = attr_name.empty() ? cxx_decl->getName() : attr_name;
+            if (name == llvm::StringRef(ag.get_contract_name())) {
+               contract_class = cxx_decl;
+               return false;
+            }
+         }
 
+         return true;
+      }
+      inline bool contract_found() const {
+         return contract_class != nullptr;
+      }
+      inline const clang::CXXRecordDecl* get_contract() const {
+         return contract_class;
+      }
+   };
    class eosio_abigen_consumer : public ASTConsumer {
       private:
          eosio_abigen_visitor *visitor;
@@ -883,6 +906,10 @@ namespace eosio { namespace cdt {
             auto& f_mgr = src_mgr.getFileManager();
             auto main_fe = f_mgr.getFile(main_file);
             if (main_fe) {
+               contract_class_finder cf;
+               cf.TraverseDecl(Context.getTranslationUnitDecl());
+               if (cf.contract_found())
+                  visitor->set_contract_class(cf.get_contract());
                visitor->TraverseDecl(Context.getTranslationUnitDecl());
             }
          }
