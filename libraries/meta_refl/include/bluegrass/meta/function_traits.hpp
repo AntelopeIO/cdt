@@ -34,7 +34,7 @@
 
 #define BLUEGRASS_HAS_TEMPLATE_MEMBER(ARG, NAME)                  \
    bluegrass::meta::overloaded {                             \
-        [](auto&& f, std::enable_if_t<std::is_class_v<std::decay_t<decltype(f)>> && \
+        [&](auto&& f, std::enable_if_t<std::is_class_v<std::decay_t<decltype(f)>> && \
                         bluegrass::meta::detail::pass_type<          \
                             decltype(&std::decay_t<decltype(f)>::type::template NAME)>(), int> = 0) constexpr { \
                             return true;                       \
