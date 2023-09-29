@@ -8,5 +8,4 @@ RUN apt-get update && apt-get upgrade -y && \
                                                       python3 \
                                                       pkg-config \
                                                       libcurl4-openssl-dev \
-                                                      libboost-all-dev \
-                                                      libcurl4-gnutls-dev
+                                                      libboost-all-dev
