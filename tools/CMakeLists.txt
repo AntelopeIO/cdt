@@ -22,6 +22,8 @@ include_directories(${LLVM_SRCDIR}/include)
 include_directories(${LLVM_BINDIR}/include)
 link_directories(${LLVM_LIBRARY_DIRS})
 add_definitions(${LLVM_DEFINITIONS})
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
 
 set(EOSIO_STACK_SIZE 8192)
 
@@ -67,7 +69,6 @@ macro (add_tool name)
      LLVMDemangle
    )
 
-   add_custom_command( TARGET ${name} POST_BUILD COMMAND mkdir -p ${CMAKE_BINARY_DIR}/bin )
    add_custom_command( TARGET ${name} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${name}> ${CMAKE_BINARY_DIR}/bin/ )
 endmacro()
 
