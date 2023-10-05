@@ -64,6 +64,8 @@ create_symlink eosio-pp eosio-pp
 create_symlink cdt-init cdt-init
 create_symlink eosio-wasm2wast eosio-wasm2wast
 create_symlink eosio-wast2wasm eosio-wast2wasm
+create_symlink eosio-wasm2wast cdt-wasm2wast
+create_symlink eosio-wast2wasm cdt-wast2wasm
 create_symlink cdt-ar cdt-ar
 create_symlink cdt-abidiff cdt-abidiff
 create_symlink cdt-nm cdt-nm
