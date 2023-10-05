@@ -22,7 +22,7 @@ int main(int argc, const char **argv) {
   Options opts = CreateOptions();
 
   std::string line;
-  if (opts.native || opts.shared_lib) {
+  if (opts.native) {
 #ifdef __APPLE__
      if (!eosio::cdt::environment::exec_subprogram("ld", opts.ld_options, true))
 #else
@@ -41,7 +41,7 @@ int main(int argc, const char **argv) {
   }
 
   // finally any post processing
-  if (!fno_post_pass_opt && !opts.native && !opts.shared_lib) {
+  if (!fno_post_pass_opt && !opts.native) {
      if ( !llvm::sys::fs::exists( opts.eosio_pp_dir+"/eosio-pp" ) ) {
         std::cerr << "Error: eosio.pp not found! (Try reinstalling eosio.cdt)" << std::endl;
         return -1;

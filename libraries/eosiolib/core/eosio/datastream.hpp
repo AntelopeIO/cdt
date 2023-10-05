@@ -17,7 +17,7 @@
 #include <optional>
 #include <variant>
 
-#include <cstring>
+#include <string.h>
 
 namespace eosio {
 
