@@ -7,6 +7,17 @@ on:
       - "release/*"
   pull_request:
   workflow_dispatch:
+    inputs:
+      override-leap-dev:
+        description: Override leap-dev target
+        type: string
+      override-leap-dev-prerelease:
+        type: choice
+        description: Override leap-dev prelease
+        options:
+        - default
+        - true
+        - false
 
 permissions:
   packages: write
@@ -53,14 +64,38 @@ jobs:
           push: true
           tags: ${{fromJSON(needs.d.outputs.p)[matrix.platform].image}}
           file: ${{fromJSON(needs.d.outputs.p)[matrix.platform].dockerfile}}
+
+  versions:
+    name: Determine Versions
+    runs-on: ubuntu-latest
+    outputs:
+      leap-dev-target: ${{steps.versions.outputs.leap-dev-target}}
+      leap-dev-prerelease: ${{steps.versions.outputs.leap-dev-prerelease}}
+    steps:
+      - name: Setup versions from input or defaults
+        id: versions
+        env:
+          GH_TOKEN: ${{github.token}}
+        run: |
+          DEFAULTS_JSON=$(curl -sSfL $(gh api https://api.github.com/repos/${{github.repository}}/contents/.cicd/defaults.json?ref=${{github.sha}} --jq .download_url))
+          echo leap-dev-target=$(echo "$DEFAULTS_JSON" | jq -r '."leap-dev".target') >> $GITHUB_OUTPUT
+          echo leap-dev-prerelease=$(echo "$DEFAULTS_JSON" | jq -r '."leap-dev".prerelease') >> $GITHUB_OUTPUT
+
+          if [[ "${{inputs.override-leap-dev}}" != "" ]]; then
+            echo leap-dev-target=${{inputs.override-leap-dev}} >> $GITHUB_OUTPUT
+          fi
+          if [[ "${{inputs.override-leap-dev-prerelease}}" == +(true|false) ]]; then
+            echo leap-dev-prerelease=${{inputs.override-leap-dev-prerelease}} >> $GITHUB_OUTPUT
+          fi
+
   Build:
     name: Build & Test
-    needs: [d, build-platforms]
+    needs: [d, build-platforms, versions]
     if: always() && needs.d.result == 'success' && (needs.build-platforms.result == 'success' || needs.build-platforms.result == 'skipped')
     strategy:
       fail-fast: false
       matrix:
-        platform: [ubuntu18, ubuntu20, ubuntu22]
+        platform: [ubuntu20, ubuntu22, ubuntu22-llvm]
     runs-on: ["self-hosted", "enf-x86-beefy"]
     container: ${{fromJSON(needs.d.outputs.p)[matrix.platform].image}}
     steps:
@@ -69,15 +104,15 @@ jobs:
             submodules: recursive
         - name: Download leap-dev.deb (Ubuntu 20 only)
           if: matrix.platform == 'ubuntu20'
-          uses: AntelopeIO/asset-artifact-download-action@v2
+          uses: AntelopeIO/asset-artifact-download-action@v3
           with:
             owner: AntelopeIO
             repo: leap
             file: 'leap-dev.*(x86_64|amd64).deb'
-            target: 4.0
+            target: '${{needs.versions.outputs.leap-dev-target}}'
+            prereleases: ${{fromJSON(needs.versions.outputs.leap-dev-prerelease)}}
             artifact-name: leap-dev-ubuntu20-amd64
             container-package: experimental-binaries
-            token: ${{github.token}}
         - name: Install leap-dev.deb (Ubuntu 20 only)
           if: matrix.platform == 'ubuntu20'
           run: |
@@ -92,13 +127,13 @@ jobs:
             make -j $(nproc)
             cd tests
             ctest -j $(nproc) --output-on-failure
-        - name: Package (Ubuntu 18 only)
-          if: matrix.platform == 'ubuntu18'
+        - name: Package (Ubuntu 20 only)
+          if: matrix.platform == 'ubuntu20'
           run: |
             cd build/packages
             bash generate_package.sh deb ubuntu amd64
-        - name: Upload (Ubuntu 18 only)
-          if: matrix.platform == 'ubuntu18'
+        - name: Upload (Ubuntu 20 only)
+          if: matrix.platform == 'ubuntu20'
           uses: actions/upload-artifact@v3
           with:
             name: cdt_ubuntu_package_amd64
