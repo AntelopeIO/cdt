@@ -44,7 +44,7 @@ endif()
 # on top of the Clang tooling platform. We keep them in a separate repository
 # to keep the primary Clang repository small and focused.
 # It also may be included by LLVM_EXTERNAL_CLANG_TOOLS_EXTRA_SOURCE_DIR.
-add_llvm_external_project(clang-tools-extra extra)
+#add_llvm_external_project(clang-tools-extra extra)
 
 # libclang may require clang-tidy in clang-tools-extra.
 add_clang_subdirectory(libclang)

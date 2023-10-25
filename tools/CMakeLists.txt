@@ -16,9 +16,9 @@ else()
 endif()
 
 include_directories(${LLVM_INCLUDE_DIRS})
-include_directories(${LLVM_SRCDIR}/tools/clang/include)
+include_directories(${LLVM_SRCDIR}/clang/include)
 include_directories(${LLVM_BINDIR}/tools/clang/include)
-include_directories(${LLVM_SRCDIR}/include)
+include_directories(${LLVM_SRCDIR}/llvm/include)
 include_directories(${LLVM_BINDIR}/include)
 link_directories(${LLVM_LIBRARY_DIRS})
 add_definitions(${LLVM_DEFINITIONS})
@@ -47,6 +47,7 @@ macro (add_tool name)
      clangSerialization
      clangParse
      clangSema
+     clangSupport
      clangAnalysis
      clangAST
      clangLex
@@ -67,6 +68,7 @@ macro (add_tool name)
      LLVMCore
      LLVMSupport
      LLVMDemangle
+     LLVMWindowsDriver
    )
 
    add_custom_command( TARGET ${name} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${name}> ${CMAKE_BINARY_DIR}/bin/ )

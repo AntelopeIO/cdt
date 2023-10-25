@@ -151,6 +151,9 @@ public:
   SectionSymbol *getSectionSymbol(uint32_t index) const;
   TagSymbol *getTagSymbol(uint32_t index) const;
   TableSymbol *getTableSymbol(uint32_t index) const;
+  std::string getEosioABI() const { return eosioABI; }
+  ArrayRef<StringRef> getEosioActions() const { return eosioActions; }
+  ArrayRef<StringRef> getEosioNotify() const { return eosioNotify; }
 
 private:
   Symbol *createDefined(const WasmSymbol &sym);
@@ -160,6 +163,9 @@ private:
   void addLegacyIndirectFunctionTableIfNeeded(uint32_t tableSymbolCount);
 
   std::unique_ptr<WasmObjectFile> wasmObj;
+  std::string eosioABI;
+  ArrayRef<StringRef> eosioActions;
+  ArrayRef<StringRef> eosioNotify;
 };
 
 // .so file.

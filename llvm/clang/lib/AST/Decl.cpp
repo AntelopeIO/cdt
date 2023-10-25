@@ -4738,11 +4738,22 @@ bool RecordDecl::isInjectedClassName() const {
     cast<RecordDecl>(getDeclContext())->getDeclName() == getDeclName();
 }
 
+bool RecordDecl::isEosioIgnore() const { return hasAttr<EosioIgnoreAttr>(); }
+
 bool RecordDecl::isLambda() const {
   if (auto RD = dyn_cast<CXXRecordDecl>(this))
     return RD->isLambda();
   return false;
 }
+
+bool FunctionDecl::isEosioWasmABI()const { return hasAttr<EosioWasmABIAttr>(); }
+StringRef FunctionDecl::getWasmABI()const { return getAttr<EosioWasmABIAttr>()->getAbi(); }
+bool FunctionDecl::isEosioWasmEntry()const { return hasAttr<EosioWasmEntryAttr>(); }
+bool FunctionDecl::isEosioWasmImport()const { return hasAttr<EosioWasmImportAttr>(); }
+bool FunctionDecl::isEosioWasmAction()const { return hasAttr<EosioWasmActionAttr>(); }
+StringRef FunctionDecl::getEosioWasmAction()const { return getAttr<EosioWasmActionAttr>()->getName(); }
+bool FunctionDecl::isEosioWasmNotify()const { return hasAttr<EosioWasmNotifyAttr>(); }
+StringRef FunctionDecl::getEosioWasmNotify()const { return getAttr<EosioWasmNotifyAttr>()->getName(); }
 
 bool RecordDecl::isCapturedRecord() const {
   return hasAttr<CapturedRecordAttr>();

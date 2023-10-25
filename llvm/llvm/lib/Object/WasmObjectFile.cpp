@@ -369,6 +369,53 @@ Error WasmObjectFile::parseSection(WasmSection &Sec) {
   }
 }
 
+Error WasmObjectFile::parseEosioABISection(ReadContext& Ctx) {
+   StringRef sr = readString(Ctx);
+   eosio_abi = sr;
+
+   if (Ctx.Ptr != Ctx.End)
+      return make_error<GenericBinaryError>("eosio abi section ended prematurely",
+                                          object_error::parse_failed);
+   return Error::success();
+
+}
+
+Error WasmObjectFile::parseAllowedSection(ReadContext& Ctx) {
+   while (Ctx.Ptr < Ctx.End) {
+    StringRef Name = readString(Ctx);
+    AllowedImports.push_back(Name);
+   }
+
+   if (Ctx.Ptr != Ctx.End)
+      return make_error<GenericBinaryError>("allowed import section ended prematurely",
+                                          object_error::parse_failed);
+   return Error::success();
+}
+
+Error WasmObjectFile::parseActionsSection(ReadContext& Ctx) {
+   while (Ctx.Ptr < Ctx.End) {
+    StringRef Name = readString(Ctx);
+    Actions.push_back(Name);
+   }
+
+   if (Ctx.Ptr != Ctx.End)
+      return make_error<GenericBinaryError>("actions section ended prematurely",
+                                          object_error::parse_failed);
+   return Error::success();
+}
+
+Error WasmObjectFile::parseNotifySection(ReadContext& Ctx) {
+   while (Ctx.Ptr < Ctx.End) {
+    StringRef Name = readString(Ctx);
+    Notify.push_back(Name);
+   }
+
+   if (Ctx.Ptr != Ctx.End)
+      return make_error<GenericBinaryError>("notify section ended prematurely",
+                                          object_error::parse_failed);
+   return Error::success();
+}
+
 Error WasmObjectFile::parseDylinkSection(ReadContext &Ctx) {
   // Legacy "dylink" section support.
   // See parseDylink0Section for the current "dylink.0" section parsing.
@@ -1053,7 +1100,19 @@ Error WasmObjectFile::parseRelocSection(StringRef Name, ReadContext &Ctx) {
 }
 
 Error WasmObjectFile::parseCustomSection(WasmSection &Sec, ReadContext &Ctx) {
-  if (Sec.Name == "dylink") {
+  if (Sec.Name == ".imports") {
+     if (Error Err = parseAllowedSection(Ctx))
+        return Err;
+  } else if (Sec.Name == ".eosio_abi") {
+     if (Error Err = parseEosioABISection(Ctx))
+        return Err;
+  } else if (Sec.Name == ".eosio_actions") {
+     if (Error Err = parseActionsSection(Ctx))
+        return Err;
+  } else if (Sec.Name == ".eosio_notify") {
+     if (Error Err = parseNotifySection(Ctx))
+        return Err;
+  } else if (Sec.Name == "dylink") {
     if (Error Err = parseDylinkSection(Ctx))
       return Err;
   } else if (Sec.Name == "dylink.0") {

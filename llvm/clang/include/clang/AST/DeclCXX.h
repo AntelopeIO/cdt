@@ -16,6 +16,7 @@
 #define LLVM_CLANG_AST_DECLCXX_H
 
 #include "clang/AST/ASTUnresolvedSet.h"
+#include "clang/AST/Attr.h"
 #include "clang/AST/Decl.h"
 #include "clang/AST/DeclBase.h"
 #include "clang/AST/DeclarationName.h"
@@ -503,6 +504,17 @@ public:
 
   /// Iterator that traverses the base classes of a class.
   using base_class_const_iterator = const CXXBaseSpecifier *;
+  bool isEosioContract() const { return hasAttr<EosioContractAttr>(); }
+  bool isEosioAction() const { return hasAttr<EosioActionAttr>(); }
+  bool isEosioTable() const { return hasAttr<EosioTableAttr>(); }
+  bool isEosioIgnore() const { return hasAttr<EosioIgnoreAttr>(); }
+  bool hasEosioRicardian() const { return hasAttr<EosioRicardianAttr>(); }
+  bool isEosioReadOnly() const { return hasAttr<EosioReadOnlyAttr>(); }
+  EosioActionAttr* getEosioActionAttr() const { return getAttr<EosioActionAttr>(); }
+  EosioTableAttr*  getEosioTableAttr() const { return getAttr<EosioTableAttr>(); }
+  EosioContractAttr*  getEosioContractAttr() const { return getAttr<EosioContractAttr>(); }
+  EosioRicardianAttr*  getEosioRicardianAttr() const { return getAttr<EosioRicardianAttr>(); }
+  EosioReadOnlyAttr* getEosioReadOnlyAttr() const { return getAttr<EosioReadOnlyAttr>(); }
 
   CXXRecordDecl *getCanonicalDecl() override {
     return cast<CXXRecordDecl>(RecordDecl::getCanonicalDecl());
@@ -2020,6 +2032,16 @@ public:
 
   bool isStatic() const;
   bool isInstance() const { return !isStatic(); }
+  bool isEosioAction() const { return hasAttr<EosioActionAttr>(); }
+  bool isEosioNotify() const { return hasAttr<EosioNotifyAttr>(); }
+  bool isEosioContract() const { return hasAttr<EosioContractAttr>(); }
+  bool hasEosioRicardian() const { return hasAttr<EosioRicardianAttr>(); }
+  bool isEosioReadOnly() const { return hasAttr<EosioReadOnlyAttr>(); }
+  EosioActionAttr* getEosioActionAttr() const { return getAttr<EosioActionAttr>(); }
+  EosioNotifyAttr* getEosioNotifyAttr() const { return getAttr<EosioNotifyAttr>(); }
+  EosioContractAttr* getEosioContractAttr() const { return getAttr<EosioContractAttr>(); }
+  EosioRicardianAttr* getEosioRicardianAttr() const { return getAttr<EosioRicardianAttr>(); }
+  EosioReadOnlyAttr* getEosioReadOnlyAttr() const { return getAttr<EosioReadOnlyAttr>(); }
 
   /// Returns true if the given operator is implicitly static in a record
   /// context.

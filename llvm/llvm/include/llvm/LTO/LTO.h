@@ -156,6 +156,7 @@ public:
 
   /// A range over the symbols in this InputFile.
   ArrayRef<Symbol> symbols() const { return Symbols; }
+  ArrayRef<Symbol> symbols() { return Symbols; }
 
   /// Returns linker options specified in the input file.
   StringRef getCOFFLinkerOpts() const { return COFFLinkerOpts; }

@@ -360,6 +360,9 @@ def : MergeRule<"setOR<SpeculativeLoadHardeningAttr>">;
 def : MergeRule<"adjustCallerSSPLevel">;
 def : MergeRule<"adjustCallerStackProbes">;
 def : MergeRule<"adjustCallerStackProbeSize">;
+
+def EosioWasmEntry  : EnumAttr<"eosio_wasm_entry", [FnAttr]>;
+def EosioWasmImport : EnumAttr<"eosio_wasm_import", [FnAttr]>;
 def : MergeRule<"adjustMinLegalVectorWidth">;
 def : MergeRule<"adjustNullPointerValidAttr">;
 def : MergeRule<"setAND<MustProgressAttr>">;

@@ -449,6 +449,7 @@ static void readConfigs(opt::InputArgList &args) {
   config->shared = args.hasArg(OPT_shared);
   config->stripAll = args.hasArg(OPT_strip_all);
   config->stripDebug = args.hasArg(OPT_strip_debug);
+  config->stackCanary = args.hasArg(OPT_stack_canary);
   config->stackFirst = args.hasArg(OPT_stack_first);
   config->trace = args.hasArg(OPT_trace);
   config->thinLTOCacheDir = args.getLastArgValue(OPT_thinlto_cache_dir);
@@ -656,6 +657,11 @@ static Symbol *handleUndefined(StringRef name, const char *option) {
   return sym;
 }
 
+static Symbol* addUndefined(StringRef name) {
+   return symtab->addUndefinedFunction(name, "", "", 0, nullptr, nullptr, false);
+}
+
+
 static void handleLibcall(StringRef name) {
   Symbol *sym = symtab->find(name);
   if (!sym)
@@ -748,9 +754,13 @@ static void createSyntheticSymbols() {
                                                             true};
   static llvm::wasm::WasmGlobalType mutableGlobalTypeI64 = {WASM_TYPE_I64,
                                                             true};
+  static WasmSignature entrySignature = config->otherModel ? nullSignature : WasmSignature{{}, {ValType::I64, ValType::I64, ValType::I64}};
   WasmSym::callCtors = symtab->addSyntheticFunction(
       "__wasm_call_ctors", WASM_SYMBOL_VISIBILITY_HIDDEN,
       make<SyntheticFunction>(nullSignature, "__wasm_call_ctors"));
+  WasmSym::entryFunc = symtab->addSyntheticFunction(
+      config->entry, WASM_SYMBOL_VISIBILITY_DEFAULT | WASM_SYMBOL_BINDING_WEAK,
+      make<SyntheticFunction>(entrySignature, config->entry));
 
   bool is64 = config->is64.value_or(false);
 
@@ -780,6 +790,17 @@ static void createSyntheticSymbols() {
     // For non-PIC code
     WasmSym::stackPointer = createGlobalVariable("__stack_pointer", true);
     WasmSym::stackPointer->markLive();
+    if (config->stackCanary) {
+        llvm::wasm::WasmGlobal canary;
+        canary.Type = {WASM_TYPE_I64, true};
+        canary.InitExpr.Value.Int64 = 0;
+	      canary.InitExpr.Opcode = WASM_OPCODE_I64_CONST;
+        canary.SymbolName = "__stack_canary";
+        auto* sc = make<InputGlobal>(canary, nullptr);
+        sc->live = true;
+        WasmSym::stackCanary = symtab->addSyntheticGlobal(
+           "__stack_canary", WASM_SYMBOL_VISIBILITY_HIDDEN, sc);	
+    }
   }
 
   if (config->sharedMemory) {
@@ -811,13 +832,16 @@ static void createOptionalSymbols() {
 
   WasmSym::dsoHandle = symtab->addOptionalDataSymbol("__dso_handle");
 
-  if (!config->shared)
+  if (!config->shared) {
+    config->exportedSymbols.insert("__data_end");
     WasmSym::dataEnd = symtab->addOptionalDataSymbol("__data_end");
+  }
 
   if (!config->isPic) {
     WasmSym::stackLow = symtab->addOptionalDataSymbol("__stack_low");
     WasmSym::stackHigh = symtab->addOptionalDataSymbol("__stack_high");
     WasmSym::globalBase = symtab->addOptionalDataSymbol("__global_base");
+    config->exportedSymbols.insert("__heap_base");
     WasmSym::heapBase = symtab->addOptionalDataSymbol("__heap_base");
     WasmSym::heapEnd = symtab->addOptionalDataSymbol("__heap_end");
     WasmSym::definedMemoryBase = symtab->addOptionalDataSymbol("__memory_base");
@@ -1132,6 +1156,16 @@ void LinkerDriver::linkerMain(ArrayRef<const char *> argsArr) {
             config->entry);
   }
 
+  // Is the entry symbol found
+  for (ObjFile *file : symtab->objectFiles) {
+    for (Symbol *sym : file->getSymbols()) {
+       if (toString(*sym) == config->entry) {
+          symtab->entryIsUndefined = false;
+       }
+     }
+  }
+
+
   // If the user code defines a `__wasm_call_dtors` function, remember it so
   // that we can call it from the command export wrappers. Unlike
   // `__wasm_call_ctors` which we synthesize, `__wasm_call_dtors` is defined
@@ -1161,6 +1195,37 @@ void LinkerDriver::linkerMain(ArrayRef<const char *> argsArr) {
 
   // Create wrapped symbols for -wrap option.
   std::vector<WrappedSymbol> wrapped = addWrappedSymbols(args);
+
+  auto get_kind = [](const char* str) -> uint8_t {
+     if (strcmp(str, "function") == 0)
+        return 0;
+     else if (strcmp(str, "table") == 0)
+        return 1;
+     else if (strcmp(str, "memory") == 0)
+        return 2;
+     return 3;
+  };
+
+  auto get_first = [](const std::string& exp) {
+     return exp.substr(0, exp.find(":"));
+  };
+
+  auto get_second = [](const std::string& exp) {
+     return exp.substr(exp.find(":")+1);
+  };
+
+  std::vector<char*> exportStrs;
+  for (auto* arg : args.filtered(OPT_only_export)) {
+     auto name = get_first(std::string(arg->getValue()));
+     char* cname = new char[name.size()];
+     memcpy(cname, name.c_str(), name.size());
+     exportStrs.push_back(cname);
+     if (!name.empty()) {
+        auto type = get_second(std::string(arg->getValue()));
+        WasmExport we = {cname, get_kind(type.c_str()), 0};
+        config->exports.push_back(we);
+     }
+  }
 
   // If any of our inputs are bitcode files, the LTO code generator may create
   // references to certain library functions that might not be explicit in the
@@ -1236,6 +1301,10 @@ void LinkerDriver::linkerMain(ArrayRef<const char *> argsArr) {
 
   // Write the result to the file.
   writeResult();
+
+  // clean up
+  for (const auto* cp : exportStrs)
+    delete[] cp;
 }
 
 } // namespace wasm

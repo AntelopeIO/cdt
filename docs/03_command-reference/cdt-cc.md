@@ -47,7 +47,6 @@ compiler options:
   -finline-hint-functions  - Inline functions which are (explicitly or implicitly) marked inline
   -fmerge-all-constants    - Allow merging of constants
   -fnative                 - Compile and link for x86-64
-  -fno-cfl-aa              - Disable CFL Alias Analysis
   -fno-elide-constructors  - Disable C++ copy constructor elision
   -fno-lto                 - Disable LTO
   -fno-post-pass           - Don't run post processing pass

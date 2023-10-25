@@ -149,6 +149,9 @@ public:
   ArrayRef<WasmSegment> dataSegments() const { return DataSegments; }
   ArrayRef<wasm::WasmFunction> functions() const { return Functions; }
   ArrayRef<wasm::WasmDebugName> debugNames() const { return DebugNames; }
+  ArrayRef<StringRef> actions() const { return Actions; }
+  ArrayRef<StringRef> notify() const { return Notify; }
+  StringRef get_eosio_abi() const { return eosio_abi; }
   uint32_t startFunction() const { return StartFunction; }
   uint32_t getNumImportedGlobals() const { return NumImportedGlobals; }
   uint32_t getNumImportedTables() const { return NumImportedTables; }
@@ -259,12 +262,16 @@ private:
   Error parseDylinkSection(ReadContext &Ctx);
   Error parseDylink0Section(ReadContext &Ctx);
   Error parseNameSection(ReadContext &Ctx);
+  Error parseAllowedSection(ReadContext &Ctx);
+  Error parseActionsSection(ReadContext &Ctx);
+  Error parseNotifySection(ReadContext &Ctx);
   Error parseLinkingSection(ReadContext &Ctx);
   Error parseLinkingSectionSymtab(ReadContext &Ctx);
   Error parseLinkingSectionComdat(ReadContext &Ctx);
   Error parseProducersSection(ReadContext &Ctx);
   Error parseTargetFeaturesSection(ReadContext &Ctx);
   Error parseRelocSection(StringRef Name, ReadContext &Ctx);
+  Error parseEosioABISection(ReadContext &Ctx);
 
   wasm::WasmObjectHeader Header;
   std::vector<WasmSection> Sections;
@@ -277,6 +284,9 @@ private:
   std::vector<wasm::WasmGlobal> Globals;
   std::vector<wasm::WasmTag> Tags;
   std::vector<wasm::WasmImport> Imports;
+  std::vector<StringRef> AllowedImports;
+  std::vector<StringRef> Actions;
+  std::vector<StringRef> Notify;
   std::vector<wasm::WasmExport> Exports;
   std::vector<wasm::WasmElemSegment> ElemSegments;
   std::vector<WasmSegment> DataSegments;
@@ -284,6 +294,7 @@ private:
   std::vector<wasm::WasmFunction> Functions;
   std::vector<WasmSymbol> Symbols;
   std::vector<wasm::WasmDebugName> DebugNames;
+  StringRef eosio_abi;
   uint32_t StartFunction = -1;
   bool HasLinkingSection = false;
   bool HasDylinkSection = false;

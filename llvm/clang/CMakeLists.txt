@@ -478,6 +478,7 @@ endif()
 add_subdirectory(lib)
 add_subdirectory(tools)
 add_subdirectory(runtime)
+add_subdirectory(plugins)
 
 option(CLANG_BUILD_EXAMPLES "Build CLANG example programs by default." OFF)
 add_subdirectory(examples)

@@ -108,7 +108,7 @@ endif()
 # Set default build type for cmake's try_compile module.
 # CMake 3.17 or newer sets CMAKE_DEFAULT_BUILD_TYPE to one of the
 # items from CMAKE_CONFIGURATION_TYPES. Logic below can be further
-# simplified once LLVM's minimum CMake version is updated to 3.17.
+# simplified once LLVM''s minimum CMake version is updated to 3.17.
 if(CMAKE_DEFAULT_BUILD_TYPE)
   set(CMAKE_TRY_COMPILE_CONFIGURATION ${CMAKE_DEFAULT_BUILD_TYPE})
 else()
@@ -448,10 +448,10 @@ set(LLVM_ALL_TARGETS
 # List of targets with JIT support:
 set(LLVM_TARGETS_WITH_JIT X86 PowerPC AArch64 ARM Mips SystemZ)
 
-set(LLVM_TARGETS_TO_BUILD "all"
+set(LLVM_TARGETS_TO_BUILD "X86"
     CACHE STRING "Semicolon-separated list of targets to build, or \"all\".")
 
-set(LLVM_EXPERIMENTAL_TARGETS_TO_BUILD ""
+set(LLVM_EXPERIMENTAL_TARGETS_TO_BUILD "WebAssembly"
     CACHE STRING "Semicolon-separated list of experimental targets to build.")
 
 option(BUILD_SHARED_LIBS

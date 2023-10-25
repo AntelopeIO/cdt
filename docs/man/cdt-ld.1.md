@@ -39,10 +39,6 @@ execution in Antelope block chain virtual machines.
 
     Compile and link for x86-64
     
-**`--fno-cfl-aa`**
-
-    Disable CFL Alias Analysis
-    
 **`--fno-lto`**
 
     Disable LTO

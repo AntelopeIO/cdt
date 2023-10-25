@@ -429,6 +429,10 @@ void ObjFile::parse(bool ignoreComdats) {
     }
   }
 
+  eosioABI     = wasmObj->get_eosio_abi();
+  eosioActions = wasmObj->actions();
+  eosioNotify  = wasmObj->notify();
+
   ArrayRef<StringRef> comdats = wasmObj->linkingData().Comdats;
   for (StringRef comdat : comdats) {
     bool isNew = ignoreComdats || symtab->addComdat(comdat);
@@ -534,6 +538,15 @@ void ObjFile::parse(bool ignoreComdats) {
     }
     size_t idx = symbols.size();
     symbols.push_back(createUndefined(wasmSym, isCalledDirectly[idx]));
+
+    for (const auto& allowed : wasmObj->allowed_imports()) {
+       if (auto symName = sym.getName()) {
+          if (*symName == allowed) {
+             symtab->addAllowedUndefFunction(*symName);
+             break;
+          }
+       }
+    }
   }
 
   addLegacyIndirectFunctionTableIfNeeded(tableSymbolCount);

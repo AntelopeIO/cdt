@@ -57,6 +57,7 @@ struct Configuration {
   bool shared;
   bool stripAll;
   bool stripDebug;
+  bool stackCanary;
   bool stackFirst;
   bool isStatic = false;
   bool trace;
@@ -76,6 +77,9 @@ struct Configuration {
   llvm::StringRef outputFile;
   llvm::StringRef thinLTOCacheDir;
   llvm::StringRef whyExtract;
+  llvm::StringRef abiOutputFile;
+  std::vector<llvm::wasm::WasmExport> exports;
+  bool otherModel;
 
   llvm::StringSet<> allowUndefinedSymbols;
   llvm::StringSet<> exportedSymbols;
@@ -91,6 +95,14 @@ struct Configuration {
 
   // True if we are creating position-independent code.
   bool isPic;
+
+  inline bool should_export(const llvm::wasm::WasmExport& ex)const {
+     for (const auto& x : exports) {
+        if ((memcmp(x.Name.str().c_str(), ex.Name.str().c_str(), ex.Name.size()) == 0 || x.Name.str()[0] == '*') && x.Kind == ex.Kind)
+           return true;
+     }
+     return false;
+  }
 
   // True if we have an MVP input that uses __indirect_function_table and which
   // requires it to be allocated to table number 0.
