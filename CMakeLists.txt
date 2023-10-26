@@ -15,7 +15,7 @@ project(cdt)
 
 set(VERSION_MAJOR 4)
 set(VERSION_MINOR 0)
-set(VERSION_PATCH 0)
+set(VERSION_PATCH 1)
 set(VERSION_SUFFIX "") 
 
 if (VERSION_SUFFIX)
@@ -93,17 +93,6 @@ configure_file(${CMAKE_SOURCE_DIR}/cdt-llvm/LICENSE.TXT ${CMAKE_BINARY_DIR}/lice
 configure_file(${CMAKE_SOURCE_DIR}/libraries/boost/boost.license ${CMAKE_BINARY_DIR}/licenses/boost.license COPYONLY)
 configure_file(${CMAKE_SOURCE_DIR}/libraries/meta_refl/LICENSE ${CMAKE_BINARY_DIR}/licenses/meta_refl.license COPYONLY)
 configure_file(${CMAKE_SOURCE_DIR}/tools/external/wabt/LICENSE ${CMAKE_BINARY_DIR}/licenses/wabt.license COPYONLY)
-configure_file(${CMAKE_SOURCE_DIR}/tools/external/antler-proj/LICENSE ${CMAKE_BINARY_DIR}/licenses/antler-proj.license COPYONLY)
-file(GLOB license_files ${CMAKE_SOURCE_DIR}/tools/external/antler-proj/licenses/*)
-# add licenses for antler-proj submodules
-foreach(full_path IN ITEMS ${license_files})
-   # change format to match other license filenames
-   get_filename_component(file_name ${full_path} NAME)
-   string(REPLACE "LICENSE." "" file_name ${file_name})
-   string(TOLOWER ${file_name} file_name)
-   set(file_name "${file_name}.license")
-   configure_file("${full_path}" "${CMAKE_BINARY_DIR}/licenses/${file_name}" COPYONLY)
-endforeach()
 configure_file(${CMAKE_SOURCE_DIR}/tools/jsoncons/LICENSE ${CMAKE_BINARY_DIR}/licenses/jsoncons.license COPYONLY)
 configure_file(${CMAKE_SOURCE_DIR}/LICENSE ${CMAKE_BINARY_DIR}/licenses/cdt.license COPYONLY)
 

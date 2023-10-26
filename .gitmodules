@@ -10,6 +10,3 @@
 [submodule "libraries/native/softfloat"]
 	path = libraries/native/softfloat
 	url = https://github.com/AntelopeIO/berkeley-softfloat-3
-[submodule "tools/external/antler-proj"]
-	path = tools/external/antler-proj
-	url = https://github.com/AntelopeIO/antler-proj

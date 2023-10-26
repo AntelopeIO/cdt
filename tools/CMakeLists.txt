@@ -79,13 +79,3 @@ add_subdirectory(init)
 add_subdirectory(external)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/compiler_options.hpp.in ${CMAKE_BINARY_DIR}/compiler_options.hpp)
-
-add_custom_command( OUTPUT ${CMAKE_BINARY_DIR}/bin/antler-proj
-                    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:antler-proj> ${CMAKE_BINARY_DIR}/bin/
-                    DEPENDS antler-proj
-                    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/external/antler-proj/tools
-                  )
-
-add_custom_target(copy_files ALL
-    DEPENDS  ${CMAKE_BINARY_DIR}/bin/antler-proj
-)
