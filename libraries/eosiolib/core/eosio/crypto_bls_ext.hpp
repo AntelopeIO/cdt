@@ -53,81 +53,81 @@ namespace eosio {
 
     inline int32_t bls_g1_add(const bls_g1& op1, const bls_g1& op2, bls_g1& res) {
         return internal_use_do_not_use::bls_g1_add(
-            op1.data(), sizeof(bls_g1),
-            op2.data(), sizeof(bls_g1),
-            res.data(), sizeof(bls_g1)
+            op1.data(), op1.size(),
+            op2.data(), op2.size(),
+            res.data(), res.size()
         );
     }
 
     inline int32_t bls_g2_add(const bls_g2& op1, const bls_g2& op2, bls_g2& res) {
         return internal_use_do_not_use::bls_g2_add(
-            op1.data(), sizeof(bls_g2),
-            op2.data(), sizeof(bls_g2),
-            res.data(), sizeof(bls_g2)
+            op1.data(), op1.size(),
+            op2.data(), op2.size(),
+            res.data(), res.size()
         );
     }
 
     inline int32_t bls_g1_weighted_sum(const bls_g1 g1_points[], const bls_scalar scalars[], uint32_t num, bls_g1& res) {
         return internal_use_do_not_use::bls_g1_weighted_sum(
-            num ? g1_points[0].data() : nullptr, num * sizeof(bls_g1),
-            num ? scalars[0].data() : nullptr, num * sizeof(bls_scalar),
+            num ? g1_points[0].data() : nullptr, num * g1_points[0].size(),
+            num ? scalars[0].data() : nullptr, num * scalars[0].size(),
             num,
-            res.data(), sizeof(bls_g1)
+            res.data(), res.size()
         );
     }
 
     inline int32_t bls_g2_weighted_sum(const bls_g2 g2_points[], const bls_scalar scalars[], uint32_t num, bls_g2& res) {
         return internal_use_do_not_use::bls_g2_weighted_sum(
-            num ? g2_points[0].data() : nullptr, num * sizeof(bls_g2),
-            num ? scalars[0].data() : nullptr, num * sizeof(bls_scalar),
+            num ? g2_points[0].data() : nullptr, num * g2_points[0].size(),
+            num ? scalars[0].data() : nullptr, num * scalars[0].size(),
             num,
-            res.data(), sizeof(bls_g2)
+            res.data(), res.size()
         );
     }
 
     inline int32_t bls_pairing(const bls_g1 g1_points[], const bls_g2 g2_points[], const uint32_t num, bls_gt& res) {
         return internal_use_do_not_use::bls_pairing(
-            num ? g1_points[0].data() : nullptr, num * sizeof(bls_g1),
-            num ? g2_points[0].data() : nullptr, num * sizeof(bls_g2),
+            num ? g1_points[0].data() : nullptr, num * g1_points[0].size(),
+            num ? g2_points[0].data() : nullptr, num * g2_points[0].size(),
             num,
-            res.data(), sizeof(bls_gt)
+            res.data(), res.size()
         );
     }
 
     inline int32_t bls_g1_map(const bls_fp& e, bls_g1& res) {
         return internal_use_do_not_use::bls_g1_map(
-            e.data(), sizeof(bls_fp),
-            res.data(), sizeof(bls_g1)
+            e.data(), e.size(),
+            res.data(), res.size()
         );
     }
 
     inline int32_t bls_g2_map(const bls_fp2& e, bls_g2& res) {
         return internal_use_do_not_use::bls_g2_map(
-            e[0].data(), sizeof(bls_fp2),
-            res.data(), sizeof(bls_g2)
+            e[0].data(), 2 * e[0].size(),
+            res.data(), res.size()
         );
     }
 
     inline int32_t bls_fp_mod(const bls_s& s, bls_fp& res) {
         return internal_use_do_not_use::bls_fp_mod(
-            s.data(), sizeof(bls_s),
-            res.data(), sizeof(bls_fp)
+            s.data(), s.size(),
+            res.data(), res.size()
         );
     }
 
     inline int32_t bls_fp_mul(const bls_fp& op1, const bls_fp& op2, bls_fp& res) {
         return internal_use_do_not_use::bls_fp_mul(
-            op1.data(), sizeof(bls_fp),
-            op2.data(), sizeof(bls_fp),
-            res.data(), sizeof(bls_fp)
+            op1.data(), op1.size(),
+            op2.data(), op2.size(),
+            res.data(), res.size()
         );
     }
 
     inline int32_t bls_fp_exp(const bls_fp& base, const bls_s& exp, bls_fp& res) {
         return internal_use_do_not_use::bls_fp_exp(
-            base.data(), sizeof(bls_fp),
-            exp.data(), sizeof(bls_s),
-            res.data(), sizeof(bls_fp)
+            base.data(), base.size(),
+            exp.data(), exp.size(),
+            res.data(), res.size()
         );
     }
 }
