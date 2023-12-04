@@ -1,0 +1,33 @@
+name: Upload Release .deb
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  eb:
+    name: Upload Release .deb
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      actions: read
+    steps:
+      - name: Get cdt.deb
+        id: getter
+        uses: AntelopeIO/asset-artifact-download-action@v3
+        with:
+          owner: ${{github.repository_owner}}
+          repo: ${{github.event.repository.name}}
+          file: cdt_.*_amd64.deb 
+          target: ${{github.sha}}
+          artifact-name: cdt_ubuntu_package_amd64
+          wait-for-exact-target: true
+      - run: |
+          curl -LsSf \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${{github.token}}" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          -H "Content-Type: application/octet-stream" \
+          --data-binary "@${{steps.getter.outputs.downloaded-file}}" \
+          "https://uploads.github.com/repos/${{github.repository}}/releases/${{github.event.release.id}}/assets?name=${{steps.getter.outputs.downloaded-file}}"

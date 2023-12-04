@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.5)
-project(cdt_tools)
 find_package(LLVM REQUIRED CONFIG)
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
@@ -26,9 +25,7 @@ add_definitions(${LLVM_DEFINITIONS})
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 
-set(CMAKE_CXX_STANDARD 17)
 set(EOSIO_STACK_SIZE 8192)
-set(ENABLE_NATIVE_COMPILER TRUE)
 
 macro (add_tool name)
    set(LLVM_LINK_COMPONENTS support)
@@ -75,23 +72,10 @@ macro (add_tool name)
    add_custom_command( TARGET ${name} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${name}> ${CMAKE_BINARY_DIR}/bin/ )
 endmacro()
 
-add_subdirectory(../libraries/eosiolib ${CMAKE_BINARY_DIR}/eosiolib)
-add_subdirectory(../libraries/native ${CMAKE_BINARY_DIR}/native)
 add_subdirectory(abidiff)
 add_subdirectory(cc)
 add_subdirectory(ld)
 add_subdirectory(init)
 add_subdirectory(external)
-#add_subdirectory(antler-run) # TODO: add back when it will be ready
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/compiler_options.hpp.in ${CMAKE_BINARY_DIR}/compiler_options.hpp)
-
-add_custom_command( OUTPUT ${CMAKE_BINARY_DIR}/bin/antler-proj
-                    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:antler-proj> ${CMAKE_BINARY_DIR}/bin/
-                    DEPENDS antler-proj
-                    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/external/antler-proj/tools
-                  )
-
-add_custom_target(copy_files ALL
-    DEPENDS  ${CMAKE_BINARY_DIR}/bin/antler-proj
-)
