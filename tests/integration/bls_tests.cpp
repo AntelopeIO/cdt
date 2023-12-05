@@ -114,10 +114,21 @@ BOOST_FIXTURE_TEST_CASE( sig_verify_test, bls_primitives_tester ) try {
    // assumes signed message of std::vector<uint8_t> msg = {51, 23, 56, 93, 212, 129, 128, 27, 251, 12, 42, 129, 210, 9, 34, 98};
    // vector<uint8_t> seed(32, 0x30); array<uint64_t, 4> sk = secret_key(seed); g1 pk = g1::one().scale(sk).affine(); string pk_hex = to_hex(pk.toAffineBytesLE());
    // g2 sig = sign(sk, msg); string sig_hex = to_hex(sig.toAffineBytesLE());
-   push_action("eosio"_n, "verify"_n, "test"_n, mvo()
+   push_action("eosio"_n, "verifyraw"_n, "test"_n, mvo()
       ("pk", "c27efc440ed89d739ff80f1c7178d4672d5f71e8c8926a85785d0f84074e79c1662c522fdbd6fcaebd640d816dea6c0dc36c5d7e7a297afc960369e306d845fcad0e5fe2a88c0d3bbe854d4f9e3e6365c9c1003662f0e81b35fd9c6a11d0a10c")
       ("sig", "e13a38c18dfad440a9af8d720bfb9ce0f388a25a5789a8cdc34b87204fe29db5cc16658a5d9f4fa4a7cc16b8ef8d2d0d1a5984e6b69ca228692f1920e9340f149024b4d856711656f11bb1e0c7d081e5bb80692638a9bace2d8f4d796b4887129c59fbb7901997cbbb681f709291a45315979f55b719dfc8757d3a878cf01e4a48a0e6647b837d0ea8aea5d41e121b0dd37fa20007aef4f51740d846cc8d6ab151dbd88964e7d19890a500d5537be81b881451b75f928a66f546441d45028603"));
 
+   // bls_private_key sk = bls_private_key(seed_1);
+   // bls_public_key pk = sk.get_public_key();
+   // std::string msg = "this is a message string";
+   // std::vector<uint8_t> msg_v(msg.begin(), msg.end());
+   // bls_signature signature = sk.sign(msg_v);
+   // pk.to_string();
+   // signature.to_string();
+   push_action("eosio"_n, "verify"_n, "test"_n, mvo()
+      ("pk", "PUB_BLS_sS66EwY8bNx7vkDn3mKhwPhhqa1V6STN1QSb6bWOIFBTloF5zt5b55r9y7uQMiQGrvt6XOZO3CpEgthlba7R7qz7Qob2YcD5EX3Ng/rUUdMBsjEJRuXNWICPe0QbKAoCQOw9vw==")
+      ("sig", "SIG_BLS_07NCCTekrxhDFurhRhl3b8m4T+xmTixSl63TYcee/xJONi2/qy9+8o5vyetMefsL4hhDMfy1yIeHERqxUvGguRBBncpabp84b3P2bNpY18A+PVs7qKFqlld1gEUqt+cDOcwkyUe6HqqFXR5wtXoSHE4lHauV3CzR0lD91gnr2c49aUQPAC7SD+ZcnZyahwURje+Db26zhTXIO1WWIx6vwKnZUuvZEbzYrijjBQKeZsqp0eoAzjrByx9gOmN2d/AR9PhRvg==")
+      ("msg", "this is a message string"));
 } FC_LOG_AND_RETHROW()
 
 BOOST_FIXTURE_TEST_CASE( sig_pop_verify_test, bls_primitives_tester ) try {

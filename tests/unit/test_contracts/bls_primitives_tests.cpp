@@ -135,13 +135,16 @@ class [[eosio::contract]] bls_primitives_tests : public contract{
         std::vector<uint8_t> msg = {51, 23, 56, 93, 212, 129, 128, 27, 251, 12, 42, 129, 210, 9, 34, 98};
 
         [[eosio::action]]
-        void verify(const std::vector<char>& pk, const std::vector<char>& sig) {
+        void verifyraw(const std::vector<char>& pk, const std::vector<char>& sig) {
             check(pk.size() == std::tuple_size<bls_g1>::value, "wrong pk size passed");
             check(sig.size() == std::tuple_size<bls_g2>::value, "wrong sig size passed");
 
-            std::string msg_str;
-            std::copy(msg.begin(), msg.end(), std::back_inserter(msg_str));
+            std::string msg_str(msg.begin(), msg.end());
             check(bls_signature_verify(*reinterpret_cast<const bls_g1*>(pk.data()), *reinterpret_cast<const bls_g2*>(sig.data()), msg_str), "signature verify failed");
         }
 
+        [[eosio::action]]
+        void verify(const std::string& pk, const std::string& sig, const std::string& msg) {
+            check(bls_signature_verify(decode_bls_public_key_to_g1(pk), decode_bls_signature_to_g2(sig), msg), "signature verify failed");
+        }
 };

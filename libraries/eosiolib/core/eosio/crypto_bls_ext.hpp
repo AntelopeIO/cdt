@@ -469,7 +469,7 @@ namespace detail {
         bls_g2_map(t, q);
         bls_g2_add(p, q, res);
     }
-}
+} // namespace detail
 
     inline std::string encode_g1_to_bls_public_key(const bls_g1& g1) {
         return detail::bls_type_to_base64<bls_g1, detail::bls_public_key_prefix>(g1);
