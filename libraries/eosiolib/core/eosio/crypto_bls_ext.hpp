@@ -371,7 +371,8 @@ namespace detail {
         return ret;
     }
 
-    const inline std::string POP_CIPHERSUITE_ID = "BLS_POP_BLS12381G2_XMD:SHA-256_SSWU_RO_POP_";
+    const inline std::string CIPHERSUITE_ID     = "BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_NUL_"; // basic DST
+    const inline std::string POP_CIPHERSUITE_ID = "BLS_POP_BLS12381G2_XMD:SHA-256_SSWU_RO_POP_"; // proof of possession DST
 
     // g1::one().negate().toAffineBytesLE(), 96 bytes
     const inline std::vector<uint8_t> G1_ONE_NEG = {0xbb, 0xc6, 0x22, 0xdb, 0xa, 0xf0, 0x3a, 0xfb, 0xef, 0x1a, 0x7a, 0xf9,
@@ -490,16 +491,33 @@ namespace detail {
         bls_g1 g1_points[2] = {0};
         bls_g2 g2_points[2] = {0};
 
-        memcpy(g1_points[0].data(), G1_ONE_NEG.data(), G1_ONE_NEG.size());
-        memcpy(g2_points[0].data(), signature_proof.data(), signature_proof.size());
+        std::memcpy(g1_points[0].data(), G1_ONE_NEG.data(), G1_ONE_NEG.size());
+        std::memcpy(g2_points[0].data(), signature_proof.data(), signature_proof.size());
 
-        memcpy(g1_points[1].data(), pubkey.data(), pubkey.size());
+        std::memcpy(g1_points[1].data(), pubkey.data(), pubkey.size());
         g2_fromMessage(pubkey, POP_CIPHERSUITE_ID, g2_points[1]);
 
         bls_gt r;
         bls_pairing(g1_points, g2_points, 2, r);
 
-        return 0 == std::memcmp(r.data(), GT_ONE.data(), sizeof(bls_gt));
+        return 0 == std::memcmp(r.data(), GT_ONE.data(), GT_ONE.size());
+    }
+
+    // pubkey and signature are assumed to be in RAW affine little-endian bytes
+    bool bls_signature_verify(const bls_g1& pubkey, const bls_g2& signature_proof, const std::string& msg) {
+        bls_g1 g1_points[2];
+        bls_g2 g2_points[2];
+
+        std::memcpy(g1_points[0].data(), detail::G1_ONE_NEG.data(), detail::G1_ONE_NEG.size());
+        std::memcpy(g2_points[0].data(), signature_proof.data(), signature_proof.size());
+
+        std::memcpy(g1_points[1].data(), pubkey.data(), pubkey.size());
+        detail::g2_fromMessage(msg, detail::CIPHERSUITE_ID, g2_points[1]);
+
+        bls_gt r;
+        bls_pairing(g1_points, g2_points, 2, r);
+
+        return  0 == std::memcmp(r.data(), detail::GT_ONE.data(), detail::GT_ONE.size());
     }
 }
 

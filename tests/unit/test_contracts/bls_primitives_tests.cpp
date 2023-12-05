@@ -131,7 +131,6 @@ class [[eosio::contract]] bls_primitives_tests : public contract{
             check(decode_bls_signature_to_g2(base64) == *reinterpret_cast<const bls_g2*>(g2.data()), "base64 to g2 decoding doesn't match" );
         }
 
-        const std::string CIPHERSUITE_ID = "BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_NUL_";
         // caller of verify() must use this msg
         std::vector<uint8_t> msg = {51, 23, 56, 93, 212, 129, 128, 27, 251, 12, 42, 129, 210, 9, 34, 98};
 
@@ -139,20 +138,10 @@ class [[eosio::contract]] bls_primitives_tests : public contract{
         void verify(const std::vector<char>& pk, const std::vector<char>& sig) {
             check(pk.size() == std::tuple_size<bls_g1>::value, "wrong pk size passed");
             check(sig.size() == std::tuple_size<bls_g2>::value, "wrong sig size passed");
-            bls_g1 g1_points[2];
-            bls_g2 g2_points[2];
 
-            memcpy(g1_points[0].data(), detail::G1_ONE_NEG.data(), sizeof(bls_g1));
-            memcpy(g2_points[0].data(), sig.data(), sizeof(bls_g2));
-
-            bls_g2 p_msg;
-            detail::g2_fromMessage(std::span<char>(reinterpret_cast<char*>(msg.data()), msg.size()), CIPHERSUITE_ID, p_msg);
-            memcpy(g1_points[1].data(), pk.data(), sizeof(bls_g1));
-            memcpy(g2_points[1].data(), p_msg.data(), sizeof(bls_g2));
-
-            bls_gt r;
-            bls_pairing(g1_points, g2_points, 2, r);
-            check(0 == memcmp(r.data(), detail::GT_ONE.data(), sizeof(bls_gt)), "bls signature verify failed");
+            std::string msg_str;
+            std::copy(msg.begin(), msg.end(), std::back_inserter(msg_str));
+            check(bls_signature_verify(*reinterpret_cast<const bls_g1*>(pk.data()), *reinterpret_cast<const bls_g2*>(sig.data()), msg_str), "raw pop verify failed");
         }
 
 };
