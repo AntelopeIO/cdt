@@ -141,7 +141,7 @@ class [[eosio::contract]] bls_primitives_tests : public contract{
 
             std::string msg_str;
             std::copy(msg.begin(), msg.end(), std::back_inserter(msg_str));
-            check(bls_signature_verify(*reinterpret_cast<const bls_g1*>(pk.data()), *reinterpret_cast<const bls_g2*>(sig.data()), msg_str), "raw pop verify failed");
+            check(bls_signature_verify(*reinterpret_cast<const bls_g1*>(pk.data()), *reinterpret_cast<const bls_g2*>(sig.data()), msg_str), "signature verify failed");
         }
 
 };
