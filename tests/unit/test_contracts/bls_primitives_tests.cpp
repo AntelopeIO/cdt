@@ -106,9 +106,9 @@ class [[eosio::contract]] bls_primitives_tests : public contract{
 
         [[eosio::action]]
         void popverifyraw(const std::vector<char>& pk, const std::vector<char>& sig) {
-            check(pk.size() == std::tuple_size<bls_g1_affine>::value, "wrong public key size passed");
-            check(sig.size() == std::tuple_size<bls_g2_affine>::value, "wrong signature size passed");
-            check(bls_pop_verify(*reinterpret_cast<const bls_g1_affine*>(pk.data()), *reinterpret_cast<const bls_g2_affine*>(sig.data())), "raw pop verify failed");
+            check(pk.size() == std::tuple_size<bls_g1>::value, "wrong public key size passed");
+            check(sig.size() == std::tuple_size<bls_g2>::value, "wrong signature size passed");
+            check(bls_pop_verify(*reinterpret_cast<const bls_g1*>(pk.data()), *reinterpret_cast<const bls_g2*>(sig.data())), "raw pop verify failed");
         }
 
         [[eosio::action]]
@@ -118,24 +118,20 @@ class [[eosio::contract]] bls_primitives_tests : public contract{
 
         [[eosio::action]]
         void g1baseb4enc(const std::vector<char>& g1, const std::string& base64 ) {
-            check(g1.size() == std::tuple_size<bls_g1_affine>::value, "wrong g1 size passed");
+            check(g1.size() == std::tuple_size<bls_g1>::value, "wrong g1 size passed");
 
-            check(encode_g1_to_bls_public_key(*reinterpret_cast<const bls_g1_affine*>(g1.data())) == base64, "g1 to base64 encoding doesn't match" );
-            check(decode_bls_public_key_to_g1(base64) == *reinterpret_cast<const bls_g1_affine*>(g1.data()), "base64 to g1 decoding doesn't match" );
+            check(encode_g1_to_bls_public_key(*reinterpret_cast<const bls_g1*>(g1.data())) == base64, "g1 to base64 encoding doesn't match" );
+            check(decode_bls_public_key_to_g1(base64) == *reinterpret_cast<const bls_g1*>(g1.data()), "base64 to g1 decoding doesn't match" );
         }
 
         [[eosio::action]]
         void sigbaseb4enc(const std::vector<char>& g2, const std::string& base64) {
-            check(g2.size() == std::tuple_size<bls_g2_affine>::value, "wrong g2 size passed");
-            check(encode_g2_to_bls_signature(*reinterpret_cast<const bls_g2_affine*>(g2.data())) == base64, "g2 to base64 encoding doesn't match" );
-            check(decode_bls_signature_to_g2(base64) == *reinterpret_cast<const bls_g2_affine*>(g2.data()), "base64 to g2 decoding doesn't match" );
+            check(g2.size() == std::tuple_size<bls_g2>::value, "wrong g2 size passed");
+            check(encode_g2_to_bls_signature(*reinterpret_cast<const bls_g2*>(g2.data())) == base64, "g2 to base64 encoding doesn't match" );
+            check(decode_bls_signature_to_g2(base64) == *reinterpret_cast<const bls_g2*>(g2.data()), "base64 to g2 decoding doesn't match" );
         }
 
         const std::string CIPHERSUITE_ID = "BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_NUL_";
-        // g1::one().negate().toAffineBytesLE()
-        const std::vector<uint8_t> G1_ONE_NEG = {0xbb, 0xc6, 0x22, 0xdb, 0xa, 0xf0, 0x3a, 0xfb, 0xef, 0x1a, 0x7a, 0xf9, 0x3f, 0xe8, 0x55, 0x6c, 0x58, 0xac, 0x1b, 0x17, 0x3f, 0x3a, 0x4e, 0xa1, 0x5, 0xb9, 0x74, 0x97, 0x4f, 0x8c, 0x68, 0xc3, 0xf, 0xac, 0xa9, 0x4f, 0x8c, 0x63, 0x95, 0x26, 0x94, 0xd7, 0x97, 0x31, 0xa7, 0xd3, 0xf1, 0x17, 0xca, 0xc2, 0x39, 0xb9, 0xd6, 0xdc, 0x54, 0xad, 0x1b, 0x75, 0xcb, 0xe, 0xba, 0x38, 0x6f, 0x4e, 0x36, 0x42, 0xac, 0xca, 0xd5, 0xb9, 0x55, 0x66, 0xc9, 0x7, 0xb5, 0x1d, 0xef, 0x6a, 0x81, 0x67, 0xf2, 0x21, 0x2e, 0xcf, 0xc8, 0x76, 0x7d, 0xaa, 0xa8, 0x45, 0xd5, 0x55, 0x68, 0x1d, 0x4d, 0x11};
-        // fp12::one().toBytesLE();
-        const std::vector<uint8_t> GT_ONE = []{ std::vector<uint8_t> r(576, 0); r[0] = 1; return r; }();
         // caller of verify() must use this msg
         std::vector<uint8_t> msg = {51, 23, 56, 93, 212, 129, 128, 27, 251, 12, 42, 129, 210, 9, 34, 98};
 
@@ -146,8 +142,17 @@ class [[eosio::contract]] bls_primitives_tests : public contract{
             bls_g1 g1_points[2];
             bls_g2 g2_points[2];
 
-            memcpy(g1_points[0].data(), G1_ONE_NEG.data(), sizeof(bls_g1));
+            memcpy(g1_points[0].data(), detail::G1_ONE_NEG.data(), sizeof(bls_g1));
             memcpy(g2_points[0].data(), sig.data(), sizeof(bls_g2));
+
+            bls_g2 p_msg;
+            detail::g2_fromMessage(std::span<char>(reinterpret_cast<char*>(msg.data()), msg.size()), CIPHERSUITE_ID, p_msg);
+            memcpy(g1_points[1].data(), pk.data(), sizeof(bls_g1));
+            memcpy(g2_points[1].data(), p_msg.data(), sizeof(bls_g2));
+
+            bls_gt r;
+            bls_pairing(g1_points, g2_points, 2, r);
+            check(0 == memcmp(r.data(), detail::GT_ONE.data(), sizeof(bls_gt)), "bls signature verify failed");
         }
 
 };
