@@ -4,6 +4,7 @@ file(GLOB HEADERS "*.hpp"
 add_library(eosio
             eosiolib.cpp
             crypto.cpp
+            base64.cpp
             ${HEADERS})
 
 add_library(eosio_malloc
@@ -40,6 +41,7 @@ if (ENABLE_NATIVE_COMPILER)
                       eosiolib.cpp
                       crypto.cpp
                       malloc.cpp
+                      base64.cpp
                       ${HEADERS})
 
    add_dependencies( native_eosio eosio )
