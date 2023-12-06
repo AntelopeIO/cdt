@@ -68,57 +68,36 @@ namespace eosio {
     }
 
     inline int32_t bls_g1_weighted_sum(const bls_g1 g1_points[], const bls_scalar scalars[], uint32_t num, bls_g1& res) {
-        if (num > 0) {
-            return internal_use_do_not_use::bls_g1_weighted_sum(
-                g1_points[0].data(), num * g1_points[0].size(),
-                scalars[0].data(), num * scalars[0].size(),
-                num,
-                res.data(), res.size()
-            );
-        } else {
-            return internal_use_do_not_use::bls_g1_weighted_sum(
-                nullptr, 0,
-                nullptr, 0,
-                0,
-                res.data(), res.size()
-            );
-        }
+        if (num == 0)
+           return return_code::failure;
+        return internal_use_do_not_use::bls_g1_weighted_sum(
+            g1_points[0].data(), num * g1_points[0].size(),
+            scalars[0].data(), num * scalars[0].size(),
+            num,
+            res.data(), res.size()
+        );
     }
 
     inline int32_t bls_g2_weighted_sum(const bls_g2 g2_points[], const bls_scalar scalars[], uint32_t num, bls_g2& res) {
-        if (num > 0) {
-            return internal_use_do_not_use::bls_g2_weighted_sum(
-                g2_points[0].data(), num * g2_points[0].size(),
-                scalars[0].data(), num * scalars[0].size(),
-                num,
-                res.data(), res.size()
-            );
-        } else {
-            return internal_use_do_not_use::bls_g2_weighted_sum(
-                nullptr, 0,
-                nullptr, 0,
-                0,
-                res.data(), res.size()
-            );
-        }
+        if (num == 0)
+           return return_code::failure;
+        return internal_use_do_not_use::bls_g2_weighted_sum(
+            g2_points[0].data(), num * g2_points[0].size(),
+            scalars[0].data(), num * scalars[0].size(),
+            num,
+            res.data(), res.size()
+        );
     }
 
     inline int32_t bls_pairing(const bls_g1 g1_points[], const bls_g2 g2_points[], const uint32_t num, bls_gt& res) {
-        if (num > 0) {
-            return internal_use_do_not_use::bls_pairing(
-                g1_points[0].data(), num * g1_points[0].size(),
-                g2_points[0].data(), num * g2_points[0].size(),
-                num,
-                res.data(), res.size()
-            );
-        } else {
-            return internal_use_do_not_use::bls_pairing(
-                nullptr, 0,
-                nullptr, 0,
-                0,
-                res.data(), res.size()
-            );
-        }
+        if (num == 0)
+           return return_code::failure;
+        return internal_use_do_not_use::bls_pairing(
+            g1_points[0].data(), num * g1_points[0].size(),
+            g2_points[0].data(), num * g2_points[0].size(),
+            num,
+            res.data(), res.size()
+        );
     }
 
     inline int32_t bls_g1_map(const bls_fp& e, bls_g1& res) {
