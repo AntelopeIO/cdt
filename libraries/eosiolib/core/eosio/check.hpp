@@ -22,6 +22,15 @@ namespace eosio {
       }
    }
 
+
+   /**
+    * Return codes returned by host functions
+    */
+   enum return_code : int32_t {
+      failure = -1,
+      success = 0
+   };
+
    /**
     *  @defgroup system System
     *  @ingroup core
