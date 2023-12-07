@@ -14,6 +14,12 @@ struct [[eosio::table]] out_of_class2 {
 typedef eosio::multi_index<"mi.config5"_n, out_of_class2> out_of_class_index51;
 using uout_of_class_index51 = eosio::multi_index<"mi.config51"_n, out_of_class2>;
 
+struct [[eosio::table, eosio::contract("singleton_contract")]] out_of_class3 {
+    uint64_t id;
+    uint64_t primary_key() const { return id; }
+};
+typedef eosio::multi_index<"mi.config52"_n, out_of_class3> out_of_class_index52;
+
 typedef eosio::singleton<"smpl.conf5"_n, eosio::name> smpl_config5;
 typedef eosio::singleton<"config5"_n, out_of_class2> config5;
 typedef smpl_config5 smpl_config51;

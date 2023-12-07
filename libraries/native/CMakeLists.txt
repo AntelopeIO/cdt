@@ -1,5 +1,3 @@
-set(PARENT_PROJECT_NAME ${PROJECT_NAME})
-
 project(native LANGUAGES CXX ASM)
 
 if (NOT __APPLE)
@@ -8,10 +6,8 @@ else()
    set(CRT_ASM macho_crt.s)
 endif()
 
-if (NOT ${PARENT_PROJECT_NAME} MATCHES "cdt_tools")
-   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-everything -allow-sse")
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-everything -allow-sse")
-endif()
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-everything -allow-sse")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-everything -allow-sse")
 
 file(GLOB HEADERS "*.hpp"
                   "*.h")
@@ -336,29 +332,15 @@ list( APPEND softfloat_sources ${softfloat_headers} )
 add_library ( sf STATIC ${softfloat_sources} )
 target_include_directories( sf PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/softfloat/source/include" "${CMAKE_CURRENT_SOURCE_DIR}/softfloat/source/8086-SSE" "${CMAKE_CURRENT_SOURCE_DIR}/softfloat/build/Linux-x86_64-GCC" ${CMAKE_SOURCE_DIR})
 
-if (${PARENT_PROJECT_NAME} STREQUAL "cdt_tools")
-   add_library(${PROJECT_NAME} STATIC ${softfloat_sources} intrinsics.cpp crt_lib.cpp)
-
-   target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/../libraries/eosiolib/core
-                                                     ${CMAKE_SOURCE_DIR}/../libraries/eosiolib/contracts
-                                                     ${CMAKE_SOURCE_DIR}/../libraries/eosiolib/capi
-                                                     ${CMAKE_SOURCE_DIR}/../libraries/meta_refl/include)
-   # suppress executable stack warning. this is due to absence of .note.GNU-stack
-   target_link_libraries(${PROJECT_NAME} PUBLIC "-Wl,-z,noexecstack")
-else()
-   add_native_library ( native STATIC ${softfloat_sources} intrinsics.cpp crt.cpp ${CRT_ASM})
-endif()
-
+add_native_library ( native STATIC ${softfloat_sources} intrinsics.cpp crt.cpp ${CRT_ASM} )
 target_include_directories( native PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/softfloat/source/include" "${CMAKE_CURRENT_SOURCE_DIR}/softfloat/source/8086-SSE" "${CMAKE_CURRENT_SOURCE_DIR}/softfloat/build/Linux-x86_64-GCC" ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/eosiolib/capi ${CMAKE_SOURCE_DIR}/eosiolib/contracts ${CMAKE_SOURCE_DIR}/eosiolib/core)
 
 add_dependencies(native native_eosio)
 
-if (NOT ${PARENT_PROJECT_NAME} MATCHES "cdt_tools")
-   add_custom_command( TARGET native POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:native> ${BASE_BINARY_DIR}/lib )
+add_custom_command( TARGET native POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:native> ${BASE_BINARY_DIR}/lib )
 
-   add_custom_command( TARGET sf POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:sf> ${BASE_BINARY_DIR}/lib )
+add_custom_command( TARGET sf POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:sf> ${BASE_BINARY_DIR}/lib )
 
-   file(COPY ${CMAKE_CURRENT_SOURCE_DIR} DESTINATION ${BASE_BINARY_DIR}/include/eosio FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "softfloat" EXCLUDE)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR} DESTINATION ${BASE_BINARY_DIR}/include/eosio FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "softfloat" EXCLUDE)
 
-   file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/native DESTINATION ${BASE_BINARY_DIR}/include/eosiolib FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "softfloat" EXCLUDE)
-endif()
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/native DESTINATION ${BASE_BINARY_DIR}/include/eosiolib FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "softfloat" EXCLUDE)

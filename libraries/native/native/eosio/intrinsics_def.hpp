@@ -176,17 +176,15 @@ intrinsic_macro(alt_bn128_pair) \
 intrinsic_macro(mod_exp) \
 intrinsic_macro(bls_g1_add) \
 intrinsic_macro(bls_g2_add) \
-intrinsic_macro(bls_g1_mul) \
-intrinsic_macro(bls_g2_mul) \
-intrinsic_macro(bls_g1_exp) \
-intrinsic_macro(bls_g2_exp) \
+intrinsic_macro(bls_g1_weighted_sum) \
+intrinsic_macro(bls_g2_weighted_sum) \
 intrinsic_macro(bls_pairing) \
 intrinsic_macro(bls_g1_map) \
 intrinsic_macro(bls_g2_map) \
 intrinsic_macro(bls_fp_mod) \
+intrinsic_macro(bls_fp_mul) \
+intrinsic_macro(bls_fp_exp) \
 intrinsic_macro(set_finalizers)
-
-
 
 #define CREATE_ENUM(name) \
    name,
