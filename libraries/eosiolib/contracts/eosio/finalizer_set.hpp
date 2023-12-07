@@ -31,7 +31,7 @@ namespace eosio {
 
     void set_finalizers( const abi_finalizer_set& fin_set ) {
         for (const auto& finalizer : fin_set.finalizers)
-            eosio::check(finalizer.public_key_g1_affine_le.size() == sizeof(bls_g1_affine), "public key has a wrong size" );
+            eosio::check(finalizer.public_key_g1_affine_le.size() == sizeof(bls_g1), "public key has a wrong size" );
         auto packed = eosio::pack(fin_set);
         internal_use_do_not_use::set_finalizers(packed.data(), packed.size());
     }
