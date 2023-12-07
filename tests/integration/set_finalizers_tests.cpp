@@ -45,12 +45,12 @@ BOOST_FIXTURE_TEST_CASE(set_finalizers_test, tester) try {
     signed_block_ptr cur_block = produce_block();
     fc::variant pretty_output;
     abi_serializer::to_variant( *cur_block, pretty_output, get_resolver(), fc::microseconds::maximum() );
-    BOOST_ASSERT(pretty_output.get_object().contains("proposed_finalizer_set"));
-    BOOST_ASSERT(pretty_output["proposed_finalizer_set"]["generation"] == 1);
-    BOOST_ASSERT(pretty_output["proposed_finalizer_set"]["fthreshold"] == 1);
-    BOOST_ASSERT(pretty_output["proposed_finalizer_set"]["finalizers"].size() == 1);
-    BOOST_ASSERT(pretty_output["proposed_finalizer_set"]["finalizers"][size_t(0)]["description"] == "test_desc");
-    BOOST_ASSERT(pretty_output["proposed_finalizer_set"]["finalizers"][size_t(0)]["fweight"] == 1);
+    BOOST_REQUIRE(pretty_output.get_object().contains("proposed_finalizer_policy"));
+    BOOST_REQUIRE_EQUAL(pretty_output["proposed_finalizer_policy"]["generation"], 1);
+    BOOST_REQUIRE_EQUAL(pretty_output["proposed_finalizer_policy"]["fthreshold"], 1);
+    BOOST_REQUIRE_EQUAL(pretty_output["proposed_finalizer_policy"]["finalizers"].size(), 1u);
+    BOOST_REQUIRE_EQUAL(pretty_output["proposed_finalizer_policy"]["finalizers"][size_t(0)]["description"], "test_desc");
+    BOOST_REQUIRE_EQUAL(pretty_output["proposed_finalizer_policy"]["finalizers"][size_t(0)]["fweight"], 1);
     //TODO: add key check here after base64 support will be added
 
     // testing wrong public key size
