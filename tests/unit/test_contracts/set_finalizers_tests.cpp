@@ -6,7 +6,7 @@ public:
     using contract::contract;
 
     [[eosio::action]]
-    void setfinal(const eosio::abi_finalizer_set& fin_set) {
-        eosio::set_finalizers(fin_set);
+    void setfinal(const eosio::abi_finalizer_policy& finalizer_policy) {
+        eosio::set_finalizers(finalizer_policy);
     }
 };

@@ -22,17 +22,17 @@ namespace eosio {
 
         EOSLIB_SERIALIZE(abi_finalizer_authority, (description)(fweight)(public_key_g1_affine_le));
     };
-    struct abi_finalizer_set {
+    struct abi_finalizer_policy {
         uint64_t                             fthreshold = 0;
         std::vector<abi_finalizer_authority> finalizers;
 
-        EOSLIB_SERIALIZE(abi_finalizer_set, (fthreshold)(finalizers));
+        EOSLIB_SERIALIZE(abi_finalizer_policy, (fthreshold)(finalizers));
     };
 
-    void set_finalizers( const abi_finalizer_set& fin_set ) {
-        for (const auto& finalizer : fin_set.finalizers)
+    void set_finalizers( const abi_finalizer_policy& finalizer_policy ) {
+        for (const auto& finalizer : finalizer_policy.finalizers)
             eosio::check(finalizer.public_key_g1_affine_le.size() == sizeof(bls_g1), "public key has a wrong size" );
-        auto packed = eosio::pack(fin_set);
+        auto packed = eosio::pack(finalizer_policy);
         internal_use_do_not_use::set_finalizers(packed.data(), packed.size());
     }
 
