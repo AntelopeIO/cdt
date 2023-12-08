@@ -24,7 +24,7 @@ BOOST_FIXTURE_TEST_CASE(set_finalizers_test, tester) try {
     produce_block();
 
     push_action(config::system_account_name, "setfinal"_n, "test"_n, mvo()
-        ("fin_set", mvo()("fthreshold", 1)
+        ("finalizer_policy", mvo()("fthreshold", 1)
                          ("finalizers", std::vector<mvo>{mvo()
                                         ("description", "test_desc")
                                         ("fweight", 1)
@@ -42,7 +42,7 @@ BOOST_FIXTURE_TEST_CASE(set_finalizers_test, tester) try {
 
     // testing wrong public key size
     BOOST_CHECK_THROW(push_action(config::system_account_name, "setfinal"_n, "test"_n, mvo()
-        ("fin_set", mvo()("fthreshold", 1)
+        ("finalizer_policy", mvo()("fthreshold", 1)
                          ("finalizers", std::vector<mvo>{mvo()
                                         ("description", "test_desc")
                                         ("fweight", 1)
