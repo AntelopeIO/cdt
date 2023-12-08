@@ -1,5 +1,5 @@
 #include <eosio/eosio.hpp>
-#include <eosio/finalizer_set.hpp>
+#include <eosio/finalizer_policy.hpp>
 
 class [[eosio::contract]] set_finalizers_tests : public eosio::contract{
 public:
