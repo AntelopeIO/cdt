@@ -12,18 +12,18 @@ using namespace fc;
 
 using mvo = fc::mutable_variant_object;
 
-BOOST_AUTO_TEST_SUITE(set_finalizers_tests)
+BOOST_AUTO_TEST_SUITE(instant_finality_tests)
 
-BOOST_FIXTURE_TEST_CASE(set_finalizers_test, tester) try {
+BOOST_FIXTURE_TEST_CASE(instant_finality_test, tester) try {
     create_accounts( { "test"_n } );
     produce_block();
 
-    set_code( config::system_account_name,  contracts::set_finalizers_test_wasm() );
-    set_abi(  config::system_account_name,  contracts::set_finalizers_test_abi().data() );
+    set_code( config::system_account_name,  contracts::instant_finality_test_wasm() );
+    set_abi(  config::system_account_name,  contracts::instant_finality_test_abi().data() );
 
     produce_block();
 
-    push_action(config::system_account_name, "setfinal"_n, "test"_n, mvo()
+    push_action(config::system_account_name, "setfinalizer"_n, "test"_n, mvo()
         ("finalizer_policy", mvo()("fthreshold", 1)
                          ("finalizers", std::vector<mvo>{mvo()
                                         ("description", "test_desc")
@@ -41,7 +41,7 @@ BOOST_FIXTURE_TEST_CASE(set_finalizers_test, tester) try {
     BOOST_REQUIRE_EQUAL(pretty_output["proposed_finalizer_policy"]["finalizers"][size_t(0)]["public_key"], "PUB_BLS_Ig71xJwYaOhbgmWN+XZvws7kvQtdmIDUze6ROe3TxOva5AdPHT2z88khOWKULu8JGwDZ8qm4NwFcjb5QfyQq7kWSclibaylzvPM+tGCHIscMGsPRreQMhFueFepjgAgKXjOb8g==");
 
     // testing wrong public key size
-    BOOST_CHECK_THROW(push_action(config::system_account_name, "setfinal"_n, "test"_n, mvo()
+    BOOST_CHECK_THROW(push_action(config::system_account_name, "setfinalizer"_n, "test"_n, mvo()
         ("finalizer_policy", mvo()("fthreshold", 1)
                          ("finalizers", std::vector<mvo>{mvo()
                                         ("description", "test_desc")

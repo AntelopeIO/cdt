@@ -26,8 +26,8 @@ namespace eosio::testing {
       static std::vector<uint8_t> bls_primitives_test_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../unit/test_contracts/bls_primitives_tests.wasm"); }
       static std::vector<char>    bls_primitives_test_abi() { return read_abi("${CMAKE_BINARY_DIR}/../unit/test_contracts/bls_primitives_tests.abi"); }
       
-      static std::vector<uint8_t> set_finalizers_test_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../unit/test_contracts/set_finalizers_tests.wasm"); }
-      static std::vector<char>    set_finalizers_test_abi() { return read_abi("${CMAKE_BINARY_DIR}/../unit/test_contracts/set_finalizers_tests.abi"); }
+      static std::vector<uint8_t> instant_finality_test_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../unit/test_contracts/instant_finality_tests.wasm"); }
+      static std::vector<char>    instant_finality_test_abi() { return read_abi("${CMAKE_BINARY_DIR}/../unit/test_contracts/instant_finality_tests.abi"); }
 
       static std::vector<uint8_t> get_code_hash_write_test_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../unit/test_contracts/get_code_hash_write.wasm"); }
       static std::vector<char>    get_code_hash_write_test_abi() { return read_abi("${CMAKE_BINARY_DIR}/../unit/test_contracts/get_code_hash_write.abi"); }

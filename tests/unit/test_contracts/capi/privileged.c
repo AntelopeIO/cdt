@@ -1,4 +1,5 @@
 #include <eosio/privileged.h>
+#include <eosio/instant_finality.h>
 #include <stdint.h>
 
 void test_privileged( void ) {

@@ -6,6 +6,7 @@
 #include <eosio/crypto_ext.h>
 #include <eosio/crypto_bls_ext.h>
 #include <eosio/db.h>
+#include <eosio/instant_finality.h>
 #include <eosio/permission.h>
 #include <eosio/print.h>
 #include <eosio/privileged.h>
