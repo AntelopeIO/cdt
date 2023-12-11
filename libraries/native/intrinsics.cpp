@@ -905,8 +905,12 @@ extern "C" {
    uint32_t get_active_security_group(char* data, uint32_t datalen){
       return intrinsics::get().call<intrinsics::get_active_security_group>(data, datalen);
    }
-
-}
+  
+   void set_finalizers(const char* data, uint32_t len) {
+      intrinsics::get().call<intrinsics::set_finalizers>(data, len);
+   }
+  
+} // extern "C"
 
 int32_t blake2_f( uint32_t rounds, const char* state, uint32_t state_len, const char* msg, uint32_t msg_len, 
                   const char* t0_offset, uint32_t t0_len, const char* t1_offset, uint32_t t1_len, int32_t final, char* result, uint32_t result_len) {
