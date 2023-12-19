@@ -24,9 +24,9 @@ namespace eosio {
     struct finalizer_authority {
         std::string           description;
         uint64_t              weight = 0;    // weight that this finalizer's vote has for meeting threshold
-        std::vector<char>     public_key_g1; // Affine little endian non-montgomery g1
+        std::vector<char>     public_key;    // Affine little endian non-montgomery g1
 
-        EOSLIB_SERIALIZE(finalizer_authority, (description)(weight)(public_key_g1));
+        EOSLIB_SERIALIZE(finalizer_authority, (description)(weight)(public_key));
     };
     struct finalizer_policy {
         uint64_t                          threshold = 0;
@@ -42,7 +42,7 @@ namespace eosio {
  */
     inline void set_finalizers( const finalizer_policy& finalizer_policy ) {
         for (const auto& finalizer : finalizer_policy.finalizers)
-            eosio::check(finalizer.public_key_g1.size() == sizeof(bls_g1), "public key has a wrong size" );
+            eosio::check(finalizer.public_key.size() == sizeof(bls_g1), "public key has a wrong size" );
         auto packed = eosio::pack(finalizer_policy);
         internal_use_do_not_use::set_finalizers(packed.data(), packed.size());
     }
