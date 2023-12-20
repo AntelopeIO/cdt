@@ -21,18 +21,18 @@ namespace eosio {
         } // extern "C"
     } //internal_use_do_not_use
 
-    struct abi_finalizer_authority {
+    struct finalizer_authority {
         std::string           description;
-        uint64_t              fweight = 0; // weight that this finalizer's vote has for meeting fthreshold
-        std::vector<char>     public_key_g1_affine_le; // Affine little endian
+        uint64_t              weight = 0;    // weight that this finalizer's vote has for meeting threshold
+        std::vector<char>     public_key;    // Affine little endian non-montgomery g1
 
-        EOSLIB_SERIALIZE(abi_finalizer_authority, (description)(fweight)(public_key_g1_affine_le));
+        EOSLIB_SERIALIZE(finalizer_authority, (description)(weight)(public_key));
     };
-    struct abi_finalizer_policy {
-        uint64_t                             fthreshold = 0;
-        std::vector<abi_finalizer_authority> finalizers;
+    struct finalizer_policy {
+        uint64_t                          threshold = 0;
+        std::vector<finalizer_authority>  finalizers;
 
-        EOSLIB_SERIALIZE(abi_finalizer_policy, (fthreshold)(finalizers));
+        EOSLIB_SERIALIZE(finalizer_policy, (threshold)(finalizers));
     };
 
 /**
@@ -40,9 +40,9 @@ namespace eosio {
  *
  * @param finalizer_policy - finalizer policy to be set
  */
-    inline void set_finalizers( const abi_finalizer_policy& finalizer_policy ) {
+    inline void set_finalizers( const finalizer_policy& finalizer_policy ) {
         for (const auto& finalizer : finalizer_policy.finalizers)
-            eosio::check(finalizer.public_key_g1_affine_le.size() == sizeof(bls_g1), "public key has a wrong size" );
+            eosio::check(finalizer.public_key.size() == sizeof(bls_g1), "public key has a wrong size" );
         auto packed = eosio::pack(finalizer_policy);
         internal_use_do_not_use::set_finalizers(packed.data(), packed.size());
     }

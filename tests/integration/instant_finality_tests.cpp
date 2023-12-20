@@ -24,29 +24,29 @@ BOOST_FIXTURE_TEST_CASE(instant_finality_test, tester) try {
     produce_block();
 
     push_action(config::system_account_name, "setfinalizer"_n, "test"_n, mvo()
-        ("finalizer_policy", mvo()("fthreshold", 1)
-                         ("finalizers", std::vector<mvo>{mvo()
-                                        ("description", "test_desc")
-                                        ("fweight", 1)
-                                        ("public_key_g1_affine_le", "220ef5c49c1868e85b82658df9766fc2cee4bd0b5d9880d4cdee9139edd3c4ebdae4074f1d3db3f3c9213962942eef091b00d9f2a9b837015c8dbe507f242aee459272589b6b2973bcf33eb4608722c70c1ac3d1ade40c845b9e15ea6380080a")})));
+        ("finalizer_policy", mvo()("threshold", 1)
+        ("finalizers", std::vector<mvo>{mvo()
+        ("description", "test_desc")
+        ("weight", 1)
+        ("public_key", "744beeb74c9d1debc318fe847f73b822ae905dff6351c3144f59c22515fe251625158acefea2adff1e37f6f509d83919df639de8074967e4bd756444f52cbeed0e9b363a6820e3f4716ce4282d43aa685f137a5a5be293840de7a0b915f12b08")})));
     signed_block_ptr cur_block = produce_block();
     fc::variant pretty_output;
     abi_serializer::to_variant( *cur_block, pretty_output, get_resolver(), fc::microseconds::maximum() );
     BOOST_REQUIRE(pretty_output.get_object().contains("proposed_finalizer_policy"));
     BOOST_REQUIRE_EQUAL(pretty_output["proposed_finalizer_policy"]["generation"], 1);
-    BOOST_REQUIRE_EQUAL(pretty_output["proposed_finalizer_policy"]["fthreshold"], 1);
+    BOOST_REQUIRE_EQUAL(pretty_output["proposed_finalizer_policy"]["threshold"], 1);
     BOOST_REQUIRE_EQUAL(pretty_output["proposed_finalizer_policy"]["finalizers"].size(), 1u);
     BOOST_REQUIRE_EQUAL(pretty_output["proposed_finalizer_policy"]["finalizers"][size_t(0)]["description"], "test_desc");
-    BOOST_REQUIRE_EQUAL(pretty_output["proposed_finalizer_policy"]["finalizers"][size_t(0)]["fweight"], 1);
-    BOOST_REQUIRE_EQUAL(pretty_output["proposed_finalizer_policy"]["finalizers"][size_t(0)]["public_key"], "PUB_BLS_Ig71xJwYaOhbgmWN+XZvws7kvQtdmIDUze6ROe3TxOva5AdPHT2z88khOWKULu8JGwDZ8qm4NwFcjb5QfyQq7kWSclibaylzvPM+tGCHIscMGsPRreQMhFueFepjgAgKXjOb8g==");
+    BOOST_REQUIRE_EQUAL(pretty_output["proposed_finalizer_policy"]["finalizers"][size_t(0)]["weight"], 1);
+    BOOST_REQUIRE_EQUAL(pretty_output["proposed_finalizer_policy"]["finalizers"][size_t(0)]["public_key"], "PUB_BLS_dEvut0ydHevDGP6Ef3O4Iq6QXf9jUcMUT1nCJRX+JRYlFYrO/qKt/x439vUJ2DkZ32Od6AdJZ+S9dWRE9Sy+7Q6bNjpoIOP0cWzkKC1DqmhfE3paW+KThA3noLkV8SsILcfxpQ==");
 
     // testing wrong public key size
     BOOST_CHECK_THROW(push_action(config::system_account_name, "setfinalizer"_n, "test"_n, mvo()
-        ("finalizer_policy", mvo()("fthreshold", 1)
-                         ("finalizers", std::vector<mvo>{mvo()
-                                        ("description", "test_desc")
-                                        ("fweight", 1)
-                                        ("public_key_g1_affine_le", std::vector<char>{'a', 'b', 'c'})}))), fc::exception);
+        ("finalizer_policy", mvo()("threshold", 1)
+        ("finalizers", std::vector<mvo>{mvo()
+        ("description", "test_desc")
+        ("weight", 1)
+        ("public_key", std::vector<char>{'a', 'b', 'c'})}))), fc::exception);
 
 } FC_LOG_AND_RETHROW()
 
