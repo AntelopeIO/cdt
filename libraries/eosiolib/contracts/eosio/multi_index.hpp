@@ -866,11 +866,11 @@ class multi_index
 
          auto secondary_keys = make_extractor_tuple::get_extractor_tuple(indices_type{}, obj);
 
-         uint64_t pk = to_raw_key(obj.primary_key());
+         uint64_t pk = _multi_index_detail::to_raw_key(obj.primary_key());
 
          updater( obj );
 
-         eosio::check( pk == to_raw_key(obj.primary_key()), "updater cannot change primary key when modifying an object" );
+         eosio::check( pk == _multi_index_detail::to_raw_key(obj.primary_key()), "updater cannot change primary key when modifying an object" );
  
          size_t size = pack_size( obj );
          //using malloc/free here potentially is not exception-safe, although WASM doesn't support exceptions
