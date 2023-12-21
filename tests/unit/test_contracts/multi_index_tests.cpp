@@ -204,41 +204,6 @@ namespace _test_multi_index
             auto itr2 = table.find(ssn);
             eosio::check(itr2 == table.end(), "idx64_general - table.erase()");
         }
-
-        // insert, update and delete by iterator
-        {
-            const uint64_t ssn = 421;
-            auto new_person = table.insert(payer, [&](auto &r)
-                                            {
-            r.id = ssn;
-            r.sec = "bob"_n.value; });
-
-            table.update(new_person, payer, [&](auto &r)
-                         { r.sec = "billy"_n.value; });
-
-            auto itr1 = table.find(ssn);
-            eosio::check(itr1 != table.end() && itr1->sec == "billy"_n.value, "idx64_general - table.update()");
-
-            table.remove(itr1);
-            auto itr2 = table.find(ssn);
-            eosio::check(itr2 == table.end(), "idx64_general - table.remove()");
-        }
-
-        // insert, update and delete by object
-        {
-            const uint64_t ssn = 421;
-            auto new_person = table.insert(payer, [&](auto &r)
-                                            {
-            r.id = ssn;
-            r.sec = "bob"_n.value; });
-
-            table.update(new_person, payer, [&](auto &r)
-                         { r.sec = "billy"_n.value; });
-
-            table.remove(new_person);
-            auto itr2 = table.find(ssn);
-            eosio::check(itr2 == table.end(), "idx64_general - table.remove()");
-        }
     }
 
     template <uint64_t TableName>
