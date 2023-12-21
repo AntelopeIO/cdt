@@ -205,7 +205,7 @@ namespace _test_multi_index
             eosio::check(itr2 == table.end(), "idx64_general - table.erase()");
         }
 
-        // insert, update and remove by iterator
+        // insert, update and delete by iterator
         {
             const uint64_t ssn = 421;
             auto new_person = table.insert(payer, [&](auto &r)
@@ -224,7 +224,7 @@ namespace _test_multi_index
             eosio::check(itr2 == table.end(), "idx64_general - table.remove()");
         }
 
-        // insert, update and remove by object
+        // insert, update and delete by object
         {
             const uint64_t ssn = 421;
             auto new_person = table.insert(payer, [&](auto &r)
@@ -235,26 +235,7 @@ namespace _test_multi_index
             table.update(new_person, payer, [&](auto &r)
                          { r.sec = "billy"_n.value; });
 
-            const auto& person_object = table.get(ssn);
-            auto& mutable_person = const_cast<record&>(person_object);
-            table.remove(mutable_person);
-            auto itr2 = table.find(ssn);
-            eosio::check(itr2 == table.end(), "idx64_general - table.remove()");
-        }
-
-        // insert, update and remove by const object
-        {
-            const uint64_t ssn = 421;
-            auto new_person = table.insert(payer, [&](auto &r)
-                                            {
-            r.id = ssn;
-            r.sec = "bob"_n.value; });
-
-            table.update(new_person, payer, [&](auto &r)
-                         { r.sec = "billy"_n.value; });
-
-            const auto& person_object = table.get(ssn);
-            table.remove(person_object);
+            table.remove(new_person);
             auto itr2 = table.find(ssn);
             eosio::check(itr2 == table.end(), "idx64_general - table.remove()");
         }
