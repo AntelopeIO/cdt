@@ -743,8 +743,8 @@ class multi_index
             }
 
             template<typename Lambda>
-            void update( T& obj, eosio::name payer, Lambda&& updater ) {
-               _multidx->update( obj, payer, std::forward<Lambda&&>(updater) );
+            void update( const T& obj, eosio::name payer, Lambda&& updater ) {
+               modify( obj, payer, std::forward<Lambda&&>(updater) );
             }
 
             const_iterator erase( const_iterator itr ) {
@@ -854,56 +854,6 @@ class multi_index
 
          return *ptr;
       } /// load_object_by_primary_iterator
-
-      template<typename Lambda>
-      void modify_object(T& obj, name payer, Lambda&& updater) {
-         using namespace _multi_index_detail;
-
-         auto& objitem = static_cast<item&>(obj);         
-         eosio::check( objitem.__idx == this, "object passed to modify is not in multi_index" );
-
-         eosio::check( _code == current_receiver(), "cannot modify objects in table of another contract" ); // Quick fix for mutating db using multi_index that shouldn't allow mutation. Real fix can come in RC2.
-
-         auto secondary_keys = make_extractor_tuple::get_extractor_tuple(indices_type{}, obj);
-
-         uint64_t pk = _multi_index_detail::to_raw_key(obj.primary_key());
-
-         updater( obj );
-
-         eosio::check( pk == _multi_index_detail::to_raw_key(obj.primary_key()), "updater cannot change primary key when modifying an object" );
- 
-         size_t size = pack_size( obj );
-         //using malloc/free here potentially is not exception-safe, although WASM doesn't support exceptions
-         void* buffer = max_stack_buffer_size < size ? malloc(size) : alloca(size);
-
-         datastream<char*> ds( (char*)buffer, size );
-         ds << obj;
-
-         internal_use_do_not_use::db_update_i64( objitem.__primary_itr, payer.value, buffer, size );
-
-         if ( max_stack_buffer_size < size ) {
-            free( buffer );
-         }
-
-         if( pk >= _next_primary_key )
-            _next_primary_key = (pk >= no_available_primary_key) ? no_available_primary_key : (pk + 1);
-
-         bluegrass::meta::for_each(indices_type{}, [&](auto idx){
-            typedef std::tuple_element_t<const_index, decltype(idx)> index_type;
-            auto secondary = index_type::extract_secondary_key( obj );
-            if( memcmp( &std::get<index_type::index_number>(secondary_keys), &secondary, sizeof(secondary) ) != 0 ) {
-               auto indexitr = objitem.__iters[index_type::number()];
-
-               if( indexitr < 0 ) {
-                  typename index_type::secondary_key_type temp_secondary_key;
-                  indexitr = objitem.__iters[index_type::number()]
-                           = secondary_index_db_functions<typename index_type::secondary_key_type>::db_idx_find_primary( _code.value, _scope, index_type::name(), pk,  temp_secondary_key );
-               }
-
-               secondary_index_db_functions<typename index_type::secondary_key_type>::db_idx_update( indexitr, payer.value, secondary );
-            }
-         } );
-      }
 
    public:
       /**
@@ -1855,9 +1805,53 @@ class multi_index
        */
       template<typename Lambda>
       void modify( const T& obj, name payer, Lambda&& updater ) {
-         T& mutable_obj = const_cast<T&>(obj);
+         using namespace _multi_index_detail;
 
-         modify_object(mutable_obj, payer, std::forward<Lambda>(updater));
+         const auto& objitem = static_cast<const item&>(obj);
+         eosio::check( objitem.__idx == this, "object passed to modify is not in multi_index" );
+         auto& mutableitem = const_cast<item&>(objitem);
+         eosio::check( _code == current_receiver(), "cannot modify objects in table of another contract" ); // Quick fix for mutating db using multi_index that shouldn't allow mutation. Real fix can come in RC2.
+
+         auto secondary_keys = make_extractor_tuple::get_extractor_tuple(indices_type{}, obj);
+
+         uint64_t pk = _multi_index_detail::to_raw_key(obj.primary_key());
+
+         auto& mutableobj = const_cast<T&>(obj); // Do not forget the auto& otherwise it would make a copy and thus not update at all.
+         updater( mutableobj );
+
+         eosio::check( pk == _multi_index_detail::to_raw_key(obj.primary_key()), "updater cannot change primary key when modifying an object" );
+
+         size_t size = pack_size( obj );
+         //using malloc/free here potentially is not exception-safe, although WASM doesn't support exceptions
+         void* buffer = max_stack_buffer_size < size ? malloc(size) : alloca(size);
+
+         datastream<char*> ds( (char*)buffer, size );
+         ds << obj;
+
+         internal_use_do_not_use::db_update_i64( objitem.__primary_itr, payer.value, buffer, size );
+
+         if ( max_stack_buffer_size < size ) {
+            free( buffer );
+         }
+
+         if( pk >= _next_primary_key )
+            _next_primary_key = (pk >= no_available_primary_key) ? no_available_primary_key : (pk + 1);
+
+         bluegrass::meta::for_each(indices_type{}, [&](auto idx){
+            typedef std::tuple_element_t<const_index, decltype(idx)> index_type;
+            auto secondary = index_type::extract_secondary_key( obj );
+            if( memcmp( &std::get<index_type::index_number>(secondary_keys), &secondary, sizeof(secondary) ) != 0 ) {
+               auto indexitr = mutableitem.__iters[index_type::number()];
+
+               if( indexitr < 0 ) {
+                  typename index_type::secondary_key_type temp_secondary_key;
+                  indexitr = mutableitem.__iters[index_type::number()]
+                           = secondary_index_db_functions<typename index_type::secondary_key_type>::db_idx_find_primary( _code.value, _scope, index_type::name(), pk,  temp_secondary_key );
+               }
+
+               secondary_index_db_functions<typename index_type::secondary_key_type>::db_idx_update( indexitr, payer.value, secondary );
+            }
+         } );
       }
 
       /**
@@ -1902,8 +1896,8 @@ class multi_index
        * @endcode
        */
       template<typename Lambda>
-      void update( T& obj, name payer, Lambda&& updater ) {
-         modify_object(obj, payer, std::forward<Lambda>(updater));
+      void update( const T& obj, name payer, Lambda&& updater ) {
+         modify(obj, payer, std::forward<Lambda>(updater));
       }
 
       /**
