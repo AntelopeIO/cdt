@@ -733,18 +733,8 @@ class multi_index
             }
 
             template<typename Lambda>
-            void update( const_iterator itr, eosio::name payer, Lambda&& updater ) {
-               modify( itr, payer, std::forward<Lambda>(updater) );
-            }
-
-            template<typename Lambda>
             void modify( const T& obj, eosio::name payer, Lambda&& updater ) {
                _multidx->modify( obj, payer, std::forward<Lambda&&>(updater) );
-            }
-
-            template<typename Lambda>
-            void update( T& obj, eosio::name payer, Lambda&& updater ) {
-               _multidx->update( obj, payer, std::forward<Lambda&&>(updater) );
             }
 
             const_iterator erase( const_iterator itr ) {
@@ -756,10 +746,6 @@ class multi_index
                _multidx->erase(obj);
 
                return itr;
-            }
-
-            const_iterator remove( const_iterator itr ) {
-               return erase(itr);
             }
 
             eosio::name get_code()const  { return _multidx->get_code(); }
@@ -854,56 +840,6 @@ class multi_index
 
          return *ptr;
       } /// load_object_by_primary_iterator
-
-      template<typename Lambda>
-      void modify_object(T& obj, name payer, Lambda&& updater) {
-         using namespace _multi_index_detail;
-
-         auto& objitem = static_cast<item&>(obj);         
-         eosio::check( objitem.__idx == this, "object passed to modify is not in multi_index" );
-
-         eosio::check( _code == current_receiver(), "cannot modify objects in table of another contract" ); // Quick fix for mutating db using multi_index that shouldn't allow mutation. Real fix can come in RC2.
-
-         auto secondary_keys = make_extractor_tuple::get_extractor_tuple(indices_type{}, obj);
-
-         uint64_t pk = to_raw_key(obj.primary_key());
-
-         updater( obj );
-
-         eosio::check( pk == to_raw_key(obj.primary_key()), "updater cannot change primary key when modifying an object" );
- 
-         size_t size = pack_size( obj );
-         //using malloc/free here potentially is not exception-safe, although WASM doesn't support exceptions
-         void* buffer = max_stack_buffer_size < size ? malloc(size) : alloca(size);
-
-         datastream<char*> ds( (char*)buffer, size );
-         ds << obj;
-
-         internal_use_do_not_use::db_update_i64( objitem.__primary_itr, payer.value, buffer, size );
-
-         if ( max_stack_buffer_size < size ) {
-            free( buffer );
-         }
-
-         if( pk >= _next_primary_key )
-            _next_primary_key = (pk >= no_available_primary_key) ? no_available_primary_key : (pk + 1);
-
-         bluegrass::meta::for_each(indices_type{}, [&](auto idx){
-            typedef std::tuple_element_t<const_index, decltype(idx)> index_type;
-            auto secondary = index_type::extract_secondary_key( obj );
-            if( memcmp( &std::get<index_type::index_number>(secondary_keys), &secondary, sizeof(secondary) ) != 0 ) {
-               auto indexitr = objitem.__iters[index_type::number()];
-
-               if( indexitr < 0 ) {
-                  typename index_type::secondary_key_type temp_secondary_key;
-                  indexitr = objitem.__iters[index_type::number()]
-                           = secondary_index_db_functions<typename index_type::secondary_key_type>::db_idx_find_primary( _code.value, _scope, index_type::name(), pk,  temp_secondary_key );
-               }
-
-               secondary_index_db_functions<typename index_type::secondary_key_type>::db_idx_update( indexitr, payer.value, secondary );
-            }
-         } );
-      }
 
    public:
       /**
@@ -1595,7 +1531,6 @@ class multi_index
          eosio::check( objitem.__idx == this, "object passed to iterator_to is not in multi_index" );
          return {this, &objitem};
       }
-
       /**
        * Adds a new object (i.e., row) to the table.
        * @ingroup multiindex
@@ -1679,48 +1614,6 @@ class multi_index
       }
 
       /**
-       * Adds a new object (i.e., row) to the table, alias for emplace()
-       * @ingroup multiindex
-       *
-       * @param payer - Account name of the payer for the Storage usage of the new object
-       * @param constructor - Lambda function that does an in-place initialization of the object to be created in the table
-       *
-       * @pre A multi index table has been instantiated
-       * @post A new object is created in the Multi-Index table, with a unique primary key (as specified in the object).  The object is serialized and written to the table. If the table does not exist, it is created.
-       * @post Secondary indices are updated to refer to the newly added object. If the secondary index tables do not exist, they are created.
-       * @post The payer is charged for the storage usage of the new object and, if the table (and secondary index tables) must be created, for the overhead of the table creation.
-       *
-       * @return A primary key iterator to the newly created object
-       *
-       * Exception - The account is not authorized to write to the table.
-       *
-       * Example:
-       *
-       * @code
-       * // This assumes the code from the constructor example. Replace myaction() {...}
-       *
-       *     void myaction() {
-       *       address_index addresses(_self, _self.value); // code, scope
-       *       // add to table, first argument is account to bill for storage
-       *       addresses.insert(_self, [&](auto& address) {
-       *         address.account_name = "dan"_n;
-       *         address.first_name = "Daniel";
-       *         address.last_name = "Larimer";
-       *         address.street = "1 EOS Way";
-       *         address.city = "Blacksburg";
-       *         address.state = "VA";
-       *       });
-       *     }
-       * }
-       * EOSIO_DISPATCH( addressbook, (myaction) )
-       * @endcode
-       */
-      template<typename Lambda>
-      const_iterator insert( name payer, Lambda&& constructor ) {
-         return emplace(payer, std::forward<Lambda>(constructor));
-      }
-
-      /**
        * Modifies an existing object in a table.
        * @ingroup multiindex
        *
@@ -1768,51 +1661,6 @@ class multi_index
       }
 
       /**
-       * Updates an existing object in a table, alias for modify()
-       * @ingroup multiindex
-       *
-       * @param itr - an iterator pointing to the object to be updated
-       * @param payer - account name of the payer for the storage usage of the updated row
-       * @param updater - lambda function that updates the target object
-       *
-       * @pre itr points to an existing element
-       * @pre payer is a valid account that is authorized to execute the action and be billed for storage usage.
-       *
-       * @post The updated object is serialized, then replaces the existing object in the table.
-       * @post Secondary indices are updated; the primary key of the updated object is not changed.
-       * @post The payer is charged for the storage usage of the updated object.
-       * @post If payer is the same as the existing payer, payer only pays for the usage difference between existing and updated object (and is refunded if this difference is negative).
-       * @post If payer is different from the existing payer, the existing payer is refunded for the storage usage of the existing object.
-       *
-       * Exceptions:
-       * If called with an invalid precondition, execution is aborted.
-       *
-       * Example:
-       *
-       * @code
-       * // This assumes the code from the constructor example. Replace myaction() {...}
-       *
-       *     void myaction() {
-       *       // create reference to address_index  - see emplace example
-       *       // add dan account to table           - see emplace example
-       *
-       *       auto itr = addresses.find("dan"_n);
-       *       eosio::check(itr != addresses.end(), "Address for account not found");
-       *       addresses.update( itr, account payer, [&]( auto& address ) {
-       *         address.city = "San Luis Obispo";
-       *         address.state = "CA";
-       *       });
-       *     }
-       * }
-       * EOSIO_DISPATCH( addressbook, (myaction) )
-       * @endcode
-       */
-      template<typename Lambda>
-      void update( const_iterator itr, name payer, Lambda&& updater ) {
-         modify( itr, payer, std::forward<Lambda>(updater) );
-      }
-
-      /**
        * Modifies an existing object in a table.
        * @ingroup multiindex
        *
@@ -1855,55 +1703,53 @@ class multi_index
        */
       template<typename Lambda>
       void modify( const T& obj, name payer, Lambda&& updater ) {
-         T& mutable_obj = const_cast<T&>(obj);
+         using namespace _multi_index_detail;
 
-         modify_object(mutable_obj, payer, std::forward<Lambda>(updater));
-      }
+         const auto& objitem = static_cast<const item&>(obj);
+         eosio::check( objitem.__idx == this, "object passed to modify is not in multi_index" );
+         auto& mutableitem = const_cast<item&>(objitem);
+         eosio::check( _code == current_receiver(), "cannot modify objects in table of another contract" ); // Quick fix for mutating db using multi_index that shouldn't allow mutation. Real fix can come in RC2.
 
-      /**
-       * Updates an existing object in a table, alias for modify()
-       * @ingroup multiindex
-       *
-       * @param obj - a reference to the object to be updated
-       * @param payer - account name of the payer for the storage usage of the updated row
-       * @param updater - lambda function that updates the target object
-       *
-       * @pre obj is an existing object in the table
-       * @pre payer is a valid account that is authorized to execute the action and be billed for storage usage.
-       *
-       * @post The modified object is serialized, then replaces the existing object in the table.
-       * @post Secondary indices are updated; the primary key of the updated object is not changed.
-       * @post The payer is charged for the storage usage of the updated object.
-       * @post If payer is the same as the existing payer, payer only pays for the usage difference between existing and updated object (and is refunded if this difference is negative).
-       * @post If payer is different from the existing payer, the existing payer is refunded for the storage usage of the existing object.
-       *
-       * Exceptions:
-       * If called with an invalid precondition, execution is aborted.
-       *
-       * Example:
-       *
-       * @code
-       * // This assumes the code from the constructor example. Replace myaction() {...}
-       *
-       *     void myaction() {
-       *       // create reference to address_index  - see emplace example
-       *       // add dan account to table           - see emplace example
-       *
-       *       auto itr = addresses.find("dan"_n);
-       *       eosio::check(itr != addresses.end(), "Address for account not found");
-       *       addresses.update( *itr, payer, [&]( auto& address ) {
-       *         address.city = "San Luis Obispo";
-       *         address.state = "CA";
-       *       });
-       *       eosio::check(itr->city == "San Luis Obispo", "Lock arf, Address not modified");
-       *     }
-       * }
-       * EOSIO_DISPATCH( addressbook, (myaction) )
-       * @endcode
-       */
-      template<typename Lambda>
-      void update( T& obj, name payer, Lambda&& updater ) {
-         modify_object(obj, payer, std::forward<Lambda>(updater));
+         auto secondary_keys = make_extractor_tuple::get_extractor_tuple(indices_type{}, obj);
+
+         uint64_t pk = _multi_index_detail::to_raw_key(obj.primary_key());
+
+         auto& mutableobj = const_cast<T&>(obj); // Do not forget the auto& otherwise it would make a copy and thus not update at all.
+         updater( mutableobj );
+
+         eosio::check( pk == _multi_index_detail::to_raw_key(obj.primary_key()), "updater cannot change primary key when modifying an object" );
+
+         size_t size = pack_size( obj );
+         //using malloc/free here potentially is not exception-safe, although WASM doesn't support exceptions
+         void* buffer = max_stack_buffer_size < size ? malloc(size) : alloca(size);
+
+         datastream<char*> ds( (char*)buffer, size );
+         ds << obj;
+
+         internal_use_do_not_use::db_update_i64( objitem.__primary_itr, payer.value, buffer, size );
+
+         if ( max_stack_buffer_size < size ) {
+            free( buffer );
+         }
+
+         if( pk >= _next_primary_key )
+            _next_primary_key = (pk >= no_available_primary_key) ? no_available_primary_key : (pk + 1);
+
+         bluegrass::meta::for_each(indices_type{}, [&](auto idx){
+            typedef std::tuple_element_t<const_index, decltype(idx)> index_type;
+            auto secondary = index_type::extract_secondary_key( obj );
+            if( memcmp( &std::get<index_type::index_number>(secondary_keys), &secondary, sizeof(secondary) ) != 0 ) {
+               auto indexitr = mutableitem.__iters[index_type::number()];
+
+               if( indexitr < 0 ) {
+                  typename index_type::secondary_key_type temp_secondary_key;
+                  indexitr = mutableitem.__iters[index_type::number()]
+                           = secondary_index_db_functions<typename index_type::secondary_key_type>::db_idx_find_primary( _code.value, _scope, index_type::name(), pk,  temp_secondary_key );
+               }
+
+               secondary_index_db_functions<typename index_type::secondary_key_type>::db_idx_update( indexitr, payer.value, secondary );
+            }
+         } );
       }
 
       /**
@@ -2057,46 +1903,6 @@ class multi_index
       }
 
       /**
-       * Deletes an existing object from a table using its primary key, alias for erase()
-       * @ingroup multiindex
-       *
-       * @param itr - An iterator pointing to the object to be removed
-       *
-       * @pre itr points to an existing element
-       * @post The object is removed from the table and all associated storage is reclaimed.
-       * @post Secondary indices associated with the table are updated.
-       * @post The existing payer for storage usage of the object is refunded for the table and secondary indices usage of the removed object, and if the table and indices are removed, for the associated overhead.
-       *
-       * @return For the signature with `const_iterator`, returns a pointer to the object following the removed object.
-       *
-       * Exceptions:
-       * The object to be removed is not in the table.
-       * The action is not authorized to modify the table.
-       * The given iterator is invalid.
-       *
-       * Example:
-       *
-       * @code
-       * // This assumes the code from the constructor example. Replace myaction() {...}
-       *
-       *     void myaction() {
-       *       // create reference to address_index  - see emplace example
-       *       // add dan account to table           - see emplace example
-       *
-       *       auto itr = addresses.find("dan"_n);
-       *       eosio::check(itr != addresses.end(), "Address for account not found");
-       *       addresses.delete( itr );
-       *       eosio::check(itr != addresses.end(), "Everting lock arf, Address not erased properly");
-       *     }
-       * }
-       * EOSIO_ABI( addressbook, (myaction) )
-       * @endcode
-       */
-      const_iterator remove( const_iterator itr ) {
-         return erase(itr);
-      }
-      
-      /**
        * Remove an existing object from a table using its primary key.
        * @ingroup multiindex
        *
@@ -2157,42 +1963,6 @@ class multi_index
          });
 
          _items_vector.erase(--(itr2.base()));
-      }
-
-/**
-       * Remove an existing object from a table using its primary key, alias for erase()
-       * @ingroup multiindex
-       *
-       * @param obj - Object to be removed
-       *
-       * @pre obj is an existing object in the table
-       * @post The object is removed from the table and all associated storage is reclaimed.
-       * @post Secondary indices associated with the table are updated.
-       * @post The existing payer for storage usage of the object is refunded for the table and secondary indices usage of the removed object, and if the table and indices are removed, for the associated overhead.
-       *
-       * Exceptions:
-       * The object to be removed is not in the table.
-       * The action is not authorized to modify the table.
-       * The given iterator is invalid.
-       *
-       * Example:
-       *
-       * @code
-       * // This assumes the code from the constructor example. Replace myaction() {...}
-       *
-       *     void myaction() {
-       *       auto itr = addresses.find("dan"_n);
-       *       eosio::check(itr != addresses.end(), "Record is not found");
-       *       addresses.remove(*itr);
-       *       itr = addresses.find("dan"_n);
-       *       eosio::check(itr == addresses.end(), "Record is not deleted");
-       *     }
-       * }
-       * EOSIO_DISPATCH( addressbook, (myaction) )
-       * @endcode
-       */
-      void remove( const T& obj ) {
-         erase(obj);
       }
 
 };
