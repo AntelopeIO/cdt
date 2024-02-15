@@ -102,8 +102,8 @@ jobs:
         - uses: actions/checkout@v3
           with:
             submodules: recursive
-        - name: Download leap-dev.deb (Ubuntu 20 only)
-          if: matrix.platform == 'ubuntu20'
+        - name: Download leap-dev.deb (Ubuntu 22 only)
+          if: matrix.platform == 'ubuntu22'
           uses: AntelopeIO/asset-artifact-download-action@v3
           with:
             owner: AntelopeIO
@@ -111,10 +111,10 @@ jobs:
             file: 'leap-dev.*(x86_64|amd64).deb'
             target: '${{needs.versions.outputs.leap-dev-target}}'
             prereleases: ${{fromJSON(needs.versions.outputs.leap-dev-prerelease)}}
-            artifact-name: leap-dev-ubuntu20-amd64
+            artifact-name: leap-dev-ubuntu22-amd64
             container-package: experimental-binaries
-        - name: Install leap-dev.deb (Ubuntu 20 only)
-          if: matrix.platform == 'ubuntu20'
+        - name: Install leap-dev.deb (Ubuntu 22 only)
+          if: matrix.platform == 'ubuntu22'
           run: |
             apt-get update && apt-get upgrade -y
             apt install -y ./leap-dev*.deb
@@ -127,13 +127,13 @@ jobs:
             make -j $(nproc)
             cd tests
             ctest -j $(nproc) --output-on-failure
-        - name: Package (Ubuntu 20 only)
-          if: matrix.platform == 'ubuntu20'
+        - name: Package (Ubuntu 22 only)
+          if: matrix.platform == 'ubuntu22'
           run: |
             cd build/packages
             bash generate_package.sh deb ubuntu amd64
-        - name: Upload (Ubuntu 20 only)
-          if: matrix.platform == 'ubuntu20'
+        - name: Upload (Ubuntu 22 only)
+          if: matrix.platform == 'ubuntu22'
           uses: actions/upload-artifact@v3
           with:
             name: cdt_ubuntu_package_amd64
