@@ -108,7 +108,7 @@ jobs:
           with:
             owner: AntelopeIO
             repo: leap
-            file: 'leap-dev.*(x86_64|amd64).deb'
+            file: 'file: leap-dev.*ubuntu22\.04_amd64.deb'
             target: '${{needs.versions.outputs.leap-dev-target}}'
             prereleases: ${{fromJSON(needs.versions.outputs.leap-dev-prerelease)}}
             artifact-name: leap-dev-ubuntu22-amd64
