@@ -31,7 +31,7 @@ unsigned int pos_of_char(const unsigned char chr) {
 std::string base64_encode(unsigned char const* bytes_to_encode, size_t in_len, bool url) {
 
     const size_t len_encoded = (in_len +2) / 3 * 4;
-    const unsigned char trailing_char = url ? '.' : '=';
+    const unsigned char trailing_char = '=';
 
     // Includes performance improvement from unmerged PR: https://github.com/ReneNyffenegger/cpp-base64/pull/27
 
@@ -74,14 +74,14 @@ std::string base64_encode(unsigned char const* bytes_to_encode, size_t in_len, b
            }
            else {
               ret.push_back(base64_chars_[(bytes_to_encode[pos + 1] & 0x0f) << 2]);
-              ret.push_back(trailing_char);
+              if (!url) ret.push_back(trailing_char);
            }
         }
         else {
 
             ret.push_back(base64_chars_[(bytes_to_encode[pos + 0] & 0x03) << 4]);
-            ret.push_back(trailing_char);
-            ret.push_back(trailing_char);
+            if (!url) ret.push_back(trailing_char);
+            if (!url) ret.push_back(trailing_char);
         }
 
         pos += 3;
