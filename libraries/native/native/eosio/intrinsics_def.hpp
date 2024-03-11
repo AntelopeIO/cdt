@@ -6,6 +6,7 @@
 #include <eosio/crypto_ext.h>
 #include <eosio/crypto_bls_ext.h>
 #include <eosio/db.h>
+#include <eosio/instant_finality.h>
 #include <eosio/permission.h>
 #include <eosio/print.h>
 #include <eosio/privileged.h>
@@ -183,9 +184,8 @@ intrinsic_macro(bls_g1_map) \
 intrinsic_macro(bls_g2_map) \
 intrinsic_macro(bls_fp_mod) \
 intrinsic_macro(bls_fp_mul) \
-intrinsic_macro(bls_fp_exp)
-
-
+intrinsic_macro(bls_fp_exp) \
+intrinsic_macro(set_finalizers)
 
 #define CREATE_ENUM(name) \
    name,

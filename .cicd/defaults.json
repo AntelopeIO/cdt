@@ -1,6 +1,6 @@
 {
     "leap-dev":{
-       "target":"main",
+       "target":"hotstuff_integration",
        "prerelease":false
     }
  }

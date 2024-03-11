@@ -4,6 +4,7 @@ macro(add_unit_test TEST_NAME)
 endmacro()
 
 add_unit_test( asset_tests )
+add_unit_test( base64_tests )
 add_unit_test( binary_extension_tests )
 add_unit_test( crt_tests )
 add_unit_test( crypto_tests )
