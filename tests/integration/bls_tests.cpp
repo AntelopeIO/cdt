@@ -102,12 +102,11 @@ BOOST_FIXTURE_TEST_CASE( fp_exp_test, bls_primitives_tester ) try {
 
 BOOST_FIXTURE_TEST_CASE( base64_test, bls_primitives_tester ) try {
    push_action("eosio"_n, "g1baseb4enc"_n, "test"_n, mvo()
-      ("g1", "dbf44b63155bdd1b124f9155ee40b00ac626d5c8aa3f88e9da5dd890df006da142833846ff233e13a40c90b596aa07190bb4de63a265b9848078cae7a3d7fca7786c160d12d705323a758849455eaf88a5a2646fafbb811da450dd07695f1b00")
-      ("base64", "PUB_BLS_2/RLYxVb3RsST5FV7kCwCsYm1ciqP4jp2l3YkN8AbaFCgzhG/yM+E6QMkLWWqgcZC7TeY6JluYSAeMrno9f8p3hsFg0S1wUyOnWISUVer4ilomRvr7uBHaRQ3QdpXxsAwOc0YQ=="));
+      ("g1", "4783d417e555ba2fe4a6a9068e3c212bc43d5c895a83dc15bfdcbb65357c4caafbf6a6884c36a41c68587a77caba3f1105feb50023b4806b003c913c3ecca1ede21ff4cf322576520571977958ec1f6b8d483ae505a1eb93675ecf856ae0dc0e")
+      ("base64", "PUB_BLS_R4PUF-VVui_kpqkGjjwhK8Q9XIlag9wVv9y7ZTV8TKr79qaITDakHGhYenfKuj8RBf61ACO0gGsAPJE8Psyh7eIf9M8yJXZSBXGXeVjsH2uNSDrlBaHrk2dez4Vq4NwOf9VEMA"));
    push_action("eosio"_n, "sigbaseb4enc"_n, "test"_n, mvo()
-      ("g2", "6bda63c93a6f638fda29b393cec8bcea5136dd2e27cec50425463f21eb1f2f09a5347024a427e302d48646565109f4181c861299edc24015b62cc146ed7b17d44510fcbf933ef0eae764dc793f68f73fe203a4c18ece7cd9d3103a6299f21519514660ccf94f0ea221d0335b4d3daf557ddeb3a8819c7136f75625e29e1bac230b88a290ff7900fb1be3147ca4a2e40fe68b2dc8c938f23e054f17603953659e2cd46265a6b2df86eb99e012ab534d4219a9cdc8d0e5038b11888533503c2f05")
-      ("base64", "SIG_BLS_a9pjyTpvY4/aKbOTzsi86lE23S4nzsUEJUY/IesfLwmlNHAkpCfjAtSGRlZRCfQYHIYSme3CQBW2LMFG7XsX1EUQ/L+TPvDq52TceT9o9z/iA6TBjs582dMQOmKZ8hUZUUZgzPlPDqIh0DNbTT2vVX3es6iBnHE291Yl4p4brCMLiKKQ/3kA+xvjFHykouQP5ostyMk48j4FTxdgOVNlnizUYmWmst+G65ngEqtTTUIZqc3I0OUDixGIhTNQPC8FRe+RNQ=="));
-
+      ("g2", "ddb6db1f52a1eb191dfa57656645689fbd08e76170f08c9674c20c243c71bda00054d06862623083abe2a738da032000f1d2784eefacb8696a48f185ecc225f2b0cc26d3e59d84cb6bafba976785002446cd2921cb954daa124058a368ba270ef6e7a57e41f3c651f2ca6e70982330b5ab3acc65887f24e9f5c63d3550d2c6fa643fd6ea061c7e24ecdc41a8c55850089ab3cf40b0d986d283d065f1e7b66047008596d721db450b0e8b8eada95a09ca258a651d0d19b4651e2b38cbae308218")
+      ("base64", "SIG_BLS_3bbbH1Kh6xkd-ldlZkVon70I52Fw8IyWdMIMJDxxvaAAVNBoYmIwg6vipzjaAyAA8dJ4Tu-suGlqSPGF7MIl8rDMJtPlnYTLa6-6l2eFACRGzSkhy5VNqhJAWKNouicO9uelfkHzxlHyym5wmCMwtas6zGWIfyTp9cY9NVDSxvpkP9bqBhx-JOzcQajFWFAImrPPQLDZhtKD0GXx57ZgRwCFltch20ULDouOralaCcolimUdDRm0ZR4rOMuuMIIYOJG0NA"));
 } FC_LOG_AND_RETHROW()
 
 BOOST_FIXTURE_TEST_CASE( sig_verify_test, bls_primitives_tester ) try {
@@ -126,8 +125,8 @@ BOOST_FIXTURE_TEST_CASE( sig_verify_test, bls_primitives_tester ) try {
    // pk.to_string();
    // signature.to_string();
    push_action("eosio"_n, "verify"_n, "test"_n, mvo()
-      ("pk", "PUB_BLS_sS66EwY8bNx7vkDn3mKhwPhhqa1V6STN1QSb6bWOIFBTloF5zt5b55r9y7uQMiQGrvt6XOZO3CpEgthlba7R7qz7Qob2YcD5EX3Ng/rUUdMBsjEJRuXNWICPe0QbKAoCQOw9vw==")
-      ("sig", "SIG_BLS_07NCCTekrxhDFurhRhl3b8m4T+xmTixSl63TYcee/xJONi2/qy9+8o5vyetMefsL4hhDMfy1yIeHERqxUvGguRBBncpabp84b3P2bNpY18A+PVs7qKFqlld1gEUqt+cDOcwkyUe6HqqFXR5wtXoSHE4lHauV3CzR0lD91gnr2c49aUQPAC7SD+ZcnZyahwURje+Db26zhTXIO1WWIx6vwKnZUuvZEbzYrijjBQKeZsqp0eoAzjrByx9gOmN2d/AR9PhRvg==")
+      ("pk", "PUB_BLS_sS66EwY8bNx7vkDn3mKhwPhhqa1V6STN1QSb6bWOIFBTloF5zt5b55r9y7uQMiQGrvt6XOZO3CpEgthlba7R7qz7Qob2YcD5EX3Ng_rUUdMBsjEJRuXNWICPe0QbKAoCQOw9vw")
+      ("sig", "SIG_BLS_07NCCTekrxhDFurhRhl3b8m4T-xmTixSl63TYcee_xJONi2_qy9-8o5vyetMefsL4hhDMfy1yIeHERqxUvGguRBBncpabp84b3P2bNpY18A-PVs7qKFqlld1gEUqt-cDOcwkyUe6HqqFXR5wtXoSHE4lHauV3CzR0lD91gnr2c49aUQPAC7SD-ZcnZyahwURje-Db26zhTXIO1WWIx6vwKnZUuvZEbzYrijjBQKeZsqp0eoAzjrByx9gOmN2d_AR9PhRvg")
       ("msg", "this is a message string"));
 } FC_LOG_AND_RETHROW()
 
@@ -137,8 +136,8 @@ BOOST_FIXTURE_TEST_CASE( sig_pop_verify_test, bls_primitives_tester ) try {
       ("sig", "3a1e5689abddbd0ed54c48c88dcef7ac9bba70abdd7a8e965fb807a188cfc8a7e21ca5c9ecc58df7681d158cc6aced13d50bbe35a5aa7848c32a290b096e1f7a61b2817660bd6e6d5686180a1c00716d47ee996ced081fdb6c4417d6cc8dbd06f26f037331c1b4703e94454374ba04e71fb7571159299b9020c124e9ecee777c2b5c16a51ca883b716082fdf2e6c150551a82eaca5efaf761053d6998a439cc696366fe82eb93f19aac34893610698b37d11f0d608fdc1befc50a7e565ea4813"));
 
    push_action("eosio"_n, "popverify"_n, "test"_n, mvo()
-      ("pk", "PUB_BLS_OwjnO72pw+/1l/xg+7G9jIGvNlkCT2KCkIJDjvUqAqcfmWWAh+pYEI4SVDwImAoPGVDH8whatLSeMTfo01rfy+1hbdN80BFDXpQKdPU/masdH9IgoInU6FF98CZ+ywgCD2yuNg==")
-      ("sig", "SIG_BLS_Oh5WiavdvQ7VTEjIjc73rJu6cKvdeo6WX7gHoYjPyKfiHKXJ7MWN92gdFYzGrO0T1Qu+NaWqeEjDKikLCW4femGygXZgvW5tVoYYChwAcW1H7pls7Qgf22xEF9bMjb0G8m8DczHBtHA+lEVDdLoE5x+3VxFZKZuQIMEk6ezud3wrXBalHKiDtxYIL98ubBUFUagurKXvr3YQU9aZikOcxpY2b+guuT8ZqsNIk2EGmLN9EfDWCP3BvvxQp+Vl6kgTpacydw=="));
+      ("pk", "PUB_BLS_82P3oM1u0IEv64u9i4vSzvg1-QDl4Fb2n50Mp8Sk7Fr1Tz0MJypzL39nSd5VPFgFC9WqrjopRbBm1Pf0RkP018fo1k2rXaJY7Wtzd9RKlE8PoQ6XhDm4PyZlIupQg_gOuiMhcg")
+      ("sig", "SIG_BLS_RrwvP79LxfahskX-ceZpbgrJ1aUkSSIzE2sMFj0twuhK8QwjcGMvT2tZ_-QMHvAV83tWZYOs7SEvoyteCKGD_Tk6YySkw1HONgvVeNWM8ZwuNgonOHkegNNPIXSIvWMTczfkg2lEtEh-ngBa5t9-4CvZ6aOjg29XPVvu6dimzHix-9E0M53YkWZ-gW5GDkkOLoN2FMxjXaELmhuI64xSeSlcWLFfZa6TMVTctBFWsHDXm1ZMkURoB83dokKHEi4OQTbJtg"));
 } FC_LOG_AND_RETHROW()
 
 BOOST_AUTO_TEST_SUITE_END()
