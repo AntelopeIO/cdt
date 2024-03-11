@@ -317,7 +317,7 @@ namespace detail {
     const inline std::string bls_signature_prefix = "SIG_BLS_";
 
     template<typename T, const std::string& Prefix>
-    std::string bls_type_to_base64(const T& g1) {
+    std::string bls_type_to_base64url(const T& g1) {
         std::array<char, sizeof(T) + bls_checksum_size> g1_with_checksum;
         auto it = std::copy(g1.begin(), g1.end(), g1_with_checksum.begin());
         
@@ -326,15 +326,15 @@ namespace detail {
                   reinterpret_cast<const char*>(csum.data())+bls_checksum_size, 
                   it);
         
-        return Prefix + eosio::base64_encode({g1_with_checksum.data(), g1_with_checksum.size()});
+        return Prefix + eosio::base64url_encode({g1_with_checksum.data(), g1_with_checksum.size()});
     }
 
     template<typename T, const std::string& Prefix>
-    T bls_base64_to_type(const char* data, size_t size) {
+    T bls_base64url_to_type(const char* data, size_t size) {
         eosio::check(size > Prefix.size(), "encoded base64 key is too short");
         eosio::check(0 == memcmp(data, Prefix.data(), Prefix.size()), "base64 encoded type must begin from corresponding prefix");
 
-        std::string decoded = eosio::base64_decode({data+Prefix.size(), size - Prefix.size()});
+        std::string decoded = eosio::base64url_decode({data+Prefix.size(), size - Prefix.size()});
         T ret;
         eosio::check(decoded.size() == ret.size() + bls_checksum_size, "decoded size " + std::to_string(decoded.size()) + 
                                                                                    " doesn't match structure size " + std::to_string(ret.size()) + 
@@ -346,6 +346,7 @@ namespace detail {
         
         auto csum = ripemd160(ret.data(), ret.size()).extract_as_byte_array();
         eosio::check(0 == memcmp(&*it, csum.data(), bls_checksum_size), "checksum of structure doesn't match");
+        printhex(static_cast<const void*>(ret.data()), ret.size());
 
         return ret;
     }
@@ -451,16 +452,16 @@ namespace detail {
 } // namespace detail
 
     inline std::string encode_g1_to_bls_public_key(const bls_g1& g1) {
-        return detail::bls_type_to_base64<bls_g1, detail::bls_public_key_prefix>(g1);
+        return detail::bls_type_to_base64url<bls_g1, detail::bls_public_key_prefix>(g1);
     }
     inline bls_g1 decode_bls_public_key_to_g1(std::string_view public_key) {
-        return detail::bls_base64_to_type<bls_g1, detail::bls_public_key_prefix>(public_key.data(), public_key.size());
+        return detail::bls_base64url_to_type<bls_g1, detail::bls_public_key_prefix>(public_key.data(), public_key.size());
     }
     inline std::string encode_g2_to_bls_signature(const bls_g2& g2) {
-        return detail::bls_type_to_base64<bls_g2, detail::bls_signature_prefix>(g2);
+        return detail::bls_type_to_base64url<bls_g2, detail::bls_signature_prefix>(g2);
     }
     inline bls_g2 decode_bls_signature_to_g2(std::string_view public_key) {
-        return detail::bls_base64_to_type<bls_g2, detail::bls_signature_prefix>(public_key.data(), public_key.size());
+        return detail::bls_base64url_to_type<bls_g2, detail::bls_signature_prefix>(public_key.data(), public_key.size());
     }
 
     // pubkey and signature are assumed to be in RAW affine little-endian bytes
