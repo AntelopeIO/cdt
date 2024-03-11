@@ -16,6 +16,7 @@ EOSIO_TEST_BEGIN(base64enc)
    CHECK_EQUAL(expected_output, base64_encode(input));
 EOSIO_TEST_END
 
+// No trailing sequence of = added
 EOSIO_TEST_BEGIN(base64urlenc)
    auto input = "abc123$&()'?\xb4\xf5\x01\xfa~a"s;
    auto expected_output = "YWJjMTIzJCYoKSc_tPUB-n5h"s;
@@ -48,6 +49,30 @@ EOSIO_TEST_BEGIN(base64dec_bad_stuff)
    CHECK_ASSERT( "encountered non-base64 character",
       ([](){
          base64_decode("YWJjMTIzJCYoKSc/tPU$B+n5h="s);
+      }));
+EOSIO_TEST_END
+
+// `+` not valid in base64 url
+EOSIO_TEST_BEGIN(base64urldec_plus_not_allowed)
+   CHECK_ASSERT( "encountered non-base64 character",
+      ([](){
+         base64_decode("YWJjMTIzJCYoKSc+tPUB-n5h"s);
+      }));
+EOSIO_TEST_END
+
+// `/` not valid in base64 url
+EOSIO_TEST_BEGIN(base64urldec_slash_not_allowed)
+   CHECK_ASSERT( "encountered non-base64 character",
+      ([](){
+         base64_decode("YWJjMTIzJCYoKSc/tPUB-n5h"s);
+      }));
+EOSIO_TEST_END
+
+// trailing not allowed in base64 url
+EOSIO_TEST_BEGIN(base64urldec_trailing_not_allowed)
+   CHECK_ASSERT( "encountered non-base64 character",
+      ([](){
+         base64_decode("YWJjMTIzJCYoKSc_tPUB-n5h=="s);
       }));
 EOSIO_TEST_END
 
@@ -112,7 +137,7 @@ EOSIO_TEST_BEGIN(base64_cpp_base64_tests)
    std::string a17_encoded_url = base64url_encode(a17_orig);
 
    CHECK_EQUAL(a17_encoded, "YWFhYWFhYWFhYWFhYWFhYWE=");
-   CHECK_EQUAL(a17_encoded_url, "YWFhYWFhYWFhYWFhYWFhYWE.");
+   CHECK_EQUAL(a17_encoded_url, "YWFhYWFhYWFhYWFhYWFhYWE");
    CHECK_EQUAL(base64_decode(a17_encoded_url), a17_orig);
    CHECK_EQUAL(base64_decode(a17_encoded), a17_orig);
 
@@ -126,9 +151,9 @@ EOSIO_TEST_BEGIN(base64_cpp_base64_tests)
    std::string s_6364_encoded_url = base64url_encode(s_6364);
 
    CHECK_EQUAL(s_6364_encoded, "A+//+Q==");
-   CHECK_EQUAL(s_6364_encoded_url, "A-__-Q..");
+   CHECK_EQUAL(s_6364_encoded_url, "A-__-Q");
    CHECK_EQUAL(base64_decode(s_6364_encoded), s_6364);
-   CHECK_EQUAL(base64_decode(s_6364_encoded_url), s_6364);
+   CHECK_EQUAL(base64url_decode(s_6364_encoded_url), s_6364);
 
    // ----------------------------------------------
 
