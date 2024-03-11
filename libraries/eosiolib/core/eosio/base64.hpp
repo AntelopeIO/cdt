@@ -39,7 +39,7 @@ namespace eosio {
 
 namespace detail {
 std::string base64_encode(unsigned char const*, size_t len, bool url = false);
-std::string base64_decode(std::string_view s, bool remove_linebreaks = false);
+std::string base64_decode(std::string_view s, bool remove_linebreaks = false, bool url = false);
 
 } // detail namespace
 
@@ -53,7 +53,7 @@ inline std::string base64url_encode(std::string_view enc) {
    return detail::base64_encode(reinterpret_cast<const unsigned char*>(enc.data()), enc.size(), true);
 }
 inline std::string base64url_decode(std::string_view encoded_string) {
-   return detail::base64_decode(encoded_string, true);
+   return detail::base64_decode(encoded_string, true, true);
 }
 
 } // namespace eosio
