@@ -368,7 +368,7 @@ namespace detail {
     const inline std::vector<uint8_t> GT_ONE = []{ std::vector<uint8_t> r(576, 0); r[0] = 1; return r; }();
 
     // Construct an extensible-output function based on SHA256
-    void xmd_sh256(
+    inline void xmd_sh256(
         char *buf,
         int buf_len,
         const char *in,
@@ -415,7 +415,7 @@ namespace detail {
         }
     }
 
-    bls_s scalar_fromBE(const bls_s& in) {
+    inline bls_s scalar_fromBE(const bls_s& in) {
         bls_s out;
         constexpr size_t last_index = sizeof(out) - 1;
         for(size_t i = 0; i <= last_index; ++i)
@@ -425,7 +425,7 @@ namespace detail {
         return out;
     }
 
-    void g2_fromMessage(std::span<const char> msg, const std::string& dst, bls_g2& res) {
+    inline void g2_fromMessage(std::span<const char> msg, const std::string& dst, bls_g2& res) {
 
         std::array<bls_s, 4> buf;
         xmd_sh256(buf.data()->data(), sizeof(buf), msg.data(), msg.size(), dst.data(), dst.length());
@@ -465,7 +465,7 @@ namespace detail {
     }
 
     // pubkey and signature are assumed to be in RAW affine little-endian bytes
-    bool bls_pop_verify(const bls_g1& pubkey, const bls_g2& signature_proof) {
+    inline bool bls_pop_verify(const bls_g1& pubkey, const bls_g2& signature_proof) {
         using namespace detail;
 
         bls_g1 g1_points[2] = {0};
@@ -484,7 +484,7 @@ namespace detail {
     }
 
     // pubkey and signature are assumed to be in RAW affine little-endian bytes
-    bool bls_signature_verify(const bls_g1& pubkey, const bls_g2& signature_proof, const std::string& msg) {
+    inline bool bls_signature_verify(const bls_g1& pubkey, const bls_g2& signature_proof, const std::string& msg) {
         bls_g1 g1_points[2];
         bls_g2 g2_points[2];
 
