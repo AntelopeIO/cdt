@@ -8,6 +8,7 @@ set_blockchain_parameters_packed : yes
 set_parameters_packed : yes
 set_privileged  : yes
 send_deferred : yes
+set_finalizers : yes
 */
 
 #include <eosio/eosio.hpp>

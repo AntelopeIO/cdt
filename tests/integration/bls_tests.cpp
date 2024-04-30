@@ -100,14 +100,44 @@ BOOST_FIXTURE_TEST_CASE( fp_exp_test, bls_primitives_tester ) try {
 
 } FC_LOG_AND_RETHROW()
 
+BOOST_FIXTURE_TEST_CASE( base64_test, bls_primitives_tester ) try {
+   push_action("eosio"_n, "g1baseb4enc"_n, "test"_n, mvo()
+      ("g1", "4783d417e555ba2fe4a6a9068e3c212bc43d5c895a83dc15bfdcbb65357c4caafbf6a6884c36a41c68587a77caba3f1105feb50023b4806b003c913c3ecca1ede21ff4cf322576520571977958ec1f6b8d483ae505a1eb93675ecf856ae0dc0e")
+      ("base64", "PUB_BLS_R4PUF-VVui_kpqkGjjwhK8Q9XIlag9wVv9y7ZTV8TKr79qaITDakHGhYenfKuj8RBf61ACO0gGsAPJE8Psyh7eIf9M8yJXZSBXGXeVjsH2uNSDrlBaHrk2dez4Vq4NwOf9VEMA"));
+   push_action("eosio"_n, "sigbaseb4enc"_n, "test"_n, mvo()
+      ("g2", "ddb6db1f52a1eb191dfa57656645689fbd08e76170f08c9674c20c243c71bda00054d06862623083abe2a738da032000f1d2784eefacb8696a48f185ecc225f2b0cc26d3e59d84cb6bafba976785002446cd2921cb954daa124058a368ba270ef6e7a57e41f3c651f2ca6e70982330b5ab3acc65887f24e9f5c63d3550d2c6fa643fd6ea061c7e24ecdc41a8c55850089ab3cf40b0d986d283d065f1e7b66047008596d721db450b0e8b8eada95a09ca258a651d0d19b4651e2b38cbae308218")
+      ("base64", "SIG_BLS_3bbbH1Kh6xkd-ldlZkVon70I52Fw8IyWdMIMJDxxvaAAVNBoYmIwg6vipzjaAyAA8dJ4Tu-suGlqSPGF7MIl8rDMJtPlnYTLa6-6l2eFACRGzSkhy5VNqhJAWKNouicO9uelfkHzxlHyym5wmCMwtas6zGWIfyTp9cY9NVDSxvpkP9bqBhx-JOzcQajFWFAImrPPQLDZhtKD0GXx57ZgRwCFltch20ULDouOralaCcolimUdDRm0ZR4rOMuuMIIYOJG0NA"));
+} FC_LOG_AND_RETHROW()
+
 BOOST_FIXTURE_TEST_CASE( sig_verify_test, bls_primitives_tester ) try {
    // assumes signed message of std::vector<uint8_t> msg = {51, 23, 56, 93, 212, 129, 128, 27, 251, 12, 42, 129, 210, 9, 34, 98};
    // vector<uint8_t> seed(32, 0x30); array<uint64_t, 4> sk = secret_key(seed); g1 pk = g1::one().scale(sk).affine(); string pk_hex = to_hex(pk.toAffineBytesLE());
    // g2 sig = sign(sk, msg); string sig_hex = to_hex(sig.toAffineBytesLE());
-   push_action("eosio"_n, "verify"_n, "test"_n, mvo()
+   push_action("eosio"_n, "verifyraw"_n, "test"_n, mvo()
       ("pk", "c27efc440ed89d739ff80f1c7178d4672d5f71e8c8926a85785d0f84074e79c1662c522fdbd6fcaebd640d816dea6c0dc36c5d7e7a297afc960369e306d845fcad0e5fe2a88c0d3bbe854d4f9e3e6365c9c1003662f0e81b35fd9c6a11d0a10c")
       ("sig", "e13a38c18dfad440a9af8d720bfb9ce0f388a25a5789a8cdc34b87204fe29db5cc16658a5d9f4fa4a7cc16b8ef8d2d0d1a5984e6b69ca228692f1920e9340f149024b4d856711656f11bb1e0c7d081e5bb80692638a9bace2d8f4d796b4887129c59fbb7901997cbbb681f709291a45315979f55b719dfc8757d3a878cf01e4a48a0e6647b837d0ea8aea5d41e121b0dd37fa20007aef4f51740d846cc8d6ab151dbd88964e7d19890a500d5537be81b881451b75f928a66f546441d45028603"));
 
+   // bls_private_key sk = bls_private_key(seed_1);
+   // bls_public_key pk = sk.get_public_key();
+   // std::string msg = "this is a message string";
+   // std::vector<uint8_t> msg_v(msg.begin(), msg.end());
+   // bls_signature signature = sk.sign(msg_v);
+   // pk.to_string();
+   // signature.to_string();
+   push_action("eosio"_n, "verify"_n, "test"_n, mvo()
+      ("pk", "PUB_BLS_sS66EwY8bNx7vkDn3mKhwPhhqa1V6STN1QSb6bWOIFBTloF5zt5b55r9y7uQMiQGrvt6XOZO3CpEgthlba7R7qz7Qob2YcD5EX3Ng_rUUdMBsjEJRuXNWICPe0QbKAoCQOw9vw")
+      ("sig", "SIG_BLS_07NCCTekrxhDFurhRhl3b8m4T-xmTixSl63TYcee_xJONi2_qy9-8o5vyetMefsL4hhDMfy1yIeHERqxUvGguRBBncpabp84b3P2bNpY18A-PVs7qKFqlld1gEUqt-cDOcwkyUe6HqqFXR5wtXoSHE4lHauV3CzR0lD91gnr2c49aUQPAC7SD-ZcnZyahwURje-Db26zhTXIO1WWIx6vwKnZUuvZEbzYrijjBQKeZsqp0eoAzjrByx9gOmN2d_AR9PhRvg")
+      ("msg", "this is a message string"));
+} FC_LOG_AND_RETHROW()
+
+BOOST_FIXTURE_TEST_CASE( sig_pop_verify_test, bls_primitives_tester ) try {
+   push_action("eosio"_n, "popverifyraw"_n, "test"_n, mvo()
+      ("pk", "3b08e73bbda9c3eff597fc60fbb1bd8c81af3659024f62829082438ef52a02a71f99658087ea58108e12543c08980a0f1950c7f3085ab4b49e3137e8d35adfcbed616dd37cd011435e940a74f53f99ab1d1fd220a089d4e8517df0267ecb0802")
+      ("sig", "3a1e5689abddbd0ed54c48c88dcef7ac9bba70abdd7a8e965fb807a188cfc8a7e21ca5c9ecc58df7681d158cc6aced13d50bbe35a5aa7848c32a290b096e1f7a61b2817660bd6e6d5686180a1c00716d47ee996ced081fdb6c4417d6cc8dbd06f26f037331c1b4703e94454374ba04e71fb7571159299b9020c124e9ecee777c2b5c16a51ca883b716082fdf2e6c150551a82eaca5efaf761053d6998a439cc696366fe82eb93f19aac34893610698b37d11f0d608fdc1befc50a7e565ea4813"));
+
+   push_action("eosio"_n, "popverify"_n, "test"_n, mvo()
+      ("pk", "PUB_BLS_82P3oM1u0IEv64u9i4vSzvg1-QDl4Fb2n50Mp8Sk7Fr1Tz0MJypzL39nSd5VPFgFC9WqrjopRbBm1Pf0RkP018fo1k2rXaJY7Wtzd9RKlE8PoQ6XhDm4PyZlIupQg_gOuiMhcg")
+      ("sig", "SIG_BLS_RrwvP79LxfahskX-ceZpbgrJ1aUkSSIzE2sMFj0twuhK8QwjcGMvT2tZ_-QMHvAV83tWZYOs7SEvoyteCKGD_Tk6YySkw1HONgvVeNWM8ZwuNgonOHkegNNPIXSIvWMTczfkg2lEtEh-ngBa5t9-4CvZ6aOjg29XPVvu6dimzHix-9E0M53YkWZ-gW5GDkkOLoN2FMxjXaELmhuI64xSeSlcWLFfZa6TMVTctBFWsHDXm1ZMkURoB83dokKHEi4OQTbJtg"));
 } FC_LOG_AND_RETHROW()
 
 BOOST_AUTO_TEST_SUITE_END()
