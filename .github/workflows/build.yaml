@@ -8,12 +8,12 @@ on:
   pull_request:
   workflow_dispatch:
     inputs:
-      override-leap-dev:
-        description: Override leap-dev target
+      override-spring-dev:
+        description: Override spring-dev target
         type: string
-      override-leap-dev-prerelease:
+      override-spring-dev-prerelease:
         type: choice
-        description: Override leap-dev prelease
+        description: Override spring-dev prelease
         options:
         - default
         - true
@@ -69,8 +69,8 @@ jobs:
     name: Determine Versions
     runs-on: ubuntu-latest
     outputs:
-      leap-dev-target: ${{steps.versions.outputs.leap-dev-target}}
-      leap-dev-prerelease: ${{steps.versions.outputs.leap-dev-prerelease}}
+      spring-dev-target: ${{steps.versions.outputs.spring-dev-target}}
+      spring-dev-prerelease: ${{steps.versions.outputs.spring-dev-prerelease}}
     steps:
       - name: Setup versions from input or defaults
         id: versions
@@ -78,14 +78,14 @@ jobs:
           GH_TOKEN: ${{github.token}}
         run: |
           DEFAULTS_JSON=$(curl -sSfL $(gh api https://api.github.com/repos/${{github.repository}}/contents/.cicd/defaults.json?ref=${{github.sha}} --jq .download_url))
-          echo leap-dev-target=$(echo "$DEFAULTS_JSON" | jq -r '."leap-dev".target') >> $GITHUB_OUTPUT
-          echo leap-dev-prerelease=$(echo "$DEFAULTS_JSON" | jq -r '."leap-dev".prerelease') >> $GITHUB_OUTPUT
+          echo spring-dev-target=$(echo "$DEFAULTS_JSON" | jq -r '."spring-dev".target') >> $GITHUB_OUTPUT
+          echo spring-dev-prerelease=$(echo "$DEFAULTS_JSON" | jq -r '."spring-dev".prerelease') >> $GITHUB_OUTPUT
 
-          if [[ "${{inputs.override-leap-dev}}" != "" ]]; then
-            echo leap-dev-target=${{inputs.override-leap-dev}} >> $GITHUB_OUTPUT
+          if [[ "${{inputs.override-spring-dev}}" != "" ]]; then
+            echo spring-dev-target=${{inputs.override-spring-dev}} >> $GITHUB_OUTPUT
           fi
-          if [[ "${{inputs.override-leap-dev-prerelease}}" == +(true|false) ]]; then
-            echo leap-dev-prerelease=${{inputs.override-leap-dev-prerelease}} >> $GITHUB_OUTPUT
+          if [[ "${{inputs.override-spring-dev-prerelease}}" == +(true|false) ]]; then
+            echo spring-dev-prerelease=${{inputs.override-spring-dev-prerelease}} >> $GITHUB_OUTPUT
           fi
 
   Build:
@@ -102,22 +102,22 @@ jobs:
         - uses: actions/checkout@v3
           with:
             submodules: recursive
-        - name: Download leap-dev.deb (Ubuntu 22 only)
+        - name: Download spring-dev.deb (Ubuntu 22 only)
           if: matrix.platform == 'ubuntu22'
           uses: AntelopeIO/asset-artifact-download-action@v3
           with:
             owner: AntelopeIO
-            repo: leap
-            file: 'leap-dev.*ubuntu22\.04_amd64.deb'
-            target: '${{needs.versions.outputs.leap-dev-target}}'
-            prereleases: ${{fromJSON(needs.versions.outputs.leap-dev-prerelease)}}
-            artifact-name: leap-dev-ubuntu22-amd64
+            repo: spring
+            file: 'spring-dev.*ubuntu22\.04_amd64.deb'
+            target: '${{needs.versions.outputs.spring-dev-target}}'
+            prereleases: ${{fromJSON(needs.versions.outputs.spring-dev-prerelease)}}
+            artifact-name: spring-dev-ubuntu22-amd64
             container-package: experimental-binaries
-        - name: Install leap-dev.deb (Ubuntu 22 only)
+        - name: Install spring-dev.deb (Ubuntu 22 only)
           if: matrix.platform == 'ubuntu22'
           run: |
             apt-get update && apt-get upgrade -y
-            apt install -y ./leap-dev*.deb
+            apt install -y ./spring-dev*.deb
             rm ./leap-dev*.deb
         - name: Build & Test
           run: |
