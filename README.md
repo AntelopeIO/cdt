@@ -66,7 +66,7 @@ Then, execute the following command in the same terminal session that you will u
 export spring_DIR=/path/to/spring/build/lib/cmake/spring
 ```
 
-Now you can continue with the steps to build CDT as described. When you run `cmake` make sure that it does not report `spring package not found`. If it does, this means CDT was not able to find a build of Leap at the specified path in `spring_DIR` and will therefore continue without building the integration tests.
+Now you can continue with the steps to build CDT as described. When you run `cmake` make sure that it does not report `spring package not found`. If it does, this means CDT was not able to find a build of Spring at the specified path in `spring_DIR` and will therefore continue without building the integration tests.
 
 ### ccache
 

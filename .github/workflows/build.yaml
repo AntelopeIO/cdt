@@ -118,7 +118,7 @@ jobs:
           run: |
             apt-get update && apt-get upgrade -y
             apt install -y ./spring-dev*.deb
-            rm ./leap-dev*.deb
+            rm ./spring-dev*.deb
         - name: Build & Test
           run: |
             mkdir build
