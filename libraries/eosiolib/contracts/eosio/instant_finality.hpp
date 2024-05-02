@@ -17,7 +17,7 @@ namespace eosio {
     namespace internal_use_do_not_use {
         extern "C" {
             __attribute__((eosio_wasm_import))
-            void set_finalizers( const char* data, uint32_t len );
+            void set_finalizers( uint64_t packed_finalizer_format, const char* data, uint32_t len );
         } // extern "C"
     } //internal_use_do_not_use
 
@@ -44,7 +44,8 @@ namespace eosio {
         for (const auto& finalizer : finalizer_policy.finalizers)
             eosio::check(finalizer.public_key.size() == sizeof(bls_g1), "public key has a wrong size" );
         auto packed = eosio::pack(finalizer_policy);
-        internal_use_do_not_use::set_finalizers(packed.data(), packed.size());
+        // 0 is packed format, currently only 0 is supported
+        internal_use_do_not_use::set_finalizers(0, packed.data(), packed.size());
     }
 
 } //eosio
