@@ -54,19 +54,19 @@ python3 -m pip install pygments
 
 ### Allowing integration tests to build
 
-Integration tests require access to a build of [Leap](https://github.com/AntelopeIO/leap), a C++ implementation of the Antelope protocol. Simply installing Leap from a binary package will not be sufficient.
+Integration tests require access to a build of [Spring](https://github.com/AntelopeIO/spring), a C++ implementation of the Antelope protocol. Simply installing Spring from a binary package will not be sufficient.
 
-If you do not wish to build Leap, you can continue with building CDT but without building the integration tests. Otherwise, follow the instructions below before running `cmake`.
+If you do not wish to build Spring, you can continue with building CDT but without building the integration tests. Otherwise, follow the instructions below before running `cmake`.
 
-First, ensure that Leap has been built from source (see Leap's [README](https://github.com/AntelopeIO/leap#building-from-source) for details) and identify the build path, e.g. `/path/to/leap/build/`.
+First, ensure that Spring has been built from source (see Spring's [README](https://github.com/AntelopeIO/spring#building-from-source) for details) and identify the build path, e.g. `/path/to/spring/build/`.
 
 Then, execute the following command in the same terminal session that you will use to build CDT:
 
 ```sh
-export leap_DIR=/path/to/leap/build/lib/cmake/leap
+export spring_DIR=/path/to/spring/build/lib/cmake/spring
 ```
 
-Now you can continue with the steps to build CDT as described. When you run `cmake` make sure that it does not report `leap package not found`. If it does, this means CDT was not able to find a build of Leap at the specified path in `leap_DIR` and will therefore continue without building the integration tests.
+Now you can continue with the steps to build CDT as described. When you run `cmake` make sure that it does not report `spring package not found`. If it does, this means CDT was not able to find a build of Spring at the specified path in `spring_DIR` and will therefore continue without building the integration tests.
 
 ### ccache
 

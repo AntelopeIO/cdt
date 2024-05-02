@@ -35,7 +35,7 @@ Start with an empty ABI, for exemplification we will work based on the `eosio.to
 An ABI enables any client or interface to interpret and even generate a GUI for your contract. For this to work consistently, describe the custom types that are used as a parameter in any public action or struct that needs to be described in the ABI.
 
 [[info | Built-in Types]]
-| Antelope implements a number of custom built-ins. Built-in types don't need to be described in an ABI file. If you would like to familiarize yourself with Antelope's built-ins, they are defined [here](https://github.com/AntelopeIO/leap/blob/6817911900a088c60f91563995cf482d6b380b2d/libraries/chain/abi_serializer.cpp#L88-L129)
+| Antelope implements a number of custom built-ins. Built-in types don't need to be described in an ABI file. If you would like to familiarize yourself with Antelope's built-ins, they are defined [here](https://github.com/AntelopeIO/spring/blob/5a3550a6fec4c1865e8aca07aa97693f720afe72/libraries/chain/abi_serializer.cpp#L92-L130)
 
 
 ```json

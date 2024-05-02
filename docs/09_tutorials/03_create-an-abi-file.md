@@ -35,7 +35,7 @@ An ABI enables any client or interface to interpret and even generate an GUI for
 [[info]]
 |Built-in Types
 
-Antelope implements a number of custom built-ins. Built-in types don't need to be described in an ABI file. If you would like to familiarize yourself with Antelope's built-ins, they are defined [here](https://github.com/AntelopeIO/leap/blob/6817911900a088c60f91563995cf482d6b380b2d/libraries/chain/abi_serializer.cpp#L88-L129).
+Antelope implements a number of custom built-ins. Built-in types don't need to be described in an ABI file. If you would like to familiarize yourself with Antelope's built-ins, they are defined [here](https://github.com/AntelopeIO/spring/blob/5a3550a6fec4c1865e8aca07aa97693f720afe72/libraries/chain/abi_serializer.cpp#L92-L130).
 
 Using **eosio.token** as an example, the only type that requires a description in the ABI file is `account_name`. The ABI uses "new_type_name" to describe explicit types, in this case `account_name`, and `account_name` is an alias of `name` type.
 
