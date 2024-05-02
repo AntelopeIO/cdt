@@ -18,7 +18,7 @@ using namespace eosio::testing;
 
 BOOST_AUTO_TEST_SUITE(multi_index_tests)
 
-// this test is copy from spring test_api_multi_index
+// this test is copied from Spring test_api_multi_index
 BOOST_FIXTURE_TEST_CASE(main_multi_index_tests, TESTER) { try {
    produce_blocks(1);
    create_account( "testapi"_n );
