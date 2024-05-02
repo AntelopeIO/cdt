@@ -44,6 +44,7 @@ namespace eosio {
         for (const auto& finalizer : finalizer_policy.finalizers)
             eosio::check(finalizer.public_key.size() == sizeof(bls_g1), "public key has a wrong size" );
         auto packed = eosio::pack(finalizer_policy);
+        // 0 is packed format, currently only 0 is supported
         internal_use_do_not_use::set_finalizers(0, packed.data(), packed.size());
     }
 
