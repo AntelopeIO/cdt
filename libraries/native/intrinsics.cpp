@@ -906,8 +906,8 @@ extern "C" {
       return intrinsics::get().call<intrinsics::get_active_security_group>(data, datalen);
    }
   
-   void set_finalizers(const char* data, uint32_t len) {
-      intrinsics::get().call<intrinsics::set_finalizers>(data, len);
+   void set_finalizers(uint64_t packed_finalizer_format, const char* data, uint32_t len) {
+      intrinsics::get().call<intrinsics::set_finalizers>(packed_finalizer_format, data, len);
    }
   
 } // extern "C"
