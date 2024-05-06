@@ -16,7 +16,7 @@ Download the appropriate version of the Debian package and then install it. To d
 
 ```sh
 wget https://github.com/AntelopeIO/cdt/releases/download/v4.1.0-rc1/cdt_4.1.0-rc1_amd64.deb
-sudo apt install ./cdt_4.1.0_amd64-rc1.deb
+sudo apt install ./cdt_4.1.0-rc1_amd64.deb
 ```
 ### Debian package uninstall
 
