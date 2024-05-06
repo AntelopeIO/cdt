@@ -95,7 +95,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [ubuntu20, ubuntu22, ubuntu22-llvm]
+        platform: [ubuntu20, ubuntu22, ubuntu22-llvm, ubuntu24]
     runs-on: ["self-hosted", "enf-x86-beefy"]
     container: ${{fromJSON(needs.d.outputs.p)[matrix.platform].image}}
     steps:
@@ -127,13 +127,13 @@ jobs:
             make -j $(nproc)
             cd tests
             ctest -j $(nproc) --output-on-failure
-        - name: Package (Ubuntu 22 only)
-          if: matrix.platform == 'ubuntu22'
+        - name: Package (Ubuntu 20 only)
+          if: matrix.platform == 'ubuntu20'
           run: |
             cd build/packages
             bash generate_package.sh deb ubuntu amd64
-        - name: Upload (Ubuntu 22 only)
-          if: matrix.platform == 'ubuntu22'
+        - name: Upload (Ubuntu 20 only)
+          if: matrix.platform == 'ubuntu20'
           uses: actions/upload-artifact@v3
           with:
             name: cdt_ubuntu_package_amd64
