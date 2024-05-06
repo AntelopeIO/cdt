@@ -15,8 +15,8 @@ CDT currently supports Linux x86_64 Debian packages. Visit the [release page](ht
 Download the appropriate version of the Debian package and then install it. To download and install the latest version, run the following:
 
 ```sh
-wget https://github.com/AntelopeIO/cdt/releases/download/v4.0.1/cdt_4.0.1_amd64.deb
-sudo apt install ./cdt_4.0.1_amd64.deb
+wget https://github.com/AntelopeIO/cdt/releases/download/v4.1.0-rc1/cdt_4.1.0-rc1_amd64.deb
+sudo apt install ./cdt_4.1.0_amd64-rc1.deb
 ```
 ### Debian package uninstall
 
@@ -28,9 +28,9 @@ sudo apt remove cdt
 
 ## Building from source
 
-Recent Ubuntu LTS releases are the only Linux distributions that we fully support. Other Linux distros and other POSIX operating systems (such as macOS) are tended to on a best-effort basis and may not be full featured. 
+Recent Ubuntu LTS releases are the only Linux distributions that we fully support. Other Linux distros and other POSIX operating systems (such as macOS) are tended to on a best-effort basis and may not be full featured.
 
-The instructions below assume that you are building on Ubuntu 20.04. 
+The instructions below assume that you are building on Ubuntu 20.04.
 
 ### Install dependencies
 
@@ -136,7 +136,7 @@ Installing CDT globally on your system will install the following tools in a loc
 * cdt-strip
 * eosio-pp
 * eosio-wasm2wast
-* eosio-wast2wasm 
+* eosio-wast2wasm
 
 It will also install CMake files for CDT accessible within a `cmake/cdt` directory located within your system's `lib` directory.
 #### Manual installation
