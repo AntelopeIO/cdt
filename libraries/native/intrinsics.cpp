@@ -890,22 +890,6 @@ extern "C" {
    }
 #pragma clang diagnostic pop
 
-   int64_t add_security_group_participants(const char* data, uint32_t datalen) {
-      return intrinsics::get().call<intrinsics::add_security_group_participants>(data, datalen);
-   }
-
-   int64_t remove_security_group_participants(const char* data, uint32_t datalen){
-      return intrinsics::get().call<intrinsics::remove_security_group_participants>(data, datalen);
-   }
-
-   bool in_active_security_group(const char* data, uint32_t datalen){
-      return intrinsics::get().call<intrinsics::in_active_security_group>(data, datalen);
-   }
-
-   uint32_t get_active_security_group(char* data, uint32_t datalen){
-      return intrinsics::get().call<intrinsics::get_active_security_group>(data, datalen);
-   }
-  
    void set_finalizers(uint64_t packed_finalizer_format, const char* data, uint32_t len) {
       intrinsics::get().call<intrinsics::set_finalizers>(packed_finalizer_format, data, len);
    }
