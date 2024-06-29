@@ -346,8 +346,7 @@ namespace detail {
         
         auto csum = ripemd160(ret.data(), ret.size()).extract_as_byte_array();
         eosio::check(0 == memcmp(&*it, csum.data(), bls_checksum_size), "checksum of structure doesn't match");
-        printhex(static_cast<const void*>(ret.data()), ret.size());
-
+        
         return ret;
     }
 
