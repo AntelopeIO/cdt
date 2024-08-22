@@ -21,7 +21,7 @@ ld options:
   -L=<string>       - Add directory to library search path
   -fasm             - Assemble file for x86-64
   -fnative          - Compile and link for x86-64
-  -fno-cfl-aa       - Disable CFL Alias Analysis
+  -fcfl-aa          - Enable CFL Alias Analysis
   -fno-lto          - Disable LTO
   -fno-post-pass    - Don't run post processing pass
   -fno-stack-first  - Don't set the stack first in memory

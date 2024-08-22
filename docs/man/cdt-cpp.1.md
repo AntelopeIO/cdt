@@ -187,9 +187,9 @@ execution in Antelope block chain virtual machines.
     
     Compile and link for x86-64
     
-**`--fno-cfl-aa`**
+**`--fcfl-aa`**
     
-    Disable CFL Alias Analysis
+    Enable CFL Alias Analysis
     
 **`--fno-elide-constructors`**
     
