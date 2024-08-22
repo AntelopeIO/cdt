@@ -28,9 +28,9 @@ sudo apt remove cdt
 
 ## Building from source
 
-Recent Ubuntu LTS releases are the only Linux distributions that we fully support. Other Linux distros and other POSIX operating systems (such as macOS) are tended to on a best-effort basis and may not be full featured. 
+Recent Ubuntu LTS releases are the only Linux distributions that we fully support. Other Linux distros and other POSIX operating systems (such as macOS) are tended to on a best-effort basis and may not be full featured.
 
-The instructions below assume that you are building on Ubuntu 20.04. 
+The instructions below assume that you are building on Ubuntu 20.04.
 
 ### Install dependencies
 
@@ -136,7 +136,7 @@ Installing CDT globally on your system will install the following tools in a loc
 * cdt-strip
 * eosio-pp
 * eosio-wasm2wast
-* eosio-wast2wasm 
+* eosio-wast2wasm
 
 It will also install CMake files for CDT accessible within a `cmake/cdt` directory located within your system's `lib` directory.
 #### Manual installation
