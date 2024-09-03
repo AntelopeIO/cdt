@@ -62,7 +62,7 @@ namespace  eosio {
           * @return true - if exists
           * @return false - otherwise
           */
-         bool exists() {
+         bool exists() const {
             return _t.find( pk_value ) != _t.end();
          }
 
@@ -72,7 +72,7 @@ namespace  eosio {
           * @brief Get the value stored inside the singleton table
           * @return T - The value stored
           */
-         T get() {
+         T get() const {
             auto itr = _t.find( pk_value );
             eosio::check( itr != _t.end(), "singleton does not exist" );
             return itr->value;
@@ -84,7 +84,7 @@ namespace  eosio {
           * @param def - The default value to be returned in case the data doesn't exist
           * @return T - The value stored
           */
-         T get_or_default( const T& def = T() ) {
+         T get_or_default( const T& def = T() ) const {
             auto itr = _t.find( pk_value );
             return itr != _t.end() ? itr->value : def;
          }

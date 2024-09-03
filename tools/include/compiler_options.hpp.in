@@ -80,9 +80,9 @@ static cl::opt<bool> fno_lto_opt(
     "fno-lto",
     cl::desc("Disable LTO"),
     cl::cat(LD_CAT));
-static cl::opt<bool> fno_cfl_aa_opt(
-      "fno-cfl-aa",
-      cl::desc("Disable CFL Alias Analysis"),
+static cl::opt<bool> fcfl_aa_opt(
+      "fcfl-aa",
+      cl::desc("Enable CFL Alias Analysis"),
       cl::cat(LD_CAT));
 static cl::opt<bool> fno_stack_first_opt(
       "fno-stack-first",
@@ -617,7 +617,7 @@ static Options CreateOptions(bool add_defaults=true) {
    else
       pp_dir = eosio::cdt::whereami::where();
 
-   if (!fno_cfl_aa_opt) {
+   if (fcfl_aa_opt) {
       copts.emplace_back("-mllvm");
       copts.emplace_back("-use-cfl-aa-in-codegen=both");
       agopts.emplace_back("-mllvm");
