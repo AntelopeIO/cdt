@@ -16,9 +16,9 @@ ExternalProject_Add(
 )
 
 
-find_package(leap QUIET)
+find_package(spring QUIET)
 
-if (leap_FOUND)
+if (spring_FOUND)
    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
       set(TEST_BUILD_TYPE "Debug")
    else()
@@ -40,5 +40,5 @@ if (leap_FOUND)
      BUILD_ALWAYS 1
    )
 else()
-   message(STATUS "leap package not found, skipping building integration tests")
+   message(STATUS "spring package not found, skipping building integration tests")
 endif()

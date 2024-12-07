@@ -1,10 +1,10 @@
 cmake_minimum_required( VERSION 3.5 )
 
-set(EOSIO_VERSION_MIN "3.1")
+set(EOSIO_VERSION_MIN "1.0")
 set(EOSIO_VERSION_SOFT_MAX "5.0")
 #set(EOSIO_VERSION_HARD_MAX "")
 
-find_package(leap)
+find_package(spring)
 
 find_path(GMP_INCLUDE_DIR NAMES gmp.h)
 find_library(GMP_LIBRARY gmp)
@@ -17,11 +17,11 @@ EOSIO_CHECK_VERSION(VERSION_OUTPUT "${EOSIO_VERSION}"
                                    "${EOSIO_VERSION_HARD_MAX}"
                                    VERSION_MATCH_ERROR_MSG)
 if(VERSION_OUTPUT STREQUAL "MATCH")
-   message(STATUS "Using Leap version ${EOSIO_VERSION}")
+   message(STATUS "Using Spring version ${EOSIO_VERSION}")
 elseif(VERSION_OUTPUT STREQUAL "WARN")
-   message(WARNING "Using Leap version ${EOSIO_VERSION} even though it exceeds the maximum supported version of ${EOSIO_VERSION_SOFT_MAX}; continuing with configuration, however build may fail.\nIt is recommended to use Leap version ${EOSIO_VERSION_SOFT_MAX}.x")
+   message(WARNING "Using Spring version ${EOSIO_VERSION} even though it exceeds the maximum supported version of ${EOSIO_VERSION_SOFT_MAX}; continuing with configuration, however build may fail.\nIt is recommended to use Spring version ${EOSIO_VERSION_SOFT_MAX}.x")
 else() # INVALID OR MISMATCH
-   message(FATAL_ERROR "Found Leap version ${EOSIO_VERSION} but it does not satisfy version requirements: ${VERSION_MATCH_ERROR_MSG}\nPlease use Leap version ${EOSIO_VERSION_SOFT_MAX}.x")
+   message(FATAL_ERROR "Found Spring version ${EOSIO_VERSION} but it does not satisfy version requirements: ${VERSION_MATCH_ERROR_MSG}\nPlease use Spring version ${EOSIO_VERSION_SOFT_MAX}.x")
 endif(VERSION_OUTPUT STREQUAL "MATCH")
 
 
