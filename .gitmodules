@@ -1,6 +1,3 @@
-[submodule "cdt-llvm"]
-	path = cdt-llvm
-	url = https://github.com/AntelopeIO/cdt-llvm
 [submodule "libraries/libc/cdt-musl"]
 	path = libraries/libc/cdt-musl
 	url = https://github.com/AntelopeIO/cdt-musl
@@ -10,3 +7,7 @@
 [submodule "libraries/native/softfloat"]
 	path = libraries/native/softfloat
 	url = https://github.com/AntelopeIO/berkeley-softfloat-3
+[submodule "llvm"]
+	path = llvm
+	url = https://github.com/llvm/llvm-project
+	branch = release/16.x

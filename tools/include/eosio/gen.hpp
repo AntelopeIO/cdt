@@ -16,6 +16,7 @@
 #include <regex>
 #include <utility>
 #include <variant>
+#include <iostream>
 
 namespace eosio { namespace cdt {
 
@@ -140,7 +141,7 @@ struct generation_utils {
       auto get = [&](const clang::Type* pt) {
          if (auto tst = llvm::dyn_cast<clang::TemplateSpecializationType>(pt))
             if (auto decl = llvm::dyn_cast<clang::RecordType>(tst->desugar()))
-               return decl->getDecl()->isEosioIgnore() ? tst->getArg(0).getAsType() : type;
+               return decl->getDecl()->isEosioIgnore() ? tst->template_arguments()[0].getAsType() : type;
          return type;
       };
 
@@ -153,7 +154,6 @@ struct generation_utils {
       return get(t);
    }
 
-
    inline void set_contract_name( const std::string& cn ) { contract_name = cn; }
    inline const std::string& get_contract_name()const { return contract_name; }
    static inline std::string get_parsed_contract_name() { return parsed_contract_name; }
@@ -161,12 +161,12 @@ struct generation_utils {
       llvm::SmallString<128> cwd;
       auto has_real_path = llvm::sys::fs::real_path("./", cwd, true);
       if (!has_real_path)
-         resource_dirs.push_back(cwd.str());
+         resource_dirs.push_back(cwd.str().str());
       for ( auto res : rd ) {
          llvm::SmallString<128> rp;
          auto has_real_path = llvm::sys::fs::real_path(res, rp, true);
          if (!has_real_path)
-            resource_dirs.push_back(rp.str());
+            resource_dirs.push_back(rp.str().str());
       }
    }
 
@@ -178,30 +178,30 @@ struct generation_utils {
    }
 
    static inline std::string get_eosio_ricardian( const clang::CXXMethodDecl* decl ) {
-      return decl->getEosioRicardianAttr()->getName();
+      return decl->getEosioRicardianAttr()->getName().str();
    }
    static inline std::string get_eosio_ricardian( const clang::CXXRecordDecl* decl ) {
-      return decl->getEosioRicardianAttr()->getName();
+      return decl->getEosioRicardianAttr()->getName().str();
    }
 
    static inline std::string get_action_name( const clang::CXXMethodDecl* decl ) {
       std::string action_name = "";
       auto tmp = decl->getEosioActionAttr()->getName();
       if (!tmp.empty())
-         return tmp;
+         return tmp.str();
       return decl->getNameAsString();
    }
    static inline std::string get_notify_pair( const clang::CXXMethodDecl* decl ) {
       std::string notify_pair = "";
       auto tmp = decl->getEosioNotifyAttr()->getName();
-      return tmp;
+      return tmp.str();
    }
    static inline std::string get_action_name( const clang::CXXRecordDecl* decl ) {
       std::string action_name = "";
       auto tmp = decl->getEosioActionAttr()->getName();
       if (!tmp.empty())
-         return tmp;
-      return decl->getName();
+         return tmp.str();
+      return decl->getName().str();
    }
    inline std::string get_rc_filename() {
       return contract_name+".contracts.md";
@@ -338,7 +338,7 @@ struct generation_utils {
       auto resolve = [&](const clang::Type* t) {
          auto tst = llvm::dyn_cast<clang::TemplateSpecializationType>(t);
          if (tst) {
-            auto arg = tst->getArg(index);
+            auto arg = tst->template_arguments()[index];
             if ( arg.getKind() == clang::TemplateArgument::ArgKind::Type ) {
                ret_val = arg.getAsType();
                return;
@@ -371,10 +371,14 @@ struct generation_utils {
             auto il = llvm::dyn_cast<clang::IntegerLiteral>(ce->getSubExpr());
             return std::to_string(il->getValue().getLimitedValue());
          } else if (auto ce = llvm::dyn_cast<clang::ConstantExpr>(std::get<clang::Expr*>(arg))) {
-             return ce->getResultAsAPSInt().toString(10);
+             llvm::SmallString<64> ret_str;
+             ce->getResultAsAPSInt().toString(ret_str);
+             return ret_str.str().str();
          }
       } else {
-         return std::get<llvm::APSInt>(arg).toString(10);
+         llvm::SmallString<64> ret_str;
+         std::get<llvm::APSInt>(arg).toString(ret_str);
+         return ret_str.str().str();
       }
       CDT_INTERNAL_ERROR("Tried to get a non-existent template argument");
       __builtin_unreachable();
@@ -493,9 +497,9 @@ struct generation_utils {
       auto pt = llvm::dyn_cast<clang::ElaboratedType>(type.getTypePtr());
       auto tst = llvm::dyn_cast<clang::TemplateSpecializationType>(pt ? pt->desugar().getTypePtr() : type.getTypePtr());
       std::string ret = tst->getTemplateName().getAsTemplateDecl()->getName().str()+"_";
-      for (int i=0; i < tst->getNumArgs(); ++i) {
+      for (int i=0; i < tst->template_arguments().size(); ++i) {
          ret += get_template_argument_as_string(type, i);
-         if (i < tst->getNumArgs() - 1) {
+         if (i < tst->template_arguments().size() - 1) {
             ret += "_";
          }
       }
@@ -632,12 +636,12 @@ struct generation_utils {
                } else if (tname == "map" || tname == "pair") {
                   translate_explicit_nested_map_or_pair(type, depth, ret, tname, gottype);
                } else if (tname == "tuple")  {
-                  int argcnt = tst->getNumArgs();
+                  int argcnt = tst->template_arguments().size();
                   translate_explicit_nested_tuple(type, depth, argcnt, ret, tname, gottype);
                } else if (tname == "array")  {
                   translate_explicit_nested_array(type, depth, ret, tname, gottype);
                } else if (tname == "variant") {
-                  int argcnt = tst->getNumArgs();
+                  int argcnt = tst->template_arguments().size();
                   translate_explicit_nested_variant(type, depth, argcnt, ret, tname, gottype);
                }
             }
@@ -693,9 +697,9 @@ struct generation_utils {
          auto pt = llvm::dyn_cast<clang::ElaboratedType>(type.getTypePtr());
          auto tst = llvm::dyn_cast<clang::TemplateSpecializationType>( pt ? pt->desugar().getTypePtr() : type.getTypePtr() );
          std::string ret = "tuple_";
-         for (int i=0; i < tst->getNumArgs(); ++i) {
+         for (int i=0; i < tst->template_arguments().size(); ++i) {
             ret += get_template_argument_as_string( type, i );
-            if ( i < tst->getNumArgs()-1 )
+            if ( i < tst->template_arguments().size()-1 )
                ret += "_";
          }
          return replace_in_name(ret);
@@ -718,9 +722,9 @@ struct generation_utils {
          auto pt = llvm::dyn_cast<clang::ElaboratedType>(type.getTypePtr());
          auto tst = llvm::dyn_cast<clang::TemplateSpecializationType>(pt ? pt->desugar().getTypePtr() : type.getTypePtr() );
          std::string ret = tst->getTemplateName().getAsTemplateDecl()->getName().str()+"_";
-         for (int i=0; i < tst->getNumArgs(); ++i) {
+         for (int i=0; i < tst->template_arguments().size(); ++i) {
             ret += get_template_argument_as_string(type,i);
-            if ( i < tst->getNumArgs()-1 )
+            if ( i < tst->template_arguments().size()-1 )
                ret += "_";
          }
          return _translate_type(replace_in_name(ret));
@@ -834,7 +838,7 @@ struct generation_utils {
       if (is_template_specialization( t, {"vector", "set", "deque", "list", "map", "pair","tuple", "array","variant", "optional"} )) {
          auto pt = llvm::dyn_cast<clang::ElaboratedType>(t.getTypePtr());
          auto tst = llvm::dyn_cast<clang::TemplateSpecializationType>(pt ? pt->desugar().getTypePtr() : t.getTypePtr());
-         for(int i = 0; i < tst->getNumArgs(); ++i){
+         for(int i = 0; i < tst->template_arguments().size(); ++i){
             // a type is nested only when one of the next level template arguments is eventually not primitive
             if (!is_primitive_eventually( std::get<clang::QualType>(get_template_argument(t, i)) )) return true;
          }

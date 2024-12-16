@@ -289,7 +289,7 @@ execution in Antelope block chain virtual machines.
     
 **`--only-export=<string>`**
     
-    Export only this symbol
+    Adds symbol to export
             
 **`--print-all-options`**
     
@@ -302,11 +302,7 @@ execution in Antelope block chain virtual machines.
 **`--shared`**
     
     Make shared object native library
-    
-**`--stack-canary`**
-    
-    Stack canary for non stack first layouts
-    
+
 **`--stack-size=<int>`**
     
     Specifies the maximum stack size for the contract. Defaults to 8192 bytes

@@ -453,9 +453,9 @@ namespace eosio { namespace cdt {
             auto& f_mgr = src_mgr.getFileManager();
             auto main_fe = f_mgr.getFile(main_file);
             if (main_fe) {
-               auto fid = src_mgr.getOrCreateFileID(f_mgr.getFile(main_file), SrcMgr::CharacteristicKind::C_User);
+               auto fid = src_mgr.getOrCreateFileID(*main_fe, SrcMgr::CharacteristicKind::C_User);
                visitor->set_main_fid(fid);
-               visitor->set_main_name(main_fe->getName());
+               visitor->set_main_name((*main_fe)->getName());
                visitor->TraverseDecl(Context.getTranslationUnitDecl());
                visitor->process_read_only_actions();
 
@@ -475,7 +475,7 @@ namespace eosio { namespace cdt {
 
                   std::ofstream out(fn.c_str());
                   {
-                     llvm::SmallString<64> abs_file_path(main_fe->getName());
+                     llvm::SmallString<64> abs_file_path((*main_fe)->getName());
                      llvm::sys::fs::make_absolute(abs_file_path);
                      out << "#include \"" << abs_file_path.c_str() << "\"\n";
                   }
@@ -518,7 +518,7 @@ namespace eosio { namespace cdt {
       public:
          virtual std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI, StringRef file) {
             CI.getPreprocessor().addPPCallbacks(std::make_unique<eosio_ppcallbacks>(CI.getSourceManager(), file.str()));
-            return std::make_unique<eosio_codegen_consumer>(&CI, file);
+            return std::make_unique<eosio_codegen_consumer>(&CI, file.str());
          }
    };
 
