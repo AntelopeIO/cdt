@@ -36,6 +36,12 @@ extern "C" {
    void ripemd160( const char* data, uint32_t length, capi_checksum160* hash );
 
    __attribute__((eosio_wasm_import))
+   int verify_rsa_sha256_sig( const void* message,   uint32_t message_len,
+                              const char* signature, uint32_t signature_len,
+                              const char* exponent,  uint32_t exponent_len,
+                              const char* modulus,   uint32_t modulus_len);
+
+   __attribute__((eosio_wasm_import))
    int recover_key( const capi_checksum256* digest, const char* sig,
                     size_t siglen, char* pub, size_t publen );
 
@@ -89,6 +95,18 @@ namespace eosio {
       ::ripemd160( data, length, &hash );
       return {hash.hash};
    }
+
+   bool verify_rsa_sha256_sig( const void* message,
+                               uint32_t message_len,
+                               std::string_view signature,
+                               std::string_view exponent,
+                               std::string_view modulus) {
+        return ::verify_rsa_sha256_sig(
+            message, message_len,
+            signature.data(), signature.size(),
+            exponent.data(), exponent.size(),
+            modulus.data(), modulus.size());
+    }
 
    eosio::public_key recover_key( const eosio::checksum256& digest, const eosio::signature& sig ) {
       auto digest_data = digest.extract_as_byte_array();

@@ -187,6 +187,29 @@ __attribute__((eosio_wasm_import))
 void ripemd160( const char* data, uint32_t length, struct capi_checksum160* hash );
 
 /**
+ * Verifies the RSA SHA-256 signature for a given message using the provided public key components (exponent and modulus).
+ *
+ * @param message - The original message that was signed.
+ * @param message_len - Length of the message in bytes.
+ * @param signature - The RSA signature to verify.
+ * @param signature_len - Length of the signature in bytes.
+ * @param exponent - The public key exponent.
+ * @param exponent_len - Length of the exponent in bytes.
+ * @param modulus - The public key modulus.
+ * @param modulus_len - Length of the modulus in bytes.
+ * @return int - Returns 1 if the signature is valid, 0 if invalid.
+ *
+ *  Example:
+ *
+ *  @code
+ *  @endcode
+ */
+__attribute__((eosio_wasm_import))
+int verify_rsa_sha256_sig( const void* message,   uint32_t message_len,
+                           const char* signature, uint32_t signature_len,
+                           const char* exponent,  uint32_t exponent_len,
+                           const char* modulus,   uint32_t modulus_len);
+/**
  *  Calculates the public key used for a given signature and hash used to create a message.
  *
  *  @param digest - Hash used to create a message
