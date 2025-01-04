@@ -1,0 +1,80 @@
+diff --git a/tools/cc/cdt-cc.cpp.in b/tools/cc/cdt-cc.cpp.in
+index 03db15943..d5e7257f1 100644
+--- a/tools/cc/cdt-cc.cpp.in
++++ b/tools/cc/cdt-cc.cpp.in
+@@ -60,6 +60,14 @@ int main(int argc, const char **argv) {
+ 
+       new_opts.insert(new_opts.begin(), "-o"+output);
+       outputs.push_back(output);
++
++      // Using a range-based for loop
++      std::cout << "**** Clang-16 Options:  ";
++      for (const auto& msg : new_opts) {
++         std::cout << msg << " ";
++      }
++      std::cout << std::endl;
++
+       if (!eosio::cdt::environment::exec_subprogram("clang-16", new_opts)) {
+          llvm::sys::fs::remove(tmp_file);
+          return -1;
+@@ -73,6 +81,12 @@ int main(int argc, const char **argv) {
+       for (auto input : outputs) {
+          new_opts.insert(new_opts.begin(), input);
+       }
++      // Using a range-based for loop
++      std::cout << "**** Clang-LD Options:  ";
++      for (const auto& msg : new_opts) {
++          std::cout << msg << " ";
++      }
++      std::cout << std::endl;
+       if (!eosio::cdt::environment::exec_subprogram("cdt-ld", new_opts)) {
+          for (auto input : outputs) {
+             llvm::sys::fs::remove(input);
+diff --git a/tools/ld/cdt-ld.cpp.in b/tools/ld/cdt-ld.cpp.in
+index 6bb649c80..2d47c326a 100644
+--- a/tools/ld/cdt-ld.cpp.in
++++ b/tools/ld/cdt-ld.cpp.in
+@@ -24,12 +24,30 @@ int main(int argc, const char **argv) {
+   std::string line;
+   if (opts.native) {
+ #ifdef __APPLE__
++     // Using a range-based for loop
++     std::cout << "**** APPLE-LD Options:  ";
++     for (const auto& msg : opts.ld_options) {
++       std::cout << msg << " ";
++     }
++     std::cout << std::endl;
+      if (!eosio::cdt::environment::exec_subprogram("ld", opts.ld_options, true))
+ #else
++     // Using a range-based for loop
++     std::cout << "**** NATIVE-LD.lld Options:  ";
++     for (const auto& msg : opts.ld_options) {
++       std::cout << msg << " ";
++     }
++     std::cout << std::endl;
+      if (!eosio::cdt::environment::exec_subprogram("ld.lld", opts.ld_options))
+ #endif
+          return -1;
+   } else {
++      // Using a range-based for loop
++      std::cout << "**** WASM-LD Options:  ";
++      for (const auto& msg : opts.ld_options) {
++          std::cout << msg << " ";
++      }
++      std::cout << std::endl;
+       if (!eosio::cdt::environment::exec_subprogram("wasm-ld", opts.ld_options)) {
+          std::cerr << "Exit due to wasm-ld failure" << std::endl;
+          return -1;
+@@ -47,6 +65,12 @@ int main(int argc, const char **argv) {
+         return -1;
+      }
+ 
++     // Using a range-based for loop
++     std::cout << "**** EOSIO-PP Options:  ";
++     for (const auto& msg : {opts.output_fn}) {
++       std::cout << msg << " ";
++     }
++     std::cout << std::endl;
+      if (!eosio::cdt::environment::exec_subprogram("eosio-pp", {opts.output_fn})) {
+         std::cerr << "eosio-pp failed" << std::endl;
+         return -1;
