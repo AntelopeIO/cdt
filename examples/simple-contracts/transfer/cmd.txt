@@ -1,0 +1,7 @@
+cdt-cpp -abigen -o enf.wasm -R ricardian transfer.cpp
+cleos set contract enf ./transfer enf.wasm enf.abi
+cleos get currency balance eosio.token enf EOS
+cleos get currency balance eosio.token webaccount1 EOS
+cleos push action enf fixtransfer  -p enf
+cleos get currency balance eosio.token enf EOS
+cleos get currency balance eosio.token webaccount1 EOS

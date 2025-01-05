@@ -1,0 +1,3 @@
+cdt-cpp -abigen -o enf.wasm -R ricardian helloworld.cpp
+cleos set contract enf ./helloworld enf.wasm enf.abi
+cleos push action enf declare  -p enf

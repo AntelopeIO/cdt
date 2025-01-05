@@ -1,0 +1,3 @@
+cdt-cpp -abigen -o enf.wasm -R ricardian readnumber.cpp
+cleos set contract enf ./readnumber enf.wasm enf.abi
+cleos push action enf readnumber  -p enf
