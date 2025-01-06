@@ -440,26 +440,24 @@ static void GetCompDefaults(std::vector<std::string>& copts) {
       copts.emplace_back("-U__APPLE__");
       if (!fnative_opt) {
          copts.emplace_back("-Xclang");
-         copts.emplace_back("-load");
          copts.emplace_back("-Xclang");
          if (llvm::sys::fs::exists(eosio::cdt::whereami::where()+"/LLVMEosioApply"+eosio_apply_suff))
-            copts.emplace_back(eosio::cdt::whereami::where()+"/LLVMEosioApply"+eosio_apply_suff);
+            copts.emplace_back("-fpass-plugin="+eosio::cdt::whereami::where()+"/LLVMEosioApply"+eosio_apply_suff);
          else if (llvm::sys::fs::exists(eosio::cdt::whereami::where()+"/../lib/LLVMEosioApply"+eosio_apply_suff))
-            copts.emplace_back(eosio::cdt::whereami::where()+"/../lib/LLVMEosioApply"+eosio_apply_suff);
+            copts.emplace_back("-fpass-plugin="+eosio::cdt::whereami::where()+"/../lib/LLVMEosioApply"+eosio_apply_suff);
       }
       if (false && fnative_opt) {
          copts.emplace_back("-Xclang");
-         copts.emplace_back("-load");
          copts.emplace_back("-Xclang");
          if (llvm::sys::fs::exists(eosio::cdt::whereami::where()+"/LLVMEosioSoftfloat"+eosio_apply_suff))
-            copts.emplace_back(eosio::cdt::whereami::where()+"/LLVMEosioSoftfloat"+eosio_apply_suff);
+            copts.emplace_back("-fpass-plugin="+eosio::cdt::whereami::where()+"/LLVMEosioSoftfloat"+eosio_apply_suff);
          else if (llvm::sys::fs::exists(eosio::cdt::whereami::where()+"/../lib/LLVMEosioSoftfloat"+eosio_apply_suff))
-            copts.emplace_back(eosio::cdt::whereami::where()+"/../lib/LLVMEosioSoftfloat"+eosio_apply_suff);
+            copts.emplace_back("-fpass-plugin="+eosio::cdt::whereami::where()+"/../lib/LLVMEosioSoftfloat"+eosio_apply_suff);
       }
       if (llvm::sys::fs::exists(eosio::cdt::whereami::where()+"/eosio_plugin"+eosio_apply_suff))
-         copts.emplace_back("-fplugin="+eosio::cdt::whereami::where()+"/eosio_plugin"+eosio_apply_suff);
+         copts.emplace_back("-fpass-plugin="+"+eosio::cdt::whereami::where()+"/eosio_plugin"+eosio_apply_suff);
       else if (llvm::sys::fs::exists(eosio::cdt::whereami::where()+"/../lib/eosio_plugin"+eosio_apply_suff))
-         copts.emplace_back("-fplugin="+eosio::cdt::whereami::where()+"/../lib/eosio_plugin"+eosio_apply_suff);
+         copts.emplace_back("-fpass-plugin="+"+eosio::cdt::whereami::where()+"/../lib/eosio_plugin"+eosio_apply_suff);
    }
 }
 
@@ -932,7 +930,7 @@ static Options CreateOptions(bool add_defaults=true) {
       ldopts.emplace_back("-fnative");
    if (fuse_main_opt)
       ldopts.emplace_back("-fuse-main");
-   
+
    if(warn_action_read_only_opt) {
       warn_action_read_only = true;
    } else {
