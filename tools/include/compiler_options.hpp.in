@@ -455,9 +455,9 @@ static void GetCompDefaults(std::vector<std::string>& copts) {
             copts.emplace_back("-fpass-plugin="+eosio::cdt::whereami::where()+"/../lib/LLVMEosioSoftfloat"+eosio_apply_suff);
       }
       if (llvm::sys::fs::exists(eosio::cdt::whereami::where()+"/eosio_plugin"+eosio_apply_suff))
-         copts.emplace_back("-fpass-plugin="+"+eosio::cdt::whereami::where()+"/eosio_plugin"+eosio_apply_suff);
+         copts.emplace_back("-fpass-plugin="+eosio::cdt::whereami::where()+"/eosio_plugin"+eosio_apply_suff);
       else if (llvm::sys::fs::exists(eosio::cdt::whereami::where()+"/../lib/eosio_plugin"+eosio_apply_suff))
-         copts.emplace_back("-fpass-plugin="+"+eosio::cdt::whereami::where()+"/../lib/eosio_plugin"+eosio_apply_suff);
+         copts.emplace_back("-fpass-plugin="+eosio::cdt::whereami::where()+"/../lib/eosio_plugin"+eosio_apply_suff);
    }
 }
 
