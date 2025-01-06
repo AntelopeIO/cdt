@@ -41,7 +41,7 @@ static cl::opt<std::string> entry_opt (
 
 namespace {
   // EosioApply - Mutate the apply function as needed
-  struct EosioApplyPass : public PassInfoMixin<FunctionListerPass> {
+  struct EosioApplyPass : public PassInfoMixin<EosioApplyPass> {
 
     PreservedAnalyses run(Function &F, FunctionAnalysisManager &FAM) {
        if (F.hasFnAttribute("eosio_wasm_entry") || F.getName().equals("apply")) {
@@ -85,7 +85,7 @@ PassPluginLibraryInfo getPassPluginInfo()
     PB.registerPipelineStartEPCallback(
         [&](ModulePassManager &MPM, auto)
         {
-          MPM.addPass(createModuleToFunctionPassAdaptor(FunctionListerPass()));
+          MPM.addPass(createModuleToFunctionPassAdaptor(EosioApplyPass()));
           return true;
         });
   };
