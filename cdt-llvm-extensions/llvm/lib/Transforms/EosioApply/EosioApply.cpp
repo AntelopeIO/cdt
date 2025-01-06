@@ -21,6 +21,10 @@
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Pass.h"
 #include "llvm/IR/Attributes.h"
+// Library's needed for new PassManager
+#include "llvm/IR/PassManager.h"
+#include "llvm/Passes/PassBuilder.h"
+#include "llvm/Passes/PassPlugin.h"
 #include "llvm/Support/raw_ostream.h"
 
 #include <set>
@@ -37,11 +41,11 @@ static cl::opt<std::string> entry_opt (
 
 namespace {
   // EosioApply - Mutate the apply function as needed
-  struct EosioApplyPass : public FunctionPass {
-    static char ID;
-    EosioApplyPass() : FunctionPass(ID) {}
-    bool runOnFunction(Function &F) override {
+  struct EosioApplyPass : public PassInfoMixin<FunctionListerPass> {
+
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &FAM) {
        if (F.hasFnAttribute("eosio_wasm_entry") || F.getName().equals("apply")) {
+         outs() << "Running Eosio Apply Pass on: " << F.getName() << '\n';
          auto wasm_ctors = F.getParent()->getOrInsertFunction("__wasm_call_ctors", AttributeList{}, Type::getVoidTy(F.getContext()));
          auto wasm_dtors = F.getParent()->getOrInsertFunction("__cxa_finalize", AttributeList{}, Type::getVoidTy(F.getContext()), Type::getInt32Ty(F.getContext()));
 
@@ -68,15 +72,31 @@ namespace {
             }
          }
 
-         return true;
+         return PreservedAnalyses::all();
       }
-      return false;
     }
   };
 }
 
-char EosioApplyPass::ID = 0;
-static RegisterPass<EosioApplyPass> X("apply_fixup", "Eosio Apply Fixups");
+PassPluginLibraryInfo getPassPluginInfo()
+{
+  const auto callback = [](PassBuilder &PB)
+  {
+    PB.registerPipelineStartEPCallback(
+        [&](ModulePassManager &MPM, auto)
+        {
+          MPM.addPass(createModuleToFunctionPassAdaptor(FunctionListerPass()));
+          return true;
+        });
+  };
 
-static void registerEosioApplyPass(const PassManagerBuilder&, legacy::PassManagerBase& PM) { PM.add(new EosioApplyPass()); }
-// static RegisterStandardPasses RegisterMyPass(PassManagerBuilder::EP_EarlyAsPossible, registerEosioApplyPass);
+  return {LLVM_PLUGIN_API_VERSION, "name", "0.0.1", callback};
+};
+
+/* When a plugin is loaded by the driver, it will call this entry point to
+obtain information about this plugin and about how to register its passes.
+*/
+extern "C" LLVM_ATTRIBUTE_WEAK PassPluginLibraryInfo llvmGetPassPluginInfo()
+{
+  return getPassPluginInfo();
+}
