@@ -21,6 +21,11 @@
 #include "llvm/Pass.h"
 #include "llvm/IR/Attributes.h"
 #include "llvm/Support/raw_ostream.h"
+// Library's needed for new PassManager
+#include "llvm/IR/PassManager.h"
+#include "llvm/Passes/PassBuilder.h"
+#include "llvm/Passes/PassPlugin.h"
+#include "llvm/Support/raw_ostream.h"
 
 #include <map>
 #include <set>
@@ -33,11 +38,9 @@ using namespace llvm;
 
 namespace {
   // EosioSoftfloat - Mutate the apply function as needed
-  struct EosioSoftfloatPass : public FunctionPass {
-    static char ID;
-    EosioSoftfloatPass() : FunctionPass(ID) {}
+  struct EosioSoftfloatPass : public PassInfoMixin<EosioSoftfloatPass> {
 
-    bool runOnFunction(Function &f) override {
+    PreservedAnalyses run(Function &F, FunctionAnalysisManager &FAM) {
        auto  f32add = f.getParent()->getOrInsertFunction("_eosio_f32_add", AttributeList{},
                                                                    Type::getFloatTy(f.getContext()),
                                                                    Type::getFloatTy(f.getContext()),
@@ -142,13 +145,33 @@ namespace {
           //outs() << (*(std::get<1>(item)->getParent()));
        }
 
-       return changed;
+       if (changed) {
+         return PreservedAnalyses::all();
+       }
     }
   };
 }
 
-char EosioSoftfloatPass::ID = 0;
-static RegisterPass<EosioSoftfloatPass> X("softfloat_fixup", "Eosio Softfloat Fixups");
 
-static void registerEosioSoftfloatPass(const PassManagerBuilder&, legacy::PassManagerBase& PM) { PM.add(new EosioSoftfloatPass()); }
-// static RegisterStandardPasses RegisterMyPass(PassManagerBuilder::EP_EarlyAsPossible, registerEosioSoftfloatPass);
+PassPluginLibraryInfo getPassPluginInfo()
+{
+  const auto callback = [](PassBuilder &PB)
+  {
+    PB.registerPipelineStartEPCallback(
+        [&](ModulePassManager &MPM, auto)
+        {
+          MPM.addPass(createModuleToFunctionPassAdaptor(EosioSoftfloatPass()));
+          return true;
+        });
+  };
+
+  return {LLVM_PLUGIN_API_VERSION, "name", "0.0.1", callback};
+};
+
+/* When a plugin is loaded by the driver, it will call this entry point to
+obtain information about this plugin and about how to register its passes.
+*/
+extern "C" LLVM_ATTRIBUTE_WEAK PassPluginLibraryInfo llvmGetPassPluginInfo()
+{
+  return getPassPluginInfo();
+}
