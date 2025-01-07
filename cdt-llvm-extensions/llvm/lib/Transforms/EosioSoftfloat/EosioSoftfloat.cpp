@@ -41,57 +41,57 @@ namespace {
   struct EosioSoftfloatPass : public PassInfoMixin<EosioSoftfloatPass> {
 
     PreservedAnalyses run(Function &F, FunctionAnalysisManager &FAM) {
-       auto  f32add = f.getParent()->getOrInsertFunction("_eosio_f32_add", AttributeList{},
-                                                                   Type::getFloatTy(f.getContext()),
-                                                                   Type::getFloatTy(f.getContext()),
-                                                                   Type::getFloatTy(f.getContext()));
-       auto  f32sub = f.getParent()->getOrInsertFunction("_eosio_f32_sub", AttributeList{},
-                                                                   Type::getFloatTy(f.getContext()),
-                                                                   Type::getFloatTy(f.getContext()),
-                                                                   Type::getFloatTy(f.getContext()));
-       auto  f32mul = f.getParent()->getOrInsertFunction("_eosio_f32_mul", AttributeList{},
-                                                                   Type::getFloatTy(f.getContext()),
-                                                                   Type::getFloatTy(f.getContext()),
-                                                                   Type::getFloatTy(f.getContext()));
-       auto  f32div = f.getParent()->getOrInsertFunction("_eosio_f32_div", AttributeList{},
-                                                                   Type::getFloatTy(f.getContext()),
-                                                                   Type::getFloatTy(f.getContext()),
-                                                                   Type::getFloatTy(f.getContext()));
-       auto  f32rem = f.getParent()->getOrInsertFunction("_eosio_f32_rem", AttributeList{},
-                                                                   Type::getFloatTy(f.getContext()),
-                                                                   Type::getFloatTy(f.getContext()),
-                                                                   Type::getFloatTy(f.getContext()));
+       auto  f32add = F.getParent()->getOrInsertFunction("_eosio_f32_add", AttributeList{},
+                                                                   Type::getFloatTy(F.getContext()),
+                                                                   Type::getFloatTy(F.getContext()),
+                                                                   Type::getFloatTy(F.getContext()));
+       auto  f32sub = F.getParent()->getOrInsertFunction("_eosio_f32_sub", AttributeList{},
+                                                                   Type::getFloatTy(F.getContext()),
+                                                                   Type::getFloatTy(F.getContext()),
+                                                                   Type::getFloatTy(F.getContext()));
+       auto  f32mul = F.getParent()->getOrInsertFunction("_eosio_f32_mul", AttributeList{},
+                                                                   Type::getFloatTy(F.getContext()),
+                                                                   Type::getFloatTy(F.getContext()),
+                                                                   Type::getFloatTy(F.getContext()));
+       auto  f32div = F.getParent()->getOrInsertFunction("_eosio_f32_div", AttributeList{},
+                                                                   Type::getFloatTy(F.getContext()),
+                                                                   Type::getFloatTy(F.getContext()),
+                                                                   Type::getFloatTy(F.getContext()));
+       auto  f32rem = F.getParent()->getOrInsertFunction("_eosio_f32_rem", AttributeList{},
+                                                                   Type::getFloatTy(F.getContext()),
+                                                                   Type::getFloatTy(F.getContext()),
+                                                                   Type::getFloatTy(F.getContext()));
 
-       auto  f64add = f.getParent()->getOrInsertFunction("_eosio_f64_add", AttributeList{},
-                                                                   Type::getFloatTy(f.getContext()),
-                                                                   Type::getFloatTy(f.getContext()),
-                                                                   Type::getFloatTy(f.getContext()));
-       auto  f64sub = f.getParent()->getOrInsertFunction("_eosio_f64_sub", AttributeList{},
-                                                                   Type::getFloatTy(f.getContext()),
-                                                                   Type::getFloatTy(f.getContext()),
-                                                                   Type::getFloatTy(f.getContext()));
-       auto  f64mul = f.getParent()->getOrInsertFunction("_eosio_f64_mul", AttributeList{},
-                                                                   Type::getFloatTy(f.getContext()),
-                                                                   Type::getFloatTy(f.getContext()),
-                                                                   Type::getFloatTy(f.getContext()));
-       auto  f64div = f.getParent()->getOrInsertFunction("_eosio_f64_div", AttributeList{},
-                                                                   Type::getFloatTy(f.getContext()),
-                                                                   Type::getFloatTy(f.getContext()),
-                                                                   Type::getFloatTy(f.getContext()));
-       auto  f64rem = f.getParent()->getOrInsertFunction("_eosio_f64_rem", AttributeList{},
-                                                                       Type::getFloatTy(f.getContext()),
-                                                                       Type::getFloatTy(f.getContext()),
-                                                                       Type::getFloatTy(f.getContext()));
+       auto  f64add = F.getParent()->getOrInsertFunction("_eosio_f64_add", AttributeList{},
+                                                                   Type::getFloatTy(F.getContext()),
+                                                                   Type::getFloatTy(F.getContext()),
+                                                                   Type::getFloatTy(F.getContext()));
+       auto  f64sub = F.getParent()->getOrInsertFunction("_eosio_f64_sub", AttributeList{},
+                                                                   Type::getFloatTy(F.getContext()),
+                                                                   Type::getFloatTy(F.getContext()),
+                                                                   Type::getFloatTy(F.getContext()));
+       auto  f64mul = F.getParent()->getOrInsertFunction("_eosio_f64_mul", AttributeList{},
+                                                                   Type::getFloatTy(F.getContext()),
+                                                                   Type::getFloatTy(F.getContext()),
+                                                                   Type::getFloatTy(F.getContext()));
+       auto  f64div = F.getParent()->getOrInsertFunction("_eosio_f64_div", AttributeList{},
+                                                                   Type::getFloatTy(F.getContext()),
+                                                                   Type::getFloatTy(F.getContext()),
+                                                                   Type::getFloatTy(F.getContext()));
+       auto  f64rem = F.getParent()->getOrInsertFunction("_eosio_f64_rem", AttributeList{},
+                                                                       Type::getFloatTy(F.getContext()),
+                                                                       Type::getFloatTy(F.getContext()),
+                                                                       Type::getFloatTy(F.getContext()));
 
 
        bool changed = false;
        std::set<std::pair<Instruction*, Instruction*>> working_set;
-       for ( Function::iterator bb = f.begin(); bb != f.end(); bb++ ) {
+       for ( Function::iterator bb = F.begin(); bb != F.end(); bb++ ) {
           for ( BasicBlock::iterator i = bb->begin(); i != bb->end(); i++ ) {
              Instruction* inst = &*i;
              if (AllocaInst* alloca_inst = dyn_cast<AllocaInst>(&*inst)) {
                 if (alloca_inst->getAllocatedType()->getTypeID() == Type::TypeID::X86_FP80TyID) {
-                   alloca_inst->setAllocatedType(Type::getFP128Ty(f.getContext()));
+                   alloca_inst->setAllocatedType(Type::getFP128Ty(F.getContext()));
                 }
              }
              else if (BitCastInst* bc = dyn_cast<BitCastInst>(&*inst)) {
