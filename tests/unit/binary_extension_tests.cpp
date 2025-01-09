@@ -13,7 +13,7 @@ using std::move;
 using eosio::binary_extension;
 
 // Definitions in `eosio.cdt/libraries/eosio/binary_extension.hpp`
-EOSIO_TEST_BEGIN(binary_extension_test)
+EOSIO_TEST_BEGIN(binary_extension_test_a)
    //// constexpr binary_extension()
    // constexpr bool has_value()const
    CHECK_EQUAL( (binary_extension<const char>{}.has_value()), false )
@@ -80,7 +80,9 @@ EOSIO_TEST_BEGIN(binary_extension_test)
    CHECK_EQUAL( (binary_extension<const char*>{}.operator bool()), false )
    CHECK_EQUAL( (binary_extension<const char*>{nullptr}.operator bool()), true )
    CHECK_EQUAL( (binary_extension<const char*>{"abcd"}.operator bool()), true )
+EOSIO_TEST_END
 
+EOSIO_TEST_BEGIN(binary_extension_test_b)
    // ---------------------
    // constexpr T& value()&
    binary_extension<char> be_char_value{'c'};
@@ -91,6 +93,9 @@ EOSIO_TEST_BEGIN(binary_extension_test)
    CHECK_EQUAL( std::strcmp(be_str_value.value(),"abcd") == 0, true  )
    CHECK_EQUAL( std::strcmp(be_str_value.value(),"efgh") == 0, false )
 
+EOSIO_TEST_END
+
+EOSIO_TEST_BEGIN(binary_extension_test_c)
    // --------------------------------
    // constexpr const T& value()const&
    static const binary_extension<const char> cbe_char_value{'c'};
@@ -100,7 +105,9 @@ EOSIO_TEST_BEGIN(binary_extension_test)
    static const binary_extension<const char*> cbe_str_value{"abcd"};
    CHECK_EQUAL( std::strcmp(cbe_str_value.value(), "abcd") == 0, true  )
    CHECK_EQUAL( std::strcmp(cbe_str_value.value(), "efgh") == 0, false )
+EOSIO_TEST_END
 
+EOSIO_TEST_BEGIN(binary_extension_test_d)
    // -----------------------------------------------------------------------------
    // constexpr auto value_or(U&&) -> enable_if_t<is_convertible<U, T>::value, T&>&
    binary_extension<uint8_t> be_val_or{};
@@ -113,7 +120,9 @@ EOSIO_TEST_BEGIN(binary_extension_test)
 
    binary_extension<char*> be_val_or_rval{const_cast<char*>("abcd")};
    CHECK_EQUAL( std::strcmp(be_val_or_rval.value_or(), "abcd") == 0 , true )
+EOSIO_TEST_END
 
+EOSIO_TEST_BEGIN(binary_extension_test_e)
    // -------------------------------------
    // constexpr const T&& value_or()const&&
    CHECK_EQUAL( binary_extension<const char>{'c'}.value_or(), 'c' )
@@ -128,7 +137,9 @@ EOSIO_TEST_BEGIN(binary_extension_test)
 
    binary_extension<char*> be_str_val_or{const_cast<char*>("abcd")};
    CHECK_EQUAL( std::strcmp(be_str_val_or.value_or(), "abcd") == 0 , true)
+EOSIO_TEST_END
 
+EOSIO_TEST_BEGIN(binary_extension_test_f)
    // ----------------------------
    // constexpr T value_or()const&
    static const binary_extension<const char> cbe_char_val_or{'c'};
@@ -146,7 +157,9 @@ EOSIO_TEST_BEGIN(binary_extension_test)
    binary_extension<char*> be_str_mem_op{const_cast<char*>("abcd")};
    CHECK_EQUAL( std::strcmp(*be_str_mem_op.operator->(),"abcd") == 0 , true )
    CHECK_EQUAL( std::strcmp(*be_str_mem_op.operator->(),"efgh") != 0 , true )
+EOSIO_TEST_END
 
+EOSIO_TEST_BEGIN(binary_extension_test_g)
    // ------------------------------------
    // constexpr const T* operator->()const
    static const binary_extension<const char> cbe_char_mem_op{'c'};
@@ -167,6 +180,9 @@ EOSIO_TEST_BEGIN(binary_extension_test)
    CHECK_EQUAL( std::strcmp(be_str_lval_dref_op.operator*(),"abcd") == 0, true)
    CHECK_EQUAL( std::strcmp(be_str_lval_dref_op.operator*(), "efgh") != 0, true )
 
+EOSIO_TEST_END
+
+EOSIO_TEST_BEGIN(binary_extension_test_h)
    // ------------------------------------
    // constexpr const T& operator*()const&
    static const binary_extension<const char> cbe_char_lval_dref_op{'c'};
@@ -175,8 +191,10 @@ EOSIO_TEST_BEGIN(binary_extension_test)
 
    static const binary_extension<const char*> cbe_str_lval_dref_op{"abcd"};
    CHECK_EQUAL( std::strcmp(cbe_str_lval_dref_op.operator*(),"abcd") == 0, true )
-   CHECK_EQUAL( std::strcmp(cbe_str_lval_dref_op.operator*(),"efgh") == 0, true )
+   CHECK_EQUAL( std::strcmp(cbe_str_lval_dref_op.operator*(),"efgh") != 0, true )
+EOSIO_TEST_END
 
+EOSIO_TEST_BEGIN(binary_extension_test_i)
    // ---------------------------
    // constexpr T&& operator*()&&
    binary_extension<char> be_char_rval_dref_op{'c'};
@@ -186,7 +204,9 @@ EOSIO_TEST_BEGIN(binary_extension_test)
    binary_extension<char*> be_str_rval_dref_op{const_cast<char*>("abcd")};
    CHECK_EQUAL( std::strcmp(move(be_str_rval_dref_op.operator*()),"abcd") == 0, true )
    CHECK_EQUAL( std::strcmp(move(be_str_rval_dref_op.operator*()),"efgh") != 0, true )
+EOSIO_TEST_END
 
+EOSIO_TEST_BEGIN(binary_extension_test_j)
    // --------------------------------------
    // constexpr const T&& operator*()const&&
    static const binary_extension<const char> cbe_char_rval_dref_op{'c'};
@@ -196,7 +216,9 @@ EOSIO_TEST_BEGIN(binary_extension_test)
    static const binary_extension<const char*> cbe_str_rval_dref_op{"abcd"};
    CHECK_EQUAL( std::strcmp(move(cbe_str_rval_dref_op.operator*()),"abcd") == 0, true )
    CHECK_EQUAL( std::strcmp(move(cbe_str_rval_dref_op.operator*()),"efgh") != 0, true )
+EOSIO_TEST_END
 
+EOSIO_TEST_BEGIN(binary_extension_test_k)
    // ----------------------------
    // T& emplace(Args&& ... args)&
    binary_extension<const char> be_char_emplace{'c'};
@@ -208,7 +230,9 @@ EOSIO_TEST_BEGIN(binary_extension_test)
    be_str_emplace.emplace(move("efgh"));
    CHECK_EQUAL( std::strcmp(be_str_emplace.value(),"efgh") == 0, true )
    CHECK_EQUAL( std::strcmp(be_str_emplace.value(),"abcd") != 0, true )
+EOSIO_TEST_END
 
+EOSIO_TEST_BEGIN(binary_extension_test_l)
    // ------------
    // void reset()
    binary_extension<const char> be_char_reset{'c'};
@@ -263,7 +287,18 @@ int main(int argc, char* argv[]) {
    }
    silence_output(!verbose);
 
-   EOSIO_TEST(binary_extension_test);
+   EOSIO_TEST(binary_extension_test_a);
+   EOSIO_TEST(binary_extension_test_b);
+   EOSIO_TEST(binary_extension_test_c);
+   EOSIO_TEST(binary_extension_test_d);
+   EOSIO_TEST(binary_extension_test_e);
+   EOSIO_TEST(binary_extension_test_f);
+   EOSIO_TEST(binary_extension_test_g);
+   EOSIO_TEST(binary_extension_test_h);
+   EOSIO_TEST(binary_extension_test_i);
+   EOSIO_TEST(binary_extension_test_j);
+   EOSIO_TEST(binary_extension_test_k);
+   EOSIO_TEST(binary_extension_test_l);
    EOSIO_TEST(binary_extension_assignment_test);
    return has_failed();
 }

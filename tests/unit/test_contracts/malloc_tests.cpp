@@ -2,6 +2,7 @@
 
 using namespace eosio;
 
+// TODO: chained assigmnets in volatile not supported
 class [[eosio::contract]] malloc_tests : public contract{
    public:
       using contract::contract;
