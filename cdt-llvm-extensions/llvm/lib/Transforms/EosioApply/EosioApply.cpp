@@ -71,9 +71,10 @@ namespace {
                   wasm_dtor_call->setCallingConv(F_->getCallingConv());
             }
          }
-
-         return PreservedAnalyses::all();
+		// modified the function
+         return PreservedAnalyses::none();
       }
+      return PreservedAnalyses::all();
     }
   };
 }
@@ -90,7 +91,7 @@ PassPluginLibraryInfo getPassPluginInfo()
         });
   };
 
-  return {LLVM_PLUGIN_API_VERSION, "name", "0.0.1", callback};
+  return {LLVM_PLUGIN_API_VERSION, "EosioApplyPass", "3.0.0", callback};
 };
 
 /* When a plugin is loaded by the driver, it will call this entry point to
