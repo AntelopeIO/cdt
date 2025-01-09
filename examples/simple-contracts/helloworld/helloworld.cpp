@@ -1,4 +1,5 @@
 #include <eosio/eosio.hpp>
+#include <eosio/print.hpp>
 using namespace eosio;
 
 CONTRACT enf: public contract {
@@ -6,15 +7,13 @@ CONTRACT enf: public contract {
       using contract::contract;
 
       [[eosio::action]] void declare() {
-         print_f("Hello World!\n"); 
+         print("Hello World!\n");    
       }
+
 };
 
-EOSIO_DISPATCH(enf, (declare))
-
-//extern "C" {
-//   [[eosio::wasm_entry]]
-//   void apply( uint64_t receiver, uint64_t code, uint64_t action ) {
-//      print_f("Hello from Apply\n");
-//   }
-//} 
+extern "C" {
+   [[eosio::wasm_entry]]
+   void apply( uint64_t receiver, uint64_t code, uint64_t action ) {
+   }
+} 

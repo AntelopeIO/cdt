@@ -57,6 +57,7 @@ namespace {
                                                                    Type::getFloatTy(F.getContext()),
                                                                    Type::getFloatTy(F.getContext()),
                                                                    Type::getFloatTy(F.getContext()));
+       // TODO: set but not read
        auto  f32rem = F.getParent()->getOrInsertFunction("_eosio_f32_rem", AttributeList{},
                                                                    Type::getFloatTy(F.getContext()),
                                                                    Type::getFloatTy(F.getContext()),
@@ -78,6 +79,7 @@ namespace {
                                                                    Type::getFloatTy(F.getContext()),
                                                                    Type::getFloatTy(F.getContext()),
                                                                    Type::getFloatTy(F.getContext()));
+       // TODO: set but not read
        auto  f64rem = F.getParent()->getOrInsertFunction("_eosio_f64_rem", AttributeList{},
                                                                        Type::getFloatTy(F.getContext()),
                                                                        Type::getFloatTy(F.getContext()),
@@ -94,7 +96,9 @@ namespace {
                    alloca_inst->setAllocatedType(Type::getFP128Ty(F.getContext()));
                 }
              }
+             // TODO: rm else if : set but not read src_ty and dest_ty
              else if (BitCastInst* bc = dyn_cast<BitCastInst>(&*inst)) {
+
                 auto src_ty  = bc->getSrcTy();
                 auto dest_ty = bc->getDestTy();
                 /*
