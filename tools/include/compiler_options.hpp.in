@@ -430,9 +430,7 @@ static void GetCompDefaults(std::vector<std::string>& copts) {
 #ifdef CPP_COMP
       copts.emplace_back("-fno-exceptions");
       copts.emplace_back("-fno-rtti");
-      // Warming: the '-fmodules-ts' flag is deprecated and it will be removed in Clang 17
-      // use '-std=c++20' or higher to use standard C++ modules instead [-Wdeprecated-module-ts]
-      copts.emplace_back("-fmodules-ts");
+      copts.emplace_back("-std=c++20 -fmodules");
       copts.emplace_back("-D_GNU_SOURCE=1");
 #endif
       copts.emplace_back("-DBOOST_DISABLE_ASSERTS");
