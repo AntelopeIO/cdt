@@ -430,7 +430,9 @@ static void GetCompDefaults(std::vector<std::string>& copts) {
 #ifdef CPP_COMP
       copts.emplace_back("-fno-exceptions");
       copts.emplace_back("-fno-rtti");
-      copts.emplace_back("-std=c++20 -fmodules");
+      // get eosio type and fstream include errors when moving to
+      // -std=c++20 -fmodules
+      copts.emplace_back("-fmodules-ts");
       copts.emplace_back("-D_GNU_SOURCE=1");
 #endif
       copts.emplace_back("-DBOOST_DISABLE_ASSERTS");
