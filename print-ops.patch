@@ -30,6 +30,38 @@ index 03db15943..d5e7257f1 100644
        if (!eosio::cdt::environment::exec_subprogram("cdt-ld", new_opts)) {
           for (auto input : outputs) {
              llvm::sys::fs::remove(input);
+diff --git a/tools/cc/cdt-cpp.cpp.in b/tools/cc/cdt-cpp.cpp.in
+index c8d226735..69fd044f3 100644
+--- a/tools/cc/cdt-cpp.cpp.in
++++ b/tools/cc/cdt-cpp.cpp.in
+@@ -167,6 +167,12 @@ int main(int argc, const char **argv) {
+          }
+ 
+          new_opts.insert(new_opts.begin(), "-xc++");
++         // Using a range-based for loop
++         std::cout << "**** Clang-16 Options:  ";
++         for (const auto& msg : new_opts) {
++            std::cout << msg << " ";
++         }
++         std::cout << std::endl;
+ 
+          if (!eosio::cdt::environment::exec_subprogram("clang-16", new_opts, false, stdin_redirect)) {
+             if(stdin_redirect) {
+@@ -188,7 +194,13 @@ int main(int argc, const char **argv) {
+       for (auto input : outputs) {
+          new_opts.insert(new_opts.begin(), input);
+       }
+-   
++      // Using a range-based for loop
++      std::cout << "**** CDT-LD Options:  ";
++      for (const auto& msg : new_opts) {
++         std::cout << msg << " ";
++      }
++      std::cout << std::endl;
++ 
+       if (!eosio::cdt::environment::exec_subprogram("cdt-ld", new_opts)) {
+          for (auto input : outputs) {
+             llvm::sys::fs::remove(input);
 diff --git a/tools/ld/cdt-ld.cpp.in b/tools/ld/cdt-ld.cpp.in
 index 6bb649c80..2d47c326a 100644
 --- a/tools/ld/cdt-ld.cpp.in
