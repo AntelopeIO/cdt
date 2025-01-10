@@ -16,5 +16,5 @@ CONTRACT enf: public contract {
       }
 };
 
-EOSIO_DISPATCH(enf, (fixtransfer))
+// EOSIO_DISPATCH(enf, (fixtransfer))
 
