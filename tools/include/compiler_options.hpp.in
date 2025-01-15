@@ -440,20 +440,20 @@ static void GetCompDefaults(std::vector<std::string>& copts) {
       copts.emplace_back("-U__APPLE__");
       if (!fnative_opt) {
          if (llvm::sys::fs::exists(eosio::cdt::whereami::where()+"/LLVMEosioApply"+eosio_apply_suff))
-            copts.emplace_back(eosio::cdt::whereami::where()+"-fpass-plugin=/LLVMEosioApply"+eosio_apply_suff);
+            copts.emplace_back("-fpass-plugin="+eosio::cdt::whereami::where()+"/LLVMEosioApply"+eosio_apply_suff);
          else if (llvm::sys::fs::exists(eosio::cdt::whereami::where()+"/../lib/LLVMEosioApply"+eosio_apply_suff))
-            copts.emplace_back(eosio::cdt::whereami::where()+"-fpass-plugin=/../lib/LLVMEosioApply"+eosio_apply_suff);
+            copts.emplace_back("-fpass-plugin="+eosio::cdt::whereami::where()+"/../lib/LLVMEosioApply"+eosio_apply_suff);
       }
       if (false && fnative_opt) {
          if (llvm::sys::fs::exists(eosio::cdt::whereami::where()+"/LLVMEosioSoftfloat"+eosio_apply_suff))
-            copts.emplace_back(eosio::cdt::whereami::where()+"-fpass-plugin=/LLVMEosioSoftfloat"+eosio_apply_suff);
+            copts.emplace_back("-fpass-plugin="+eosio::cdt::whereami::where()+"/LLVMEosioSoftfloat"+eosio_apply_suff);
          else if (llvm::sys::fs::exists(eosio::cdt::whereami::where()+"/../lib/LLVMEosioSoftfloat"+eosio_apply_suff))
-            copts.emplace_back(eosio::cdt::whereami::where()+"-fpass-plugin=/../lib/LLVMEosioSoftfloat"+eosio_apply_suff);
+            copts.emplace_back("-fpass-plugin="+eosio::cdt::whereami::where()+"/../lib/LLVMEosioSoftfloat"+eosio_apply_suff);
       }
       if (llvm::sys::fs::exists(eosio::cdt::whereami::where()+"/eosio_plugin"+eosio_apply_suff))
-         copts.emplace_back("-fpass-plugin="+eosio::cdt::whereami::where()+"-fpass-plugin=/eosio_plugin"+eosio_apply_suff);
+         copts.emplace_back("-fpass-plugin="+eosio::cdt::whereami::where()+"/eosio_plugin"+eosio_apply_suff);
       else if (llvm::sys::fs::exists(eosio::cdt::whereami::where()+"/../lib/eosio_plugin"+eosio_apply_suff))
-         copts.emplace_back("-fpass-plugin="+eosio::cdt::whereami::where()+"-fpass-plugin=/../lib/eosio_plugin"+eosio_apply_suff);
+         copts.emplace_back("-fpass-plugin="+eosio::cdt::whereami::where()+"/../lib/eosio_plugin"+eosio_apply_suff);
    }
 }
 
