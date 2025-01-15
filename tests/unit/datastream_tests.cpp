@@ -351,6 +351,13 @@ EOSIO_TEST_BEGIN(datastream_stream_test)
    ds.seekp(0);
    ds >> o;
    CHECK_EQUAL( co, o )
+   // test upacking an empty std::optional to a non-empty works
+   static const optional<char> co1{};  // empty
+   ds.seekp(0);
+   ds << co1;
+   ds.seekp(0);
+   ds >> o;  // o had value
+   CHECK_EQUAL( co1, o )
 
    // ---------
    // std::pair

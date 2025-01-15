@@ -456,7 +456,7 @@ inline datastream<Stream>& operator>>(datastream<Stream>& ds, std::optional<T>& 
      T val;
      ds >> val;
      opt = val;
-  }
+  } else { opt.reset(); }
   return ds;
 }
 
