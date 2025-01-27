@@ -59,8 +59,10 @@ void generate(const std::vector<std::string>& base_options, std::string input, s
    for (size_t i=0; i < size; i++)
       new_argv[i] = options[i].c_str();
 
-   CommonOptionsParser opts( size, new_argv, EosioCompilerToolCategory, 0 );
-   ClangTool ctool(opts.getCompilations(), opts.getSourcePathList());
+   auto opts = CommonOptionsParser::create( size, new_argv, EosioCompilerToolCategory );
+   if (opts.takeError())
+      throw std::runtime_error("CommonOptionsParser error");
+   ClangTool ctool(opts->getCompilations(), opts->getSourcePathList());
 
    abigen::get().set_contract_name(contract_name);
    abigen::get().set_resource_dirs(resource_paths);
@@ -111,7 +113,7 @@ int main(int argc, const char **argv) {
    // fix to show version info without having to have any other arguments
    for (int i=0; i < argc; i++) {
      if (argv[i] == std::string("-v")) {
-       eosio::cdt::environment::exec_subprogram("clang-9", {"-v"});
+       eosio::cdt::environment::exec_subprogram("clang-16", {"-v"});
        return 0;
      }
    }
@@ -138,7 +140,7 @@ int main(int argc, const char **argv) {
 
             auto src = SmallString<64>(input);
             llvm::sys::path::remove_filename(src);
-            std::string source_path = src.str().empty() ? "." : src.str();
+            std::string source_path = src.empty() ? "." : src.str().str();
             new_opts.insert(new_opts.begin(), "-I" + source_path);
 
             if (!opts.link) {
@@ -166,7 +168,7 @@ int main(int argc, const char **argv) {
 
          new_opts.insert(new_opts.begin(), "-xc++");
 
-         if (!eosio::cdt::environment::exec_subprogram("clang-9", new_opts, false, stdin_redirect)) {
+         if (!eosio::cdt::environment::exec_subprogram("clang-16", new_opts, false, stdin_redirect)) {
             if(stdin_redirect) {
                llvm::sys::fs::remove(*stdin_redirect);
             }

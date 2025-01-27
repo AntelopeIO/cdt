@@ -1,0 +1,46 @@
+### set targets
+# passing as arguments to cmake doesn't work with current build setup
+# when passing as argument LLVM tries to build WebAssembly target that doesn't exist
+# this happens as LLVM is looking for WebAssembly in the wrong step
+function(set_llvm_targets)
+  if(EXISTS ${LLVM_DEST}/llvm/CMakeLists.txt)
+    file(READ ${LLVM_DEST}/llvm/CMakeLists.txt ROOT_LLVM_CMAKE_CONTENTS)
+    # validate strings we want to replace exist
+    string(FIND "${ROOT_LLVM_CMAKE_CONTENTS}"
+           "set(LLVM_TARGETS_TO_BUILD \"all\""
+           IDX_LLVM_BUILD_TARGETS)
+    string(FIND "${ROOT_LLVM_CMAKE_CONTENTS}"
+           "set(LLVM_EXPERIMENTAL_TARGETS_TO_BUILD \"\""
+           IDX_LLVM_EXP_TARGETS)
+
+    # debug purposes check if replacements already made
+    string(FIND "${ROOT_LLVM_CMAKE_CONTENTS}"
+           "set(LLVM_TARGETS_TO_BUILD \"X86\""
+           IDX_RESOLVED_LLVM_BUILD_TARGETS)
+    string(FIND "${ROOT_LLVM_CMAKE_CONTENTS}"
+           "set(LLVM_EXPERIMENTAL_TARGETS_TO_BUILD \"WebAssembly\""
+           IDX_RESOLVED_LLVM_EXP_TARGETS)
+
+    # only replace if strings match and replace needed
+    if(IDX_LLVM_BUILD_TARGETS GREATER 0 AND IDX_LLVM_EXP_TARGETS GREATER 0)
+      string(REPLACE
+           "set(LLVM_TARGETS_TO_BUILD \"all\""
+           "set(LLVM_TARGETS_TO_BUILD \"X86\""
+           NEW_ROOT_LLVM_CMAKE_CONTENTS
+           "${ROOT_LLVM_CMAKE_CONTENTS}")
+      string(REPLACE
+           "set(LLVM_EXPERIMENTAL_TARGETS_TO_BUILD \"\""
+           "set(LLVM_EXPERIMENTAL_TARGETS_TO_BUILD \"WebAssembly\""
+           NEW_ROOT_LLVM_CMAKE_CONTENTS
+           "${NEW_ROOT_LLVM_CMAKE_CONTENTS}")
+      file(WRITE ${LLVM_DEST}/llvm/CMakeLists.txt "${NEW_ROOT_LLVM_CMAKE_CONTENTS}")
+    else()
+      # cannot find strings to replace, already replaced
+      if(NOT IDX_RESOLVED_LLVM_BUILD_TARGETS GREATER 0 AND NOT IDX_RESOLVED_LLVM_EXP_TARGETS GREATER 0)
+        message(FATAL_ERROR,"Cannot find EXPERIMENTAL Targets in ${LLVM_DEST}/llvm/CMakeLists.txt")
+      endif()
+    endif()
+  else()
+    message(FATAL_ERROR,"Need to set targets, yet file does not exist ${LLVM_DEST}/llvm/CMakeLists.txt")
+  endif()
+endfunction()

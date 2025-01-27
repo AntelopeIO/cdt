@@ -65,6 +65,11 @@ namespace bluegrass { namespace meta {
       template <typename T>
       constexpr bool pass_type() { return true; }
 
+      template <typename>
+      constexpr bool is_callable_impl(...) {
+        return false;
+      }
+
       template <typename T>
       struct wrapper_t {
         using type = T;

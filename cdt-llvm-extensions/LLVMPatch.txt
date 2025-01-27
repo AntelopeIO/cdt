@@ -1,0 +1,118 @@
+cmake_minimum_required(VERSION 3.21)
+
+set(EXTENSION_SOURCE ${CMAKE_SOURCE_DIR}/cdt-llvm-extensions)
+set(LLVM_DEST ${CMAKE_SOURCE_DIR}/llvm)
+
+# Get LLVM Major Version
+# Function to extract version from a line
+function(parse_version_line file_path version_string output_var)
+  if(EXISTS ${file_path})
+    file(READ ${file_path} input_text)
+    string(REGEX MATCH "set\\(${version_string} ([0-9]+)\\)" match "${input_text}")
+    if(match)
+        set(${output_var} "${CMAKE_MATCH_1}" PARENT_SCOPE)
+    else()
+        message(FATAL_ERROR "Failed to parse LLVM major version")
+    endif()
+  endif()
+endfunction()
+
+# function call to get version number
+parse_version_line(${LLVM_DEST}/llvm/CMakeLists.txt LLVM_VERSION_MAJOR PARSE_LLVM_MAJOR_VERSION)
+
+if(NOT PARSE_LLVM_MAJOR_VERSION EQUAL 16)
+  message(FATAL_ERROR, "Only Supporting LLVM version 16, detected version ${PARSE_LLVM_MAJOR_VERSION} exiting")
+endif()
+
+message("-- Starting LLVM patches (LLVMPatch.txt)")
+
+### Function to set experimental targets
+include(${EXTENSION_SOURCE}/SetLLVMTargets.txt)
+set_llvm_targets()
+
+### Patches CLANG
+# adds definition and declaration for Eosio Types 
+# support for C and C++
+file(COPY_FILE ${EXTENSION_SOURCE}/clang/include/clang/AST/DeclCXX.h ${LLVM_DEST}/clang/include/clang/AST/DeclCXX.h)
+file(COPY_FILE ${EXTENSION_SOURCE}/clang/include/clang/AST/Decl.h ${LLVM_DEST}/clang/include/clang/AST/Decl.h)
+file(COPY_FILE ${EXTENSION_SOURCE}/clang/include/clang/Basic/AttrDocs.td ${LLVM_DEST}/clang/include/clang/Basic/AttrDocs.td)
+file(COPY_FILE ${EXTENSION_SOURCE}/clang/include/clang/Basic/Attr.td ${LLVM_DEST}/clang/include/clang/Basic/Attr.td)
+file(COPY_FILE ${EXTENSION_SOURCE}/clang/lib/AST/Decl.cpp ${LLVM_DEST}/clang/lib/AST/Decl.cpp)
+file(COPY_FILE ${EXTENSION_SOURCE}/clang/lib/Basic/Targets/WebAssembly.h ${LLVM_DEST}/clang/lib/Basic/Targets/WebAssembly.h)
+
+### Patches CLANG
+# implements decl-related attribute processing
+# coordinates the per-module state used while generating code
+# top level handling of macro expansion for the preprocessor 
+file(COPY_FILE ${EXTENSION_SOURCE}/clang/lib/CodeGen/CodeGenModule.cpp ${LLVM_DEST}/clang/lib/CodeGen/CodeGenModule.cpp)
+file(COPY_FILE ${EXTENSION_SOURCE}/clang/lib/Lex/PPMacroExpansion.cpp ${LLVM_DEST}/clang/lib/Lex/PPMacroExpansion.cpp)
+file(COPY_FILE ${EXTENSION_SOURCE}/clang/lib/Sema/SemaDeclAttr.cpp ${LLVM_DEST}/clang/lib/Sema/SemaDeclAttr.cpp)
+
+### Patches WASM
+# creates, allocates, and populates structures needed to generate WASM
+# includes eosioABI eosioNotify eosioACtions
+file(COPY_FILE ${EXTENSION_SOURCE}/lld/wasm/InputFiles.cpp ${LLVM_DEST}/lld/wasm/InputFiles.cpp)
+file(COPY_FILE ${EXTENSION_SOURCE}/lld/wasm/InputFiles.h ${LLVM_DEST}/lld/wasm/InputFiles.h)
+
+### Patches LLVM
+# defines all attributes for LLVM
+# defines WASM Object
+# entry point to LTO (link time optimization)
+file(COPY_FILE ${EXTENSION_SOURCE}/llvm/include/llvm/IR/Attributes.td ${LLVM_DEST}/llvm/include/llvm/IR/Attributes.td)
+file(COPY_FILE ${EXTENSION_SOURCE}/llvm/include/llvm/LTO/LTO.h ${LLVM_DEST}/llvm/include/llvm/LTO/LTO.h)
+file(COPY_FILE ${EXTENSION_SOURCE}/llvm/include/llvm/Object/Wasm.h ${LLVM_DEST}/llvm/include/llvm/Object/Wasm.h)
+
+### Patches WebAssembly
+# WebAssembly Object 
+# WebAssembly LLVM assembly writer
+file(COPY_FILE ${EXTENSION_SOURCE}/llvm/lib/Object/WasmObjectFile.cpp ${LLVM_DEST}/llvm/lib/Object/WasmObjectFile.cpp)
+file(COPY_FILE ${EXTENSION_SOURCE}/llvm/lib/Target/WebAssembly/WebAssemblyAsmPrinter.cpp ${LLVM_DEST}/llvm/lib/Target/WebAssembly/WebAssemblyAsmPrinter.cpp)
+
+### Add Customer Eosio Parsers into LLVM source
+# adds directories to Transforms cmake
+# registered as added step to parsing
+# Impliment as PassManger to upgrade to LLVM 17+
+if(EXISTS ${LLVM_DEST}/llvm/lib/Transforms)
+  file(COPY ${EXTENSION_SOURCE}/llvm/lib/Transforms/EosioApply DESTINATION ${LLVM_DEST}/llvm/lib/Transforms )
+  file(COPY ${EXTENSION_SOURCE}/llvm/lib/Transforms/EosioSoftfloat DESTINATION ${LLVM_DEST}/llvm/lib/Transforms )
+  # Add new targets to cmake if needed
+  set(LLVM_LIB_TRANSFORMS_CMAKE ${LLVM_DEST}/llvm/lib/Transforms/CMakeLists.txt)
+  file(READ ${LLVM_LIB_TRANSFORMS_CMAKE} LLVM_LIB_CMAKE_CONTENTS)
+  if(NOT LLVM_LIB_CMAKE_CONTENTS MATCHES "EosioApply")
+    file(APPEND ${LLVM_LIB_TRANSFORMS_CMAKE} "add_subdirectory(EosioApply)\n")
+  endif()
+  if(NOT LLVM_LIB_CMAKE_CONTENTS MATCHES "EosioSoftfloat")
+    file(APPEND ${LLVM_LIB_TRANSFORMS_CMAKE} "add_subdirectory(EosioSoftfloat)\n")
+  endif()
+else()
+  message(FATAL_ERROR "Cannot find LLVM source please load git submodules and try again")
+endif()
+
+### Modifies AddLLD cmake targeting cdt tooling
+# must be a better way to inlcude these 
+# - read in AddLLD cmake
+# - add new targets
+# - then write back file
+if (EXISTS ${LLVM_DEST}/lld/cmake/modules/AddLLD.cmake) 
+  file(READ ${LLVM_DEST}/lld/cmake/modules/AddLLD.cmake INPUT_ADDLLD_CMAKE)
+  string(FIND "${INPUT_ADDLLD_CMAKE}" 
+         "set_target_properties(\${name} PROPERTIES FOLDER \"lld libraries\")"
+         IDX_ADDLLD_TARGET_PROPS)
+  string(FIND ${INPUT_ADDLLD_CMAKE} 
+         "\${CDT_TOOLS_SOURCE_DIR}/jsoncons/include"
+         IDX_ADDLLD_TOOLS_INCLUDE)
+  # Found target properties did not found tools/jsoncons/include 
+  # Only add if target string exists 
+  # AND do not add if tools/jsonccons/include already exists
+  if(IDX_ADDLLD_TARGET_PROPS GREATER 0 AND IDX_ADDLLD_TOOLS_INCLUDE LESS 0)
+    # Two space nesting 
+    # not sure about relative paths
+    string(REPLACE 
+         "  set_target_properties(\${name} PROPERTIES FOLDER \"lld libraries\")"
+         "  set_target_properties(\${name} PROPERTIES FOLDER \"lld libraries\")\n  set(CDT_TOOLS_SOURCE_DIR \"${CMAKE_SOURCE_DIR}/tools\")\n  target_compile_options(\${name} PUBLIC -fexceptions -Wno-reorder -Wno-sign-compare -Wno-unused-local-typedefs -fno-omit-frame-pointer)\n  target_include_directories(\${name} PUBLIC \${CDT_TOOLS_SOURCE_DIR}/jsoncons/include)\n  target_include_directories(\${name} PUBLIC \${CDT_TOOLS_SOURCE_DIR}/include)\n"
+         OUTPUT_ADDLLD_CMAKE
+         "${INPUT_ADDLLD_CMAKE}")
+    file(WRITE ${LLVM_DEST}/lld/cmake/modules/AddLLD.cmake "${OUTPUT_ADDLLD_CMAKE}")
+  endif()
+endif()
+message("-- Completed LLVM patches")
