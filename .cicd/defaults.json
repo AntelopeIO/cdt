@@ -1,6 +1,6 @@
 {
     "antelope-spring-dev":{
-       "target":"main",
+       "target":"sync_call",
        "prerelease":false
     }
  }
