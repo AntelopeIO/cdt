@@ -8,9 +8,6 @@
 #include "../../core/eosio/serialize.hpp"
 #include "../../core/eosio/datastream.hpp"
 #include "../../core/eosio/name.hpp"
-#include "../../core/eosio/fixed_bytes.hpp"
-#include "../../core/eosio/ignore.hpp"
-#include "../../core/eosio/time.hpp"
 
 namespace eosio {
 
@@ -58,17 +55,17 @@ namespace eosio {
       /**
        *  Name of the account the call is intended for
        */
-      name               receiver;
+      const name               receiver;
 
       /**
        *  flags indicating call properties, like read only request
        */
-      uint64_t           flags;
+      const uint64_t           flags;
 
       /**
        *  Payload data
        */
-      std::vector<char>  data;
+      const std::vector<char>  data;
 
       /**
        *  Default Constructor
