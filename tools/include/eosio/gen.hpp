@@ -896,11 +896,7 @@ struct generation_utils {
          "send_deferred",
          "send_inline",
          "send_context_free_inline",
-         "set_finalizers",
-         "call",
-         "get_call_return_value",
-         "get_call_data",
-         "set_call_return_value"
+         "set_finalizers"
       };
 
       return write_host_funcs.count(func_decl->getNameInfo().getAsString()) >= 1;
