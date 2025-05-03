@@ -5,16 +5,29 @@ class [[eosio::contract]] call_tests : public eosio::contract{
 public:
    using contract::contract;
 
+   // sync call is not supported, no_op_if_receiver_no_support_sync_call is set
    [[eosio::action]]
    void basictest() {
       std::vector<char> data{};
-      auto rc = eosio::call("calltests"_n, 0, data)();
-      // For now, because call dispatcher has not been implemented yet, call should return -1
+
+      // For now, because sync_call entry point has not been implemented yet and
+      // no_op_if_receiver_no_support_sync_call is set to true, call should return -1
+      auto rc = eosio::call("calltests"_n, data, false /* read_only */, true /* no_op_if_receiver_no_support_sync_call */)();
       eosio::check(rc == -1, "call did not return -1");
 
+      // call was not executed. return value size should be 0
       std::vector<char> value(10);
       auto size = eosio::get_call_return_value(value.data(), value.size());
-      // call was not executed. return value size should be 0
       eosio::check(size == 0, "return value size is not 0");
+   }
+
+   // sync call not supported, no_op_if_receiver_no_support_sync_call not set
+   [[eosio::action]]
+   void noopnotset() {
+      std::vector<char> data{};
+
+      // For now, because sync_call entry point has not been implemented yet and
+      // no_op_if_receiver_no_support_sync_call is not set, call should fail
+      eosio::call("calltests"_n, data)();
    }
 };
