@@ -68,21 +68,16 @@ namespace eosio {
       const std::vector<char>  data;
 
       /**
-       *  Default Constructor
-       */
-      call() = default;
-
-      /**
        * Construct a new call object with receiver, name, and payload data
        *
        * @tparam T  - Type of call data, must be serializable by `pack(...)`
        * @param receiver -  The name of the account this call is intended for
        * @param flags - The flags
-       * @param value - The call data that will be serialized via pack into data
+       * @param payload - The call data that will be serialized via pack into data
        */
       template<typename T>
-      call( struct name receiver, uint64_t flags, T&& value )
-      :receiver(receiver), flags(flags), data(pack(std::forward<T>(value))) {}
+      call( struct name receiver, uint64_t flags, T&& payload )
+      :receiver(receiver), flags(flags), data(pack(std::forward<T>(payload))) {}
 
       /// @cond INTERNAL
       EOSLIB_SERIALIZE( call, (receiver)(flags)(data) )
