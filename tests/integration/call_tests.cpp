@@ -23,15 +23,15 @@ BOOST_FIXTURE_TEST_CASE(basic_test, tester) try {
 
     produce_block();
 
-    // sync call entry point is not implemented yet and no_op_if_receiver_no_support_sync_call
+    // sync call entry point is not implemented yet and no_op_if_receiver_not_support_sync_call
     // is set, so the call is just a no-op
     BOOST_REQUIRE_NO_THROW(push_action("calltests"_n, "basictest"_n, "calltests"_n, {}));
 
-    // sync call entry point is not implemented yet and no_op_if_receiver_no_support_sync_call
+    // sync call entry point is not implemented yet and no_op_if_receiver_not_support_sync_call
     // is NOT set, so the call is aborted
     BOOST_CHECK_EXCEPTION(push_action("calltests"_n, "noopnotset"_n, "calltests"_n, {}),
                           eosio_assert_message_exception,
-                          fc_exception_message_contains("receiver does not support sync call but no_op_if_receiver_no_support_sync_call flag is not set"));
+                          fc_exception_message_contains("receiver does not support sync call but no_op_if_receiver_not_support_sync_call flag is not set"));
 } FC_LOG_AND_RETHROW()
 
 BOOST_AUTO_TEST_SUITE_END()

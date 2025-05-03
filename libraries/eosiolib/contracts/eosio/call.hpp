@@ -64,10 +64,10 @@ namespace eosio {
 
       /**
        *  if the receiver contract does not have sync_call entry point or its signature
-       *  is invalid, when no_op_if_receiver_no_support_sync_call is set to true,
+       *  is invalid, when no_op_if_receiver_not_support_sync_call is set to true,
        *  the sync call is no op, otherwise the call is aborted and an exception is raised.
        */
-      const bool               no_op_if_receiver_no_support_sync_call = false;
+      const bool               no_op_if_receiver_not_support_sync_call = false;
 
       /**
        *  Payload data
@@ -86,11 +86,11 @@ namespace eosio {
       call( struct name receiver, T&& payload, bool read_only = false, bool no_op = false )
       : receiver(receiver)
       , read_only(read_only)
-      , no_op_if_receiver_no_support_sync_call(no_op)
+      , no_op_if_receiver_not_support_sync_call(no_op)
       , data(pack(std::forward<T>(payload))) {}
 
       /// @cond INTERNAL
-      EOSLIB_SERIALIZE( call, (receiver)(read_only)(no_op_if_receiver_no_support_sync_call)(data) )
+      EOSLIB_SERIALIZE( call, (receiver)(read_only)(no_op_if_receiver_not_support_sync_call)(data) )
       /// @endcond
 
       /**
@@ -101,7 +101,7 @@ namespace eosio {
          auto retval =  internal_use_do_not_use::call(receiver.value, flags, data.data(), data.size());
 
          if (retval == -1) {  // sync call is not supported by the receiver contract
-            check(no_op_if_receiver_no_support_sync_call, "receiver does not support sync call but no_op_if_receiver_no_support_sync_call flag is not set");
+            check(no_op_if_receiver_not_support_sync_call, "receiver does not support sync call but no_op_if_receiver_not_support_sync_call flag is not set");
          }
          return retval;
       }
