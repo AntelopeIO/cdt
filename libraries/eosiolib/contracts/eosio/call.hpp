@@ -55,17 +55,24 @@ namespace eosio {
       /**
        *  Name of the account the call is intended for
        */
-      const name               receiver;
+      const name               receiver{};
 
       /**
-       *  flags indicating call properties, like read only request
+       *  indicating if the call is read only or not
        */
-      const uint64_t           flags;
+      const bool               read_only = false;
+
+      /**
+       *  if the receiver contract does not have sync_call entry point or its signature
+       *  is invalid, when no_op_if_receiver_no_support_sync_call is set to true,
+       *  the sync call is no op, otherwise the call is aborted and an exception is raised.
+       */
+      const bool               no_op_if_receiver_no_support_sync_call = false;
 
       /**
        *  Payload data
        */
-      const std::vector<char>  data;
+      const std::vector<char>  data{};
 
       /**
        * Construct a new call object with receiver, name, and payload data
@@ -76,18 +83,27 @@ namespace eosio {
        * @param payload - The call data that will be serialized via pack into data
        */
       template<typename T>
-      call( struct name receiver, uint64_t flags, T&& payload )
-      :receiver(receiver), flags(flags), data(pack(std::forward<T>(payload))) {}
+      call( struct name receiver, T&& payload, bool read_only = false, bool no_op = false )
+      : receiver(receiver)
+      , read_only(read_only)
+      , no_op_if_receiver_no_support_sync_call(no_op)
+      , data(pack(std::forward<T>(payload))) {}
 
       /// @cond INTERNAL
-      EOSLIB_SERIALIZE( call, (receiver)(flags)(data) )
+      EOSLIB_SERIALIZE( call, (receiver)(read_only)(no_op_if_receiver_no_support_sync_call)(data) )
       /// @endcond
 
       /**
        * Make a call using the functor operator
        */
       int64_t operator()() const {
-         return internal_use_do_not_use::call(receiver.value, flags, data.data(), data.size());
+         uint64_t flags = read_only ? 0x01 : 0x00; // last bit indicating read only
+         auto retval =  internal_use_do_not_use::call(receiver.value, flags, data.data(), data.size());
+
+         if (retval == -1) {  // sync call is not supported by the receiver contract
+            check(no_op_if_receiver_no_support_sync_call, "receiver does not support sync call but no_op_if_receiver_no_support_sync_call flag is not set");
+         }
+         return retval;
       }
    };
 
