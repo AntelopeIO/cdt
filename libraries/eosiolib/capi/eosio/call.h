@@ -20,7 +20,7 @@ extern "C" {
  *                 are reserved to be 0
  *  @param data - the data of the sync call, which may include function name, arguments, and other information
  *  @return -1 if the receiver contract does not have sync call entry point or the entry point's signature is invalid, otherwise
- *  @return the number of bytes of the return value of the call. If the function is `void`, rturn `0`
+ *  @return the number of bytes of the return value of the call. If the function is `void`, return `0`
  *
  */
 __attribute__((eosio_wasm_import))
