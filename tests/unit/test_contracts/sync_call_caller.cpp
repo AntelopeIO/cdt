@@ -29,4 +29,10 @@ public:
       eosio::check(actual_size == expected_size, "actual_size not equal to expected_size");
       eosio::check(eosio::unpack<uint32_t>(return_value) == 5u, "return value not 5");  // getback returns back the same value of parameter
    }
+
+   [[eosio::action]]
+   void voidfunctest() {
+      auto expected_size = eosio::call("callee"_n, "voidfunc"_n)();
+      eosio::check(expected_size == 0, "call did not return 0"); // void function. return value size should be 0
+   }
 };

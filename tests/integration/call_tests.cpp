@@ -54,6 +54,27 @@ BOOST_AUTO_TEST_CASE(param_basic_test) { try {
    BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "paramtest"_n, "caller"_n, {}));
 } FC_LOG_AND_RETHROW() }
 
+// Verify a sync call to a void function works properly.
+BOOST_AUTO_TEST_CASE(void_func_test) { try {
+   call_tester t({
+      {"caller"_n, contracts::caller_wasm(), contracts::caller_abi().data()},
+      {"callee"_n, contracts::callee_wasm(), contracts::callee_abi().data()}
+   });
+
+   auto  trx_trace = t.push_action("caller"_n, "voidfunctest"_n, "caller"_n, {});
+   auto& atrace    = trx_trace->action_traces;
+
+   auto& call_traces  = atrace[0].call_traces;
+   BOOST_REQUIRE_EQUAL(call_traces.size(), 1u);
+
+   // Verify the print from the void function is correct.
+   // The test contract checks the return value size is 0.
+   auto& call_trace = call_traces[0];
+   BOOST_REQUIRE_EQUAL(call_trace.call_ordinal, 1u);
+   BOOST_REQUIRE_EQUAL(call_trace.sender_ordinal, 0u);
+   BOOST_REQUIRE_EQUAL(call_trace.console, "I am a void function");
+} FC_LOG_AND_RETHROW() }
+
 BOOST_AUTO_TEST_CASE(sync_call_not_supported_test) { try {
    call_tester t({
       {"caller"_n, contracts::not_supported_wasm(), contracts::not_supported_abi().data()}
