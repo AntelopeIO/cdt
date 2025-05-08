@@ -12,7 +12,7 @@ public:
 
    [[eosio::call]]
    uint32_t getback(uint32_t in) {
-      return 20;
+      return in;
    }
 
    [[eosio::action]]
