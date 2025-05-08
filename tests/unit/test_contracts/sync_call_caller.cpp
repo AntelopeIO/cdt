@@ -47,4 +47,9 @@ public:
       auto expected_size = eosio::call("callee"_n, "voidfunc"_n)();
       eosio::check(expected_size == 0, "call did not return 0"); // void function. return value size should be 0
    }
+
+   [[eosio::action]]
+   void unknwnfuntst() {
+      eosio::call("callee"_n, "unknwnfunc"_n)(); // unknwnfunc will never be in "callee"_n contract
+   }
 };

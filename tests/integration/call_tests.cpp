@@ -125,4 +125,16 @@ BOOST_AUTO_TEST_CASE(sync_call_not_supported_test) { try {
                          fc_exception_message_contains("receiver does not support sync call but no_op_if_receiver_not_support_sync_call flag is not set"));
 } FC_LOG_AND_RETHROW() }
 
+// Verify calling an unknown function will result in an eosio_assert
+BOOST_AUTO_TEST_CASE(unknown_function_test) { try {
+   call_tester t({
+      {"caller"_n, contracts::caller_wasm(), contracts::caller_abi().data()},
+      {"callee"_n, contracts::callee_wasm(), contracts::callee_abi().data()}
+   });
+
+   BOOST_CHECK_EXCEPTION(t.push_action("caller"_n, "unknwnfuntst"_n, "caller"_n, {}),
+                         eosio_assert_code_exception,
+                         eosio_assert_code_is(8000000000000000003));
+} FC_LOG_AND_RETHROW() }
+
 BOOST_AUTO_TEST_SUITE_END()
