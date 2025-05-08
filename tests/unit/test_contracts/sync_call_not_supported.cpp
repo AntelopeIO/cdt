@@ -31,4 +31,9 @@ public:
       // no_op_if_receiver_no_support_sync_call is not set, call should fail
       eosio::call("caller"_n, data)();
    }
+
+   [[eosio::call]]
+   uint32_t callee() {
+      return 0;
+   }
 };
