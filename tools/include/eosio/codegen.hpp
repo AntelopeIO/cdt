@@ -252,6 +252,7 @@ namespace eosio { namespace cdt {
                ss << "::get_call_data(buff, sz);\n";
                ss << "}\n";
                ss << "eosio::datastream<const char*> ds{(char*)buff, sz};\n";
+               ss << "unsigned long long func_name; ds >> func_name;\n"; // skip called function name
                int i=0;
                for (auto param : decl->parameters()) {
                   clang::LangOptions lang_opts;
