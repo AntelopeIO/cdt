@@ -287,6 +287,26 @@ namespace eosio { namespace cdt {
             }
          }
 
+         // Generate get_sync_call_func_name which returns called function name
+         static void create_get_sync_call_func_name(std::stringstream& ss) {
+            ss << "\n\n#include <eosio/datastream.hpp>\n";
+            ss << "#include <eosio/name.hpp>\n";
+            ss << "extern \"C\" {\n";
+            ss << "__attribute__((eosio_wasm_import)) uint32_t get_call_data(void*, uint32_t);\n";
+            // Use unsigned long long instead of eosio::name to avoid linker warning of
+            // "C-linkage specified, but returns user-defined type 'eosio::name' which
+            // is incompatible with C"
+            ss << "__attribute__((weak)) unsigned long long  __eos_get_sync_call_func_name_() {\n";
+            ss << "void* buff = nullptr;\n";
+            ss << "uint32_t sz = sizeof(unsigned long long);\n";
+            ss << "buff = alloca(sz);\n";
+            ss << "::get_call_data(buff, sz);\n";
+            ss << "eosio::datastream<const char*> ds{(char*)buff, sz};\n";
+            ss << "unsigned long long func_name; ds >> func_name;\n";
+            ss << "return func_name;\n";
+            ss << "}}\n";
+         }
+
          virtual bool VisitCXXMethodDecl(CXXMethodDecl* decl) {
             std::string name = decl->getNameAsString();
             static std::set<std::string> _action_set; //used for validations
@@ -346,6 +366,11 @@ namespace eosio { namespace cdt {
                validate_name(name, [&](auto s) {
                   CDT_ERROR("codegen_error", decl->getLocation(), std::string("call name (")+s+") is not a valid eosio name");
                });
+
+               // Genereate get_sync_call_func_name only once
+               if (_call_set.empty()) {
+                  create_get_sync_call_func_name(ss);
+               }
 
                if (!_call_set.count(name))
                   _call_set.insert(name);
