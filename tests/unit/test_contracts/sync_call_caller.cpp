@@ -31,6 +31,18 @@ public:
    }
 
    [[eosio::action]]
+   void mulparamtest() {
+      auto expected_size = eosio::call("callee"_n, std::make_tuple("sum"_n, 10, 20, 30))();
+      eosio::check(expected_size >= 0, "call did not return a positive value");
+
+      std::vector<char> return_value;
+      return_value.resize(expected_size);
+      auto actual_size = eosio::get_call_return_value(return_value.data(), return_value.size());
+      eosio::check(actual_size == expected_size, "actual_size not equal to expected_size");
+      eosio::check(eosio::unpack<uint32_t>(return_value) == 60u, "return value not 60");  // sum returns the sum of the 3 arguments
+   }
+
+   [[eosio::action]]
    void voidfunctest() {
       auto expected_size = eosio::call("callee"_n, "voidfunc"_n)();
       eosio::check(expected_size == 0, "call did not return 0"); // void function. return value size should be 0

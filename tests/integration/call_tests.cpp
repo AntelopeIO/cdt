@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE(return_value_test) { try {
    BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "retvaltest"_n, "caller"_n, {}));
 } FC_LOG_AND_RETHROW() }
 
-// Verify a sync call passes in a parameter and returns it back correctly
+// Verify one parameter passing works correctly
 BOOST_AUTO_TEST_CASE(param_basic_test) { try {
    call_tester t({
       {"caller"_n, contracts::caller_wasm(), contracts::caller_abi().data()},
@@ -52,6 +52,16 @@ BOOST_AUTO_TEST_CASE(param_basic_test) { try {
    });
 
    BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "paramtest"_n, "caller"_n, {}));
+} FC_LOG_AND_RETHROW() }
+
+// Verify multiple parameters passing works correctly
+BOOST_AUTO_TEST_CASE(multiple_params_test) { try {
+   call_tester t({
+      {"caller"_n, contracts::caller_wasm(), contracts::caller_abi().data()},
+      {"callee"_n, contracts::callee_wasm(), contracts::callee_abi().data()}
+   });
+
+   BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "mulparamtest"_n, "caller"_n, {}));
 } FC_LOG_AND_RETHROW() }
 
 // Verify a sync call to a void function works properly.
