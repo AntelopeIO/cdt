@@ -245,12 +245,7 @@ namespace eosio { namespace cdt {
                ss << call_name;
                ss << ":";
                ss << func_name << nm;
-               ss << "\"))) void " << func_name << nm << "(unsigned long long s, unsigned long long r, size_t sz) {\n"; // sync_call entry function calls this dispatcher with arguments `sender`, `receiver`, and `data_size`
-               ss << "void* buff = nullptr;\n";
-               ss << "if (sz > 0) {\n";
-               ss << "buff = sz >= " << max_stack_size << " ? malloc(sz) : alloca(sz);\n";
-               ss << "::get_call_data(buff, sz);\n";
-               ss << "}\n";
+               ss << "\"))) void " << func_name << nm << "(unsigned long long s, unsigned long long r, size_t sz, void* buff) {\n"; // sync_call entry function calls this dispatcher with arguments `sender`, `receiver`, and `data_size`
                ss << "eosio::datastream<const char*> ds{(char*)buff, sz};\n";
                ss << "unsigned long long func_name; ds >> func_name;\n"; // skip called function name
                int i=0;
@@ -293,18 +288,23 @@ namespace eosio { namespace cdt {
             ss << "\n\n#include <eosio/datastream.hpp>\n";
             ss << "#include <eosio/name.hpp>\n";
             ss << "extern \"C\" {\n";
-            ss << "__attribute__((eosio_wasm_import)) uint32_t get_call_data(void*, uint32_t);\n";
-            // Use unsigned long long instead of eosio::name to avoid linker warning of
-            // "C-linkage specified, but returns user-defined type 'eosio::name' which
-            // is incompatible with C"
-            ss << "__attribute__((weak)) unsigned long long  __eos_get_sync_call_func_name_() {\n";
-            ss << "void* buff = nullptr;\n";
-            ss << "uint32_t sz = sizeof(unsigned long long);\n";
-            ss << "buff = alloca(sz);\n";
-            ss << "::get_call_data(buff, sz);\n";
-            ss << "eosio::datastream<const char*> ds{(char*)buff, sz};\n";
+            ss << "__attribute__((weak)) unsigned long long  __eos_get_sync_call_func_name_(void* data) {\n";
+            ss << "eosio::datastream<const char*> ds{(char*)data, sizeof(unsigned long long)};\n";
             ss << "unsigned long long func_name; ds >> func_name;\n";
             ss << "return func_name;\n";
+            ss << "}}\n";
+         }
+
+         // Generate get_sync_call_data which returns call data
+         static void create_get_sync_call_data(std::stringstream& ss) {
+            ss << "\n\n#include <eosio/datastream.hpp>\n";
+            ss << "#include <eosio/name.hpp>\n";
+            ss << "extern \"C\" {\n";
+            ss << "__attribute__((eosio_wasm_import)) uint32_t get_call_data(void*, uint32_t);\n";
+            ss << "__attribute__((weak)) void* __eos_get_sync_call_data_(unsigned long size) {\n";
+            ss << "void* data = malloc(size);\n";
+            ss << "::get_call_data(data, size);\n";
+            ss << "return data;\n";
             ss << "}}\n";
          }
 
@@ -368,8 +368,9 @@ namespace eosio { namespace cdt {
                   CDT_ERROR("codegen_error", decl->getLocation(), std::string("call name (")+s+") is not a valid eosio name");
                });
 
-               // Genereate get_sync_call_func_name only once
+               // Genereate create_get_sync_call_data and get_sync_call_func_name only once
                if (_call_set.empty()) {
+                  create_get_sync_call_data(ss);
                   create_get_sync_call_func_name(ss);
                }
 
