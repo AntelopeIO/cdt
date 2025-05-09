@@ -106,6 +106,19 @@ BOOST_AUTO_TEST_CASE(mixed_action_call_tags_test) { try {
                                              ("in3", 3)));
 } FC_LOG_AND_RETHROW() }
 
+// Verify the receiver contract with only one sync call function works
+// (for testing the sync_call entry point dispatcher)
+BOOST_AUTO_TEST_CASE(single_function_test) { try {
+   call_tester t({
+      {"caller"_n, contracts::caller_wasm(), contracts::caller_abi().data()},
+      {"callee"_n, contracts::single_func_wasm(), contracts::single_func_abi().data()}
+   });
+
+   // The single_func_wasm contains only one function and the caller contract
+   // hooks up with it
+   BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "retvaltest"_n, "caller"_n, {}));
+} FC_LOG_AND_RETHROW() }
+
 // Verify no_op_if_receiver_not_support_sync_call flag works
 BOOST_AUTO_TEST_CASE(sync_call_not_supported_test) { try {
    call_tester t({

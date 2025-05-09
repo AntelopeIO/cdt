@@ -16,6 +16,7 @@ add_contract(test_multi_index test_multi_index multi_index_tests.cpp)
 add_contract(sync_call_caller sync_call_caller sync_call_caller.cpp)
 add_contract(sync_call_callee sync_call_callee sync_call_callee.cpp)
 add_contract(sync_call_not_supported sync_call_not_supported sync_call_not_supported.cpp)
+add_contract(sync_call_single_func sync_call_single_func sync_call_single_func.cpp)
 add_contract(capi_tests capi_tests capi/capi.c capi/action.c capi/chain.c capi/crypto.c capi/db.c capi/permission.c
                                    capi/print.c capi/privileged.c capi/system.c capi/transaction.c capi/call.c)
 
