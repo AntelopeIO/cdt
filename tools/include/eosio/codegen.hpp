@@ -243,8 +243,8 @@ namespace eosio { namespace cdt {
                ss << call_name;
                ss << ":";
                ss << func_name << nm;
-               ss << "\"))) void " << func_name << nm << "(unsigned long long s, unsigned long long r, size_t sz, void* buff) {\n"; // sync_call entry function calls this dispatcher with arguments `sender`, `receiver`, and `data_size`
-               ss << "eosio::datastream<const char*> ds{(char*)buff, sz};\n";
+               ss << "\"))) void " << func_name << nm << "(unsigned long long sender, unsigned long long receiver, size_t data_size, void* data) {\n";
+               ss << "eosio::datastream<const char*> ds{(char*)data, data_size};\n";
                ss << "unsigned long long func_name; ds >> func_name;\n"; // skip called function name
                int i=0;
                for (auto param : decl->parameters()) {
@@ -261,7 +261,7 @@ namespace eosio { namespace cdt {
                   i++;
                }
                const auto& call_function = [&]() {
-                  ss << decl->getParent()->getQualifiedNameAsString() << "{eosio::name{r},eosio::name{r},ds}." << decl->getNameAsString() << "(";
+                  ss << decl->getParent()->getQualifiedNameAsString() << "{eosio::name{receiver},eosio::name{receiver},ds}." << decl->getNameAsString() << "(";
                   for (int i=0; i < decl->parameters().size(); i++) {
                      ss << "arg" << i;
                      if (i < decl->parameters().size()-1)
