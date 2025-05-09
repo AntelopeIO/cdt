@@ -234,8 +234,6 @@ namespace eosio { namespace cdt {
                ss << "\n\n#include <eosio/datastream.hpp>\n";
                ss << "#include <eosio/name.hpp>\n";
                ss << "extern \"C\" {\n";
-               ss << "__attribute__((eosio_wasm_import))\n";
-               ss << "uint32_t get_call_data(void*, uint32_t);\n";
                const auto& return_ty = decl->getReturnType().getAsString();
                if (return_ty != "void") {
                   ss << "__attribute__((eosio_wasm_import))\n";
