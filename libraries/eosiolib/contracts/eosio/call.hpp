@@ -63,24 +63,24 @@ namespace eosio {
       /**
        *  Name of the account the call is intended for
        */
-      name               receiver{};
+      const name               receiver{};
 
       /**
        *  indicating if the call is read only or not
        */
-      execution_mode     exec_mode = execution_mode::read_write;
+      const execution_mode     exec_mode = execution_mode::read_write;
 
       /**
        *  if the receiver contract does not have sync_call entry point or its signature
        *  is invalid, when on_call_not_supported_mode is set to no_op,
        *  the sync call is no op, otherwise the call is aborted and an exception is raised.
        */
-      on_call_not_supported_mode not_supported_mode = on_call_not_supported_mode::abort;
+      const on_call_not_supported_mode not_supported_mode = on_call_not_supported_mode::abort;
 
       /**
        *  Payload data
        */
-      std::vector<char>  data{};
+      const std::vector<char>  data{};
 
       /**
        * Construct a new call object with receiver, name, and payload data
