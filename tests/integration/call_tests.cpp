@@ -122,9 +122,9 @@ BOOST_AUTO_TEST_CASE(mixed_action_call_tags_test) { try {
    // Make sure we can push an action using `sum`.
    BOOST_REQUIRE_NO_THROW(t.push_action("callee"_n, "sum"_n, "callee"_n,
                                         mvo()
-                                             ("in1", 1)
-                                             ("in2", 2)
-                                             ("in3", 3)));
+                                             ("a", 1)
+                                             ("b", 2)
+                                             ("c", 3)));
 } FC_LOG_AND_RETHROW() }
 
 // Verify the receiver contract with only one sync call function works

@@ -15,7 +15,7 @@ public:
    void voidfunc();
 
    [[eosio::action, eosio::call]]
-   uint32_t sum(uint32_t in1, uint32_t in2, uint32_t in3);
+   uint32_t sum(uint32_t a, uint32_t b, uint32_t c);
 
    using getten_func = eosio::call_wrapper<"getten"_n, &sync_call_callee::getten, uint32_t>;
    using getback_func = eosio::call_wrapper<"getback"_n, &sync_call_callee::getback, uint32_t>;

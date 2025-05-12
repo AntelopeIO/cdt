@@ -17,6 +17,6 @@ void sync_call_callee::voidfunc() {
 }
 
 [[eosio::action, eosio::call]]
-uint32_t sync_call_callee::sum(uint32_t in1, uint32_t in2, uint32_t in3) {
-   return in1 + in2 + in3;
+uint32_t sync_call_callee::sum(uint32_t a, uint32_t b, uint32_t c) {
+   return a + b + c;
 }
