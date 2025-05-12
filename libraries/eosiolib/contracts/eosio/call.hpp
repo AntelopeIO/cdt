@@ -47,6 +47,13 @@ namespace eosio {
      internal_use_do_not_use::set_call_return_value(mem, len);
    }
 
+   // Request a sync call is read_write or read_only. Default is read_write
+   enum execution_mode { read_write = 0, read_only = 1 };
+
+   // Behaviour of a sync call if the receiver does not support sync calls
+   // Default is abort
+   enum on_call_not_supported_mode { abort = 0, no_op = 1 };
+
    /**
     *  This is the packed representation of a call
     *
@@ -56,24 +63,24 @@ namespace eosio {
       /**
        *  Name of the account the call is intended for
        */
-      const name               receiver{};
+      name               receiver{};
 
       /**
        *  indicating if the call is read only or not
        */
-      const bool               read_only = false;
+      execution_mode     exec_mode = execution_mode::read_write;
 
       /**
        *  if the receiver contract does not have sync_call entry point or its signature
-       *  is invalid, when no_op_if_receiver_not_support_sync_call is set to true,
+       *  is invalid, when on_call_not_supported_mode is set to no_op,
        *  the sync call is no op, otherwise the call is aborted and an exception is raised.
        */
-      const bool               no_op_if_receiver_not_support_sync_call = false;
+      on_call_not_supported_mode not_supported_mode = on_call_not_supported_mode::abort;
 
       /**
        *  Payload data
        */
-      const std::vector<char>  data{};
+      std::vector<char>  data{};
 
       /**
        * Construct a new call object with receiver, name, and payload data
@@ -84,25 +91,25 @@ namespace eosio {
        * @param payload - The call data that will be serialized via pack into data
        */
       template<typename T>
-      call( struct name receiver, T&& payload, bool read_only = false, bool no_op = false )
+      call( struct name receiver, T&& payload, execution_mode exec_mode = execution_mode::read_write, on_call_not_supported_mode not_supported_mode = on_call_not_supported_mode::abort)
       : receiver(receiver)
-      , read_only(read_only)
-      , no_op_if_receiver_not_support_sync_call(no_op)
+      , exec_mode(exec_mode)
+      , not_supported_mode(not_supported_mode)
       , data(pack(std::forward<T>(payload))) {}
 
       /// @cond INTERNAL
-      EOSLIB_SERIALIZE( call, (receiver)(read_only)(no_op_if_receiver_not_support_sync_call)(data) )
+      EOSLIB_SERIALIZE( call, (receiver)(exec_mode)(not_supported_mode)(data) )
       /// @endcond
 
       /**
        * Make a call using the functor operator
        */
       int64_t operator()() const {
-         uint64_t flags = read_only ? 0x01 : 0x00; // last bit indicating read only
+         uint64_t flags = (exec_mode == execution_mode::read_only) ? 0x01 : 0x00; // last bit indicating read only
          auto retval =  internal_use_do_not_use::call(receiver.value, flags, data.data(), data.size());
 
          if (retval == -1) {  // sync call is not supported by the receiver contract
-            check(no_op_if_receiver_not_support_sync_call, "receiver does not support sync call but no_op_if_receiver_not_support_sync_call flag is not set");
+            check(not_supported_mode == on_call_not_supported_mode::no_op, "receiver does not support sync call but on_call_not_supported_mode is set to abort");
          }
          return retval;
       }
@@ -126,21 +133,21 @@ namespace eosio {
    template <eosio::name::raw Func_Name, auto Func_Ref, typename Return_Type=void>
    struct call_wrapper {
       template <typename Receiver>
-      constexpr call_wrapper(Receiver&& receiver, bool read_only = false, bool no_op = false)
+      constexpr call_wrapper(Receiver&& receiver, execution_mode exec_mode = execution_mode::read_write, on_call_not_supported_mode not_supported_mode = on_call_not_supported_mode::abort)
          : receiver(std::forward<Receiver>(receiver))
-         , read_only(read_only)
-         , no_op(no_op)
+         , exec_mode(exec_mode)
+         , not_supported_mode(not_supported_mode)
       {}
 
       static constexpr eosio::name func_name = eosio::name(Func_Name);
       eosio::name receiver {};
-      bool read_only = false;
-      bool no_op = false;
+      execution_mode exec_mode = execution_mode::read_write;
+      on_call_not_supported_mode not_supported_mode = on_call_not_supported_mode::abort;
 
       template <typename... Args>
       call to_call(Args&&... args)const {
          static_assert(detail::type_check<Func_Ref, Args...>());
-         return call(receiver, std::make_tuple(func_name, detail::deduced<Func_Ref>{std::forward<Args>(args)...}), read_only, no_op);
+         return call(receiver, std::make_tuple(func_name, detail::deduced<Func_Ref>{std::forward<Args>(args)...}), exec_mode, not_supported_mode);
       }
 
       template <typename... Args>

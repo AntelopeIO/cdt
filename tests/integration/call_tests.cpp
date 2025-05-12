@@ -41,7 +41,11 @@ BOOST_AUTO_TEST_CASE(return_value_test) { try {
       {"callee"_n, contracts::callee_wasm(), contracts::callee_abi().data()}
    });
 
-   BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "retvaltest"_n, "caller"_n, {}));
+   // Using host function directly
+   BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "hstretvaltst"_n, "caller"_n, {}));
+
+   // Using call_wrapper
+   BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "wrpretvaltst"_n, "caller"_n, {}));
 } FC_LOG_AND_RETHROW() }
 
 // Verify one parameter passing works correctly
@@ -51,7 +55,11 @@ BOOST_AUTO_TEST_CASE(param_basic_test) { try {
       {"callee"_n, contracts::callee_wasm(), contracts::callee_abi().data()}
    });
 
-   BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "paramtest"_n, "caller"_n, {}));
+   // Using host function directly
+   BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "hstoneprmtst"_n, "caller"_n, {}));
+
+   // Using call_wrapper
+   BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "wrponeprmtst"_n, "caller"_n, {}));
 } FC_LOG_AND_RETHROW() }
 
 // Verify multiple parameters passing works correctly
@@ -61,7 +69,11 @@ BOOST_AUTO_TEST_CASE(multiple_params_test) { try {
       {"callee"_n, contracts::callee_wasm(), contracts::callee_abi().data()}
    });
 
-   BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "mulparamtest"_n, "caller"_n, {}));
+   // Using host function directly
+   BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "hstmulprmtst"_n, "caller"_n, {}));
+
+   // Using call_wrapper
+   BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "wrpmulprmtst"_n, "caller"_n, {}));
 } FC_LOG_AND_RETHROW() }
 
 // Verify a sync call to a void function works properly.
@@ -71,18 +83,27 @@ BOOST_AUTO_TEST_CASE(void_func_test) { try {
       {"callee"_n, contracts::callee_wasm(), contracts::callee_abi().data()}
    });
 
-   auto  trx_trace = t.push_action("caller"_n, "voidfunctest"_n, "caller"_n, {});
-   auto& atrace    = trx_trace->action_traces;
+   auto check = [] (const transaction_trace_ptr& trx_trace) {
+      auto& atrace    = trx_trace->action_traces;
 
-   auto& call_traces  = atrace[0].call_traces;
-   BOOST_REQUIRE_EQUAL(call_traces.size(), 1u);
+      auto& call_traces  = atrace[0].call_traces;
+      BOOST_REQUIRE_EQUAL(call_traces.size(), 1u);
 
-   // Verify the print from the void function is correct.
-   // The test contract checks the return value size is 0.
-   auto& call_trace = call_traces[0];
-   BOOST_REQUIRE_EQUAL(call_trace.call_ordinal, 1u);
-   BOOST_REQUIRE_EQUAL(call_trace.sender_ordinal, 0u);
-   BOOST_REQUIRE_EQUAL(call_trace.console, "I am a void function");
+      // Verify the print from the void function is correct.
+      // The test contract checks the return value size is 0.
+      auto& call_trace = call_traces[0];
+      BOOST_REQUIRE_EQUAL(call_trace.call_ordinal, 1u);
+      BOOST_REQUIRE_EQUAL(call_trace.sender_ordinal, 0u);
+      BOOST_REQUIRE_EQUAL(call_trace.console, "I am a void function");
+   };
+
+   // Using host function directly
+   auto trx_trace = t.push_action("caller"_n, "hstvodfuntst"_n, "caller"_n, {});
+   check(trx_trace);
+
+   // Using call_wrapper
+   trx_trace = t.push_action("caller"_n, "wrpvodfuntst"_n, "caller"_n, {});
+   check(trx_trace);
 } FC_LOG_AND_RETHROW() }
 
 // Verify a function tagged as both `action` and `call` works
@@ -96,7 +117,7 @@ BOOST_AUTO_TEST_CASE(mixed_action_call_tags_test) { try {
 
    // Make sure we can make a sync call to `sum` (`mulparamtest` in `caller` does
    // a sync call to `sum`)
-   BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "mulparamtest"_n, "caller"_n, {}));
+   BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "hstmulprmtst"_n, "caller"_n, {}));
 
    // Make sure we can push an action using `sum`.
    BOOST_REQUIRE_NO_THROW(t.push_action("callee"_n, "sum"_n, "callee"_n,
@@ -116,7 +137,7 @@ BOOST_AUTO_TEST_CASE(single_function_test) { try {
 
    // The single_func_wasm contains only one function and the caller contract
    // hooks up with it
-   BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "retvaltest"_n, "caller"_n, {}));
+   BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "hstretvaltst"_n, "caller"_n, {}));
 } FC_LOG_AND_RETHROW() }
 
 // Verify no_op_if_receiver_not_support_sync_call flag works
@@ -135,7 +156,7 @@ BOOST_AUTO_TEST_CASE(sync_call_not_supported_test) { try {
    // so the call aborts
    BOOST_CHECK_EXCEPTION(t.push_action("caller"_n, "noopnotset"_n, "caller"_n, {}),
                          eosio_assert_message_exception,
-                         fc_exception_message_contains("receiver does not support sync call but no_op_if_receiver_not_support_sync_call flag is not set"));
+                         fc_exception_message_contains("receiver does not support sync call but on_call_not_supported_mode is set to abort"));
 } FC_LOG_AND_RETHROW() }
 
 // Verify calling an unknown function will result in an eosio_assert
