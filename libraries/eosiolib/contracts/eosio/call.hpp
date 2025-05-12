@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <type_traits>
 
+#include "detail.hpp"
 #include "../../core/eosio/serialize.hpp"
 #include "../../core/eosio/datastream.hpp"
 #include "../../core/eosio/name.hpp"
@@ -107,4 +108,54 @@ namespace eosio {
       }
    };
 
+   /**
+    * Wrapper for a call object.
+    *
+    * @brief Used to wrap an a particular sync call to simplify the process of other contracts making sync calls to the "wrapped" call.
+    * Example:
+    * @code
+    * // defined by contract writer of the sync call functions
+    * using get_func = call_wrapper<"get"_n, &callee::get, uint32_t>;
+    * // usage by different contract writer
+    * get_func{"callee"_n}();
+    * // or
+    * get_func get{"callee"_n};
+    * get();
+    * @endcode
+    */
+   template <eosio::name::raw Func_Name, auto Func_Ref, typename Return_Type=void>
+   struct call_wrapper {
+      template <typename Receiver>
+      constexpr call_wrapper(Receiver&& receiver, bool read_only = false, bool no_op = false)
+         : receiver(std::forward<Receiver>(receiver))
+         , read_only(read_only)
+         , no_op(no_op)
+      {}
+
+      static constexpr eosio::name func_name = eosio::name(Func_Name);
+      eosio::name receiver {};
+      bool read_only = false;
+      bool no_op = false;
+
+      template <typename... Args>
+      call to_call(Args&&... args)const {
+         static_assert(detail::type_check<Func_Ref, Args...>());
+         return call(receiver, std::make_tuple(func_name, detail::deduced<Func_Ref>{std::forward<Args>(args)...}), read_only, no_op);
+      }
+
+      template <typename... Args>
+      Return_Type operator()(Args&&... args)const {
+         auto size = to_call(std::forward<Args>(args)...)();
+
+         if constexpr (std::is_void<Return_Type>::value) {
+            return;
+         } else {
+            constexpr size_t max_stack_buffer_size = 512;
+            char* buffer = (char*)(max_stack_buffer_size < size ? malloc(size) : alloca(size));
+            internal_use_do_not_use::get_call_return_value(buffer, size);
+            return unpack<Return_Type>(buffer, size);
+         }
+      }
+
+   };
 } // namespace eosio
