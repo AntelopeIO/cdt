@@ -171,4 +171,29 @@ BOOST_AUTO_TEST_CASE(unknown_function_test) { try {
                          eosio_assert_code_is(8000000000000000003));
 } FC_LOG_AND_RETHROW() }
 
+// Verify adding/reading entries to/from a table, and read-only enforcement work
+BOOST_AUTO_TEST_CASE(addr_book_tests) { try {
+   call_tester t({
+      {"caller"_n, contracts::addr_book_caller_wasm(), contracts::addr_book_caller_abi().data()},
+      {"callee"_n, contracts::addr_book_callee_wasm(), contracts::addr_book_callee_abi().data()}
+   });
+
+   // Try to add an entry using a read-only sync call
+   BOOST_CHECK_EXCEPTION(t.push_action("caller"_n, "upsertrdonly"_n, "caller"_n, mvo()
+                            ("user", "alice")
+                            ("first_name", "alice")
+                            ("street", "123 Main St.")),
+                         unaccessible_api,
+                         fc_exception_message_contains("this API is not allowed in read only action/call"));
+
+   // Add an entry using a read-write sync call
+   t.push_action("caller"_n, "upsert"_n, "caller"_n, mvo()
+      ("user", "alice")
+      ("first_name", "alice")
+      ("street", "123 Main St."));
+
+   // Read the inserted entry. "get"_n action will check the return value from the sync call
+   BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "get"_n, "caller"_n, mvo() ("user", "alice")));
+} FC_LOG_AND_RETHROW() }
+
 BOOST_AUTO_TEST_SUITE_END()

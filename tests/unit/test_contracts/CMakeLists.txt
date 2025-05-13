@@ -17,6 +17,8 @@ add_contract(sync_call_caller sync_call_caller sync_call_caller.cpp)
 add_contract(sync_call_callee sync_call_callee sync_call_callee.cpp)
 add_contract(sync_call_not_supported sync_call_not_supported sync_call_not_supported.cpp)
 add_contract(sync_call_single_func sync_call_single_func sync_call_single_func.cpp)
+add_contract(sync_call_addr_book_callee sync_call_addr_book_callee sync_call_addr_book_callee.cpp)
+add_contract(sync_call_addr_book_caller sync_call_addr_book_caller sync_call_addr_book_caller.cpp)
 add_contract(capi_tests capi_tests capi/capi.c capi/action.c capi/chain.c capi/crypto.c capi/db.c capi/permission.c
                                    capi/print.c capi/privileged.c capi/system.c capi/transaction.c capi/call.c)
 
