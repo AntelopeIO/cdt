@@ -275,7 +275,7 @@ namespace eosio { namespace cdt {
                call_function();
                if (return_ty != "void") {
                   ss << "const auto& packed_result = eosio::pack(result);\n";
-                  ss << "set_call_return_value((void*)packed_result.data(), packed_result.size());\n";
+                  ss << "::set_call_return_value((void*)packed_result.data(), packed_result.size());\n";
                }
                ss << "}}\n";
             }
