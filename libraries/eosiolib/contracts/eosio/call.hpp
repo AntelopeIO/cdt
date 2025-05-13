@@ -130,7 +130,7 @@ namespace eosio {
     * get();
     * @endcode
     */
-   template <eosio::name::raw Func_Name, auto Func_Ref, typename Return_Type=void>
+   template <eosio::name::raw Func_Name, auto Func_Ref>
    struct call_wrapper {
       template <typename Receiver>
       constexpr call_wrapper(Receiver&& receiver, execution_mode exec_mode = execution_mode::read_write, on_call_not_supported_mode not_supported_mode = on_call_not_supported_mode::abort)
@@ -149,6 +149,8 @@ namespace eosio {
          static_assert(detail::type_check<Func_Ref, Args...>());
          return call(receiver, std::make_tuple(func_name, detail::deduced<Func_Ref>{std::forward<Args>(args)...}), exec_mode, not_supported_mode);
       }
+
+      using Return_Type = typename detail::function_traits<decltype(Func_Ref)>::return_type;
 
       template <typename... Args>
       Return_Type operator()(Args&&... args)const {

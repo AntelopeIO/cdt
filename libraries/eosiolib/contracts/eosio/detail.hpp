@@ -75,5 +75,20 @@ namespace eosio { namespace detail {
       return true;
    }
 
+   // For non-function-pointers (function_traits is undefined)
+   template <typename T>
+   struct function_traits;
+   
+   // For non-const member function
+   template <typename Class, typename Ret, typename... Args>
+   struct function_traits<Ret (Class::*)(Args...)> {
+       using return_type = Ret;
+   };
+   
+   // For const member function
+   template <typename Class, typename Ret, typename... Args>
+   struct function_traits<Ret (Class::*)(Args...) const> {
+       using return_type = Ret;
+   };
    /// @endcond
 }} // eosio detail
