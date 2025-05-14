@@ -10,7 +10,8 @@ public:
    // Using host function directly
    [[eosio::action]]
    void hstretvaltst() {
-      auto expected_size = eosio::call("callee"_n, "getten"_n)();
+      const std::vector<char> data{ eosio::pack("getten"_n.value) };
+      auto expected_size = eosio::call("callee"_n.value, 0, data.data(), data.size());
       eosio::check(expected_size >= 0, "call did not return a positive value");
 
       std::vector<char> return_value;
@@ -31,7 +32,8 @@ public:
    [[eosio::action]]
    void hstoneprmtst() {
       // `getback(uint32_t p)` returns p
-      auto expected_size = eosio::call("callee"_n, std::make_tuple("getback"_n, 5))();
+      const std::vector<char> data{ eosio::pack(std::make_tuple("getback"_n, 5)) };
+      auto expected_size = eosio::call("callee"_n.value, 0, data.data(), data.size());
       eosio::check(expected_size >= 0, "call did not return a positive value");
 
       std::vector<char> return_value;
@@ -51,7 +53,8 @@ public:
    // Using host function directly, testing multiple parameters passing
    [[eosio::action]]
    void hstmulprmtst() {
-      auto expected_size = eosio::call("callee"_n, std::make_tuple("sum"_n, 10, 20, 30))();
+      const std::vector<char> data{ eosio::pack(std::make_tuple("sum"_n, 10, 20, 30)) };
+      auto expected_size = eosio::call("callee"_n.value, 0, data.data(), data.size());
       eosio::check(expected_size >= 0, "call did not return a positive value");
 
       std::vector<char> return_value;
@@ -70,7 +73,8 @@ public:
 
    [[eosio::action]]
    void hstvodfuntst() {
-      auto expected_size = eosio::call("callee"_n, "voidfunc"_n)();
+      const std::vector<char> data{ eosio::pack("voidfunc"_n.value) };
+      auto expected_size = eosio::call("callee"_n.value, 0, data.data(), data.size());
       eosio::check(expected_size == 0, "call did not return 0"); // void function. return value size should be 0
    }
 
@@ -82,6 +86,7 @@ public:
 
    [[eosio::action]]
    void unknwnfuntst() {
-      eosio::call("callee"_n, "unknwnfunc"_n)(); // unknwnfunc will never be in "callee"_n contract
+      const std::vector<char> data{ eosio::pack("unknwnfunc"_n.value) }; // unknwnfunc is not in "callee"_n contract
+      auto expected_size = eosio::call("callee"_n.value, 0, data.data(), data.size());
    }
 };

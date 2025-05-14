@@ -146,17 +146,14 @@ BOOST_AUTO_TEST_CASE(sync_call_not_supported_test) { try {
       {"caller"_n, contracts::not_supported_wasm(), contracts::not_supported_abi().data()}
    });
 
-   // * sync_call_not_supported contract only has actions
-   // * no_op_if_receiver_not_support_sync_call is set
-   // so the call is just a no-op
-   BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "noopset"_n, "caller"_n, {}));
+   //  sync_call_not_supported contract only has actions and on_call_not_supported_mode
+   //  is passed in as no-op, so the call is just a no-op
+   BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "noopifnot"_n, "caller"_n, {}));
 
-   // * sync_call_not_supported contract only has actions
-   // * no_op_if_receiver_not_support_sync_call is NOT set
-   // so the call aborts
-   BOOST_CHECK_EXCEPTION(t.push_action("caller"_n, "noopnotset"_n, "caller"_n, {}),
+   // on_call_not_supported_mode is passed in as abort, so the call aborts
+   BOOST_CHECK_EXCEPTION(t.push_action("caller"_n, "abortifnot"_n, "caller"_n, {}),
                          eosio_assert_message_exception,
-                         fc_exception_message_contains("receiver does not support sync call but on_call_not_supported_mode is set to abort"));
+                         fc_exception_message_contains("receiver does not support sync call while on_call_not_supported_mode is set to abort"));
 } FC_LOG_AND_RETHROW() }
 
 // Verify calling an unknown function will result in an eosio_assert

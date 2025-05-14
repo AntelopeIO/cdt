@@ -10,7 +10,7 @@ public:
    // Insert an entry using read_only, which will fail
    [[eosio::action]]
    void upsertrdonly(eosio::name user, std::string first_name, std::string street) {
-      sync_call_addr_book_callee::upsert_func{"callee"_n, eosio::execution_mode::read_only}(user, first_name, street);
+      sync_call_addr_book_callee::upsert_read_only_func{"callee"_n}(user, first_name, street);
    }
 
    // Insert an entry
