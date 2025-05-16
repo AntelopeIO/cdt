@@ -3,6 +3,8 @@
 #include <eosio/eosio.hpp>
 #include <eosio/call.hpp>
 
+using namespace eosio;
+
 class [[eosio::contract]] sync_call_caller : public eosio::contract{
 public:
    using contract::contract;
@@ -10,7 +12,8 @@ public:
    // Using host function directly
    [[eosio::action]]
    void hstretvaltst() {
-      const std::vector<char> data{ eosio::pack("getten"_n.value) };
+      call_data_header header{ .version = 0, .func_name = "getten"_n.value };
+      const std::vector<char> data{ eosio::pack(header) };
       auto expected_size = eosio::call("callee"_n.value, 0, data.data(), data.size());
       eosio::check(expected_size >= 0, "call did not return a positive value");
 
@@ -32,7 +35,8 @@ public:
    [[eosio::action]]
    void hstoneprmtst() {
       // `getback(uint32_t p)` returns p
-      const std::vector<char> data{ eosio::pack(std::make_tuple("getback"_n, 5)) };
+      call_data_header header{ .version = 0, .func_name = "getback"_n.value };
+      const std::vector<char> data{ eosio::pack(std::make_tuple(header, 5)) };
       auto expected_size = eosio::call("callee"_n.value, 0, data.data(), data.size());
       eosio::check(expected_size >= 0, "call did not return a positive value");
 
@@ -53,7 +57,8 @@ public:
    // Using host function directly, testing multiple parameters passing
    [[eosio::action]]
    void hstmulprmtst() {
-      const std::vector<char> data{ eosio::pack(std::make_tuple("sum"_n, 10, 20, 30)) };
+      call_data_header header{ .version = 0, .func_name = "sum"_n.value };
+      const std::vector<char> data{ eosio::pack(std::make_tuple(header, 10, 20, 30)) };
       auto expected_size = eosio::call("callee"_n.value, 0, data.data(), data.size());
       eosio::check(expected_size >= 0, "call did not return a positive value");
 
@@ -73,7 +78,8 @@ public:
 
    [[eosio::action]]
    void hstvodfuntst() {
-      const std::vector<char> data{ eosio::pack("voidfunc"_n.value) };
+      call_data_header header{ .version = 0, .func_name = "voidfunc"_n.value };
+      const std::vector<char> data{ eosio::pack(header) };
       auto expected_size = eosio::call("callee"_n.value, 0, data.data(), data.size());
       eosio::check(expected_size == 0, "call did not return 0"); // void function. return value size should be 0
    }
@@ -85,8 +91,17 @@ public:
    }
 
    [[eosio::action]]
-   void unknwnfuntst() {
-      const std::vector<char> data{ eosio::pack("unknwnfunc"_n.value) }; // unknwnfunc is not in "callee"_n contract
-      auto expected_size = eosio::call("callee"_n.value, 0, data.data(), data.size());
+   void hdrvaltest() {
+      // Verify function name validation works
+      call_data_header unkwn_func_header{ .version = 0, .func_name = "unknwnfunc"_n.value };
+      const std::vector<char> unkwn_func_data{ eosio::pack(unkwn_func_header) }; // unknwnfunc is not in "callee"_n contract
+      auto status = eosio::call("callee"_n.value, 0, unkwn_func_data.data(), unkwn_func_data.size());
+      eosio::check(status == -3, "call did not return -3 for unknown function");
+
+      // Verify version validation works
+      call_data_header bad_version_header{ .version = 1, .func_name = "sum"_n.value };  // version 1 is not supported
+      const std::vector<char> bad_version_data{ eosio::pack(bad_version_header) };
+      status = eosio::call("callee"_n.value, 0, bad_version_data.data(), bad_version_data.size());
+      eosio::check(status == -2, "call did not return -2 for invalid version");
    }
 };

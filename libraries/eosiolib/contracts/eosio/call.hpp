@@ -58,6 +58,13 @@ namespace eosio {
    // Default is abort
    enum on_call_not_supported_mode { abort = 0, no_op = 1 };
 
+   struct call_data_header {
+      uint32_t version   = 0;
+      uint64_t func_name = 0;
+
+      EOSLIB_SERIALIZE(call_data_header, (version)(func_name))
+   };
+
    /**
     * Wrapper for simplifying making a sync call
     *
@@ -80,7 +87,7 @@ namespace eosio {
          : receiver(std::forward<Receiver>(receiver))
       {}
 
-      static constexpr eosio::name func_name = eosio::name(Func_Name);
+      static constexpr eosio::name function_name = eosio::name(Func_Name);
       eosio::name receiver {};
 
       using ret_type = typename detail::function_traits<decltype(Func_Ref)>::return_type;
@@ -91,7 +98,11 @@ namespace eosio {
          if constexpr (Exec_Mode == execution_mode::read_only) {
             flags = 0x01;
          }
-         const std::vector<char> data{ pack(std::make_tuple(func_name, detail::deduced<Func_Ref>{std::forward<Args>(args)...})) };
+
+         call_data_header header{ .version   = 0,
+                                  .func_name = function_name.value };
+ 
+         const std::vector<char> data{ pack(std::make_tuple(header, detail::deduced<Func_Ref>{std::forward<Args>(args)...})) };
 
          auto ret_val_size = internal_use_do_not_use::call(receiver.value, flags, data.data(), data.size());
 
