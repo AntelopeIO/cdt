@@ -94,6 +94,8 @@ namespace eosio {
 
       template <typename... Args>
       ret_type operator()(Args&&... args)const {
+         static_assert(detail::type_check<Func_Ref, Args...>());
+
          uint64_t flags = 0x00;
          if constexpr (Exec_Mode == execution_mode::read_only) {
             flags = 0x01;
