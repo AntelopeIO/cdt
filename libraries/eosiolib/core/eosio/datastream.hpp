@@ -5,7 +5,9 @@
 #pragma once
 #include "check.hpp"
 #include "varint.hpp"
+#include "bitset.hpp"
 #include <bluegrass/meta/for_each.hpp>
+
 
 #include <list>
 #include <queue>
