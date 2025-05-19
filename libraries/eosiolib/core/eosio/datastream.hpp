@@ -8,7 +8,6 @@
 #include "bitset.hpp"
 #include <bluegrass/meta/for_each.hpp>
 
-
 #include <list>
 #include <queue>
 #include <vector>
