@@ -36,6 +36,8 @@ struct bitset {
 
    size_type size() const { return m_num_bits; }
 
+   size_type num_blocks() const { return m_bits.size(); }
+
    void resize(size_type num_bits) {
       m_bits.resize(calc_num_blocks(num_bits), 0);
       m_num_bits = num_bits;
@@ -150,7 +152,7 @@ struct bitset {
    }
 
 private:
-   size_type   m_num_bits{0}; // members order matters so that defaulted `operator<=>` matches `to_key` below.
+   size_type   m_num_bits{0}; // members order matters for comparison operators
    buffer_type m_bits;        // must be after `m_num_bits`
 };
 
