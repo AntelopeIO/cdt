@@ -3,9 +3,6 @@
  *  @copyright defined in eos/LICENSE
  */
 
-#ifndef __cdt_print_hpp_
-#define __cdt_print_hpp_
-
 #pragma once
 #include <utility>
 #include <string>
@@ -277,5 +274,3 @@ namespace eosio {
 
    static iostream cout;
 }
-
-#endif
