@@ -121,8 +121,8 @@ struct bitset {
    //
    // This matches the storage scheme of bitset above
    // ---------------------------------------------------------------------------------------
-   template <typename S>
-   friend S& operator>>(S& stream, bitset& obj) {
+   template <typename DataStream>
+   friend DataStream& operator>>(DataStream& stream, bitset& obj) {
       unsigned_int num_bits(0);
       stream >> num_bits;
       obj.resize(num_bits.value);
@@ -136,20 +136,18 @@ struct bitset {
       return stream;
    }
 
-   template <typename S>
-   friend S& operator<<(S& stream, const bitset& obj) {
+   template <typename DataStream>
+   friend DataStream& operator<<(DataStream& stream, const bitset& obj) {
       unsigned_int num_bits(obj.size());
       stream << num_bits;
       if (obj.size() > 0) {
          auto num_blocks = bitset::calc_num_blocks(obj.size());
          assert(num_blocks >= 1);
          for (size_t i = 0; i < num_blocks; ++i)
-            stream << bj.byte(i);
+            stream << obj.byte(i);
       }
+      return stream;
    }
-
-   // I think the above are preferable to using `EOSLIB_SERIALIZE` because of the explicit zeroing of unused bits
-   // EOSLIB_SERIALIZE(bitset, (m_num_bits)(m_bits))
 
 private:
    size_type   m_num_bits{0}; // members order matters so that defaulted `operator<=>` matches `to_key` below.
@@ -158,5 +156,4 @@ private:
 
 constexpr const char* get_type_name(bitset*) { return "bitset"; }
 
-
-}
+} // namespace eosio
