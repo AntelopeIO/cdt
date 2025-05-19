@@ -2,7 +2,6 @@
  *  @file
  *  @copyright defined in eos/LICENSE
  */
-
 #pragma once
 #include <utility>
 #include <string>
