@@ -140,20 +140,42 @@ BOOST_AUTO_TEST_CASE(single_function_test) { try {
    BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "hstretvaltst"_n, "caller"_n, {}));
 } FC_LOG_AND_RETHROW() }
 
-// Verify no_op_if_receiver_not_support_sync_call flag works
-BOOST_AUTO_TEST_CASE(sync_call_not_supported_test) { try {
+// Verify support_mode for void and non-void sync calls if calls are a failure
+BOOST_AUTO_TEST_CASE(sync_call_support_mode_failure_test) { try {
    call_tester t({
-      {"caller"_n, contracts::not_supported_wasm(), contracts::not_supported_abi().data()}
+      {"caller"_n, contracts::caller_wasm(), contracts::caller_abi().data()},
+      {"callee"_n, contracts::not_supported_wasm(), contracts::not_supported_abi().data()}
    });
 
-   //  sync_call_not_supported contract only has actions and on_call_not_supported_mode
-   //  is passed in as no-op, so the call is just a no-op
-   BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "noopifnot"_n, "caller"_n, {}));
+   // voidfncnoop uses support_mode::no_op
+   BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "voidfncnoop"_n, "caller"_n, {}));
 
-   // on_call_not_supported_mode is passed in as abort, so the call aborts
-   BOOST_CHECK_EXCEPTION(t.push_action("caller"_n, "abortifnot"_n, "caller"_n, {}),
+   // voidfncabort uses default support_mode::abort
+   BOOST_CHECK_EXCEPTION(t.push_action("caller"_n, "voidfncabort"_n, "caller"_n, {}),
                          eosio_assert_message_exception,
                          fc_exception_message_contains("receiver does not support sync call but support_mode is set to abort"));
+
+   // intfuncnoop uses support_mode::no_op
+   BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "intfuncnoop"_n, "caller"_n, {}));
+
+   // intfuncabort uses default support_mode::abort
+   BOOST_CHECK_EXCEPTION(t.push_action("caller"_n, "intfuncabort"_n, "caller"_n, {}),
+                         eosio_assert_message_exception,
+                         fc_exception_message_contains("receiver does not support sync call but support_mode is set to abort"));
+} FC_LOG_AND_RETHROW() }
+
+// Verify support_mode for void and non-void sync calls if call is successful
+BOOST_AUTO_TEST_CASE(sync_call_support_mode_success_test) { try {
+   call_tester t({
+      {"caller"_n, contracts::caller_wasm(), contracts::caller_abi().data()},
+      {"callee"_n, contracts::callee_wasm(), contracts::callee_abi().data()}
+   });
+
+   // voidnoopsucc uses support_mode::no_op
+   BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "voidnoopsucc"_n, "caller"_n, {}));
+
+   // sumnoopsucc uses support_mode::no_op
+   BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "sumnoopsucc"_n, "caller"_n, {}));
 } FC_LOG_AND_RETHROW() }
 
 // Verify header validation

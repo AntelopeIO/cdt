@@ -21,4 +21,7 @@ public:
    using getback_func = eosio::call_wrapper<"getback"_n, &sync_call_callee::getback>;
    using voidfunc_func = eosio::call_wrapper<"voidfunc"_n, &sync_call_callee::voidfunc>;
    using sum_func = eosio::call_wrapper<"sum"_n, &sync_call_callee::sum>;
+
+   using void_no_op_success_func = eosio::call_wrapper<"voidfunc"_n, &sync_call_callee::voidfunc, eosio::access_mode::read_write, eosio::support_mode::no_op>;
+   using sum_no_op_success_func = eosio::call_wrapper<"sum"_n, &sync_call_callee::sum, eosio::access_mode::read_write, eosio::support_mode::no_op>;
 };

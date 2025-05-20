@@ -58,6 +58,13 @@ namespace eosio {
    // Default is abort
    enum support_mode { abort = 0, no_op = 1 };
 
+   // For a void function, when support_mode is set to no_op, the call_wrapper.
+   // returns `std::optional<void_call>`. If the optional has no value, it indicates
+   // the call was op-op; if the optional has a value of `void_call`, the call
+   // executed successfully.
+   struct void_call {
+   };
+
    struct call_data_header {
       uint32_t version   = 0;
       uint64_t func_name = 0;
@@ -90,10 +97,20 @@ namespace eosio {
       static constexpr eosio::name function_name = eosio::name(Func_Name);
       eosio::name receiver {};
 
-      using ret_type = typename detail::function_traits<decltype(Func_Ref)>::return_type;
+      using orig_ret_type = typename detail::function_traits<decltype(Func_Ref)>::return_type;
+
+      using return_type = std::conditional_t<
+         Support_Mode == support_mode::abort,   // if Support_Mode is abort
+         orig_ret_type,                         // use the original return type
+         std::conditional_t<                    // else
+            std::is_void<orig_ret_type>::value, // original return type is void
+            std::optional<void_call>,           // use optional of empty struct
+            std::optional<orig_ret_type>        // use optional of original return type
+         >
+      >;
 
       template <typename... Args>
-      ret_type operator()(Args&&... args)const {
+      return_type operator()(Args&&... args)const {
          static_assert(detail::type_check<Func_Ref, Args...>());
 
          uint64_t flags = 0x00;
@@ -108,27 +125,32 @@ namespace eosio {
 
          auto ret_val_size = internal_use_do_not_use::call(receiver.value, flags, data.data(), data.size());
 
-         if (ret_val_size < 0) {
+         if (ret_val_size < 0) {  // the receiver does not support sync calls
             if constexpr (Support_Mode == support_mode::abort) {
                check(false, "receiver does not support sync call but support_mode is set to abort");
             } else {
-               if constexpr (std::is_void<ret_type>::value) {
-                  return;
-               } else if constexpr (std::is_default_constructible_v<ret_type>) {
-                  return {};
-               } else {
-                  static_assert(std::is_default_constructible_v<ret_type>, "Return type of support_mode::no_op function must be default constructible");
-               }
+               return std::nullopt;
             }
          }
 
-         if constexpr (std::is_void<ret_type>::value) {
+         // The sync call has been executed by the receiver
+         if constexpr (std::is_void<return_type>::value) {
             return;
          } else {
-            constexpr size_t max_stack_buffer_size = 512;
-            char* buffer = (char*)(max_stack_buffer_size < ret_val_size ? malloc(ret_val_size) : alloca(ret_val_size)); // intentionally no `free()` is called. the memory will be reset after execution
-            internal_use_do_not_use::get_call_return_value(buffer, ret_val_size);
-            return unpack<ret_type>(buffer, ret_val_size);
+            if constexpr (Support_Mode == support_mode::no_op && std::is_void<orig_ret_type>::value) {
+               return void_call{};
+            } else {
+               constexpr size_t max_stack_buffer_size = 512;
+               char* buffer = (char*)(max_stack_buffer_size < ret_val_size ? malloc(ret_val_size) : alloca(ret_val_size)); // intentionally no `free()` is called. the memory will be reset after execution
+               internal_use_do_not_use::get_call_return_value(buffer, ret_val_size);
+               auto ret_val = unpack<orig_ret_type>(buffer, ret_val_size);
+
+               if constexpr (Support_Mode == support_mode::no_op) {
+                  return std::make_optional(ret_val);
+               } else {
+                  return ret_val;
+               }
+            }
          }
       }
    };

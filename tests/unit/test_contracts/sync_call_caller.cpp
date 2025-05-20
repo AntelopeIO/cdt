@@ -1,4 +1,5 @@
 #include "sync_call_callee.hpp"
+#include "sync_call_not_supported.hpp"
 
 #include <eosio/eosio.hpp>
 #include <eosio/call.hpp>
@@ -88,6 +89,48 @@ public:
    void wrpvodfuntst() {
       sync_call_callee::voidfunc_func voidfunc{ "callee"_n };
       voidfunc();
+   }
+
+   // Verify void call. void_func uses default support_mode::abort
+   [[eosio::action]]
+   void voidfncabort() {
+      sync_call_not_supported::void_func void_func_abort{ "callee"_n };
+      void_func_abort();  // Will throw. Tester will verify that.
+   }
+
+   // void_func uses support_mode::no_op
+   [[eosio::action]]
+   void voidfncnoop() {
+      sync_call_not_supported::void_no_op_func void_func_no_op{ "callee"_n };
+      check(void_func_no_op() == std::nullopt, "void_func_no_op did not return std::nullopt");
+   }
+
+   // verify non-void call. int_func uses default support_mode::abort
+   [[eosio::action]]
+   void intfuncabort() {
+      sync_call_not_supported::int_func int_func_abort{ "callee"_n };
+      int_func_abort(); // Will throw. Tester will verify that.
+   }
+
+   // int_func uses support_mode::no_opabort
+   [[eosio::action]]
+   void intfuncnoop() {
+      sync_call_not_supported::int_no_op_func int_func_no_op{ "callee"_n };
+      check(int_func_no_op() == std::nullopt, "void_func_no_op did not return std::nullopt");
+   }
+
+   // void_no_op_success_func uses support_mode::no_op
+   [[eosio::action]]
+   void voidnoopsucc() {
+      sync_call_callee::void_no_op_success_func f{ "callee"_n };
+      check(f().has_value(), "void_no_op_success_func did not return a value");
+   }
+
+   // void_no_op_success_func uses support_mode::no_op
+   [[eosio::action]]
+   void sumnoopsucc() {
+      sync_call_callee::sum_no_op_success_func f{ "callee"_n };
+      check(*f(7, 8, 9) == 24, "sum_no_op_success_func did not return a value");
    }
 
    [[eosio::action]]
