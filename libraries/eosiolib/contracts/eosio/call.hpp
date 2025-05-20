@@ -51,12 +51,12 @@ namespace eosio {
      internal_use_do_not_use::set_call_return_value(mem, len);
    }
 
-   // Request a sync call is read_write or read_only. Default is read_write
-   enum execution_mode { read_write = 0, read_only = 1 };
+   // Indicate whether a sync call is read_write or read_only. Default is read_write
+   enum access_mode { read_write = 0, read_only = 1 };
 
-   // Behaviour of a sync call if the receiver does not support sync calls
+   // Indicate the action to take if the receiver does not support sync calls.
    // Default is abort
-   enum on_call_not_supported_mode { abort = 0, no_op = 1 };
+   enum support_mode { abort = 0, no_op = 1 };
 
    struct call_data_header {
       uint32_t version   = 0;
@@ -80,7 +80,7 @@ namespace eosio {
     * get();
     * @endcode
     */
-   template <eosio::name::raw Func_Name, auto Func_Ref, execution_mode Exec_Mode=execution_mode::read_write, on_call_not_supported_mode Not_Supported_Mode = on_call_not_supported_mode::abort>
+   template <eosio::name::raw Func_Name, auto Func_Ref, access_mode Access_Mode=access_mode::read_write, support_mode Support_Mode = support_mode::abort>
    struct call_wrapper {
       template <typename Receiver>
       constexpr call_wrapper(Receiver&& receiver)
@@ -97,7 +97,7 @@ namespace eosio {
          static_assert(detail::type_check<Func_Ref, Args...>());
 
          uint64_t flags = 0x00;
-         if constexpr (Exec_Mode == execution_mode::read_only) {
+         if constexpr (Access_Mode == access_mode::read_only) {
             flags = 0x01;
          }
 
@@ -109,15 +109,15 @@ namespace eosio {
          auto ret_val_size = internal_use_do_not_use::call(receiver.value, flags, data.data(), data.size());
 
          if (ret_val_size < 0) {
-            if constexpr (Not_Supported_Mode == on_call_not_supported_mode::abort) {
-               check(false, "receiver does not support sync call while on_call_not_supported_mode is set to abort");
+            if constexpr (Support_Mode == support_mode::abort) {
+               check(false, "receiver does not support sync call but support_mode is set to abort");
             } else {
                if constexpr (std::is_void<ret_type>::value) {
                   return;
                } else if constexpr (std::is_default_constructible_v<ret_type>) {
                   return {};
                } else {
-                  static_assert(std::is_default_constructible_v<ret_type>, "Return type of on_call_not_supported_mode::no_op function must be default constructible");
+                  static_assert(std::is_default_constructible_v<ret_type>, "Return type of support_mode::no_op function must be default constructible");
                }
             }
          }

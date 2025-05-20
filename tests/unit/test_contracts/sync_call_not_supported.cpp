@@ -12,7 +12,7 @@ public:
    void dummy() {
    }
    using dummy_func = eosio::call_wrapper<"dummy"_n, &sync_call_not_supported::dummy>;
-   using dummy_no_op_func = eosio::call_wrapper<"dummy"_n, &sync_call_not_supported::dummy, eosio::execution_mode::read_write, eosio::on_call_not_supported_mode::no_op>;
+   using dummy_no_op_func = eosio::call_wrapper<"dummy"_n, &sync_call_not_supported::dummy, eosio::access_mode::read_write, eosio::support_mode::no_op>;
 
    // request no-op
    [[eosio::action]]

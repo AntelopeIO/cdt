@@ -153,7 +153,7 @@ BOOST_AUTO_TEST_CASE(sync_call_not_supported_test) { try {
    // on_call_not_supported_mode is passed in as abort, so the call aborts
    BOOST_CHECK_EXCEPTION(t.push_action("caller"_n, "abortifnot"_n, "caller"_n, {}),
                          eosio_assert_message_exception,
-                         fc_exception_message_contains("receiver does not support sync call while on_call_not_supported_mode is set to abort"));
+                         fc_exception_message_contains("receiver does not support sync call but support_mode is set to abort"));
 } FC_LOG_AND_RETHROW() }
 
 // Verify header validation
