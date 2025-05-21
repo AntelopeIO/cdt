@@ -36,7 +36,10 @@ struct bitset {
 
    size_type size() const { return m_num_bits; }
 
-   size_type num_blocks() const { return m_bits.size(); }
+   size_type num_blocks() const {
+      assert(m_bits.size() == calc_num_blocks(m_num_bits));
+      return m_bits.size();
+   }
 
    void resize(size_type num_bits) {
       m_bits.resize(calc_num_blocks(num_bits), 0);
@@ -54,14 +57,54 @@ struct bitset {
       m_bits[block_index(pos)] &= ~bit_mask(pos);
    }
 
+   bool test(size_type pos) const {
+      return (*this)[pos];
+   }
+
    bool operator[](size_type pos) const {
       assert(pos < m_num_bits);
       return !!(m_bits[block_index(pos)] & bit_mask(pos));
    }
 
+   void flip(size_type pos) {
+      assert(pos < m_num_bits);
+      if (test(pos))
+         clear(pos);
+      else
+         set(pos);
+   }
+
+   void flip() {
+      for (auto& byte : m_bits)
+         byte = ~byte;
+      zero_unused_bits();
+   }
+
+   bool all() const {
+      auto sz = size();
+      for (size_t i=0; i<sz; ++i)
+         if (!test(i))
+            return false;
+      return true;
+   }
+
+   bool none() const {
+      for (auto& byte : m_bits)
+         if (byte)
+            return false;
+      return true;
+   }
+
    void zero_all_bits() {
       for (auto& byte : m_bits)
          byte = 0;
+   }
+
+   bitset operator|=(const bitset& o) {
+      assert(size() == o.size());
+      for (size_t i=0; i<m_bits.size(); ++i)
+         m_bits[i] |= o.m_bits[i];
+      return *this;
    }
 
    void zero_unused_bits() {
@@ -105,6 +148,27 @@ struct bitset {
       for (auto i = size(); i-- > 0;)
          res[idx++] = (*this)[i] ? '1' : '0';
       return res;
+   }
+
+   static bitset from_string(std::string_view s) {
+      bitset bs;
+      auto   num_bits = s.size();
+      bs.resize(num_bits);
+
+      for (size_t i = 0; i < num_bits; ++i) {
+         switch (s[i]) {
+         case '0':
+            break; // nothing to do, all bits initially 0
+         case '1':
+            bs.set(num_bits - i - 1); // high bitset indexes come first in the JSON representation
+            break;
+         default:
+            throw std::invalid_argument( "unexpected character in bitset string representation" );
+            break;
+         }
+      }
+      assert(bs.unused_bits_zeroed());
+      return bs;
    }
 
    void print() const {
