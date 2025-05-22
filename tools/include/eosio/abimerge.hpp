@@ -37,6 +37,10 @@ class ABIMerger {
          if (std::stod(vers.substr(vers.size()-3))*10 >= 12) {
             ret["action_results"] = merge_action_results(other);
          }
+         if (std::stod(vers.substr(vers.size()-3))*10 >= abi_call_version) {
+            ret["calls"]        = merge_calls(other);
+            ret["call_results"] = merge_call_results(other);
+         }
          return ret;
       }
    private:
@@ -82,6 +86,10 @@ class ABIMerger {
                 a["type"] == b["type"];
       }
 
+      static bool call_is_same(ojson a, ojson b) {
+         return a["name"] == b["name"] &&
+                a["type"] == b["type"];
+      }
 
       static bool variant_is_same(ojson a, ojson b) {
          for (auto tya : a["types"].array_range()) {
@@ -110,6 +118,11 @@ class ABIMerger {
       }
 
       static bool action_result_is_same(ojson a, ojson b) {
+         return a["name"] == b["name"] &&
+                a["result_type"] == b["result_type"];
+      }
+
+      static bool call_result_is_same(ojson a, ojson b) {
          return a["name"] == b["name"] &&
                 a["result_type"] == b["result_type"];
       }
@@ -181,6 +194,12 @@ class ABIMerger {
          return acts;
       }
 
+      ojson merge_calls(ojson b) {
+         ojson acts = ojson::array();
+         add_object_to_array(acts, abi, b, "calls", "name", call_is_same);
+         return acts;
+      }
+
       ojson merge_tables(ojson b) {
          ojson tabs = ojson::array();
          add_object_to_array(tabs, abi, b, "tables", "name", table_is_same);
@@ -196,6 +215,12 @@ class ABIMerger {
       ojson merge_action_results(ojson b) {
          ojson res = ojson::array();
          add_object_to_array(res, abi, b, "action_results", "name", action_result_is_same);
+         return res;
+      }
+
+      ojson merge_call_results(ojson b) {
+         ojson res = ojson::array();
+         add_object_to_array(res, abi, b, "call_results", "name", call_result_is_same);
          return res;
       }
 
