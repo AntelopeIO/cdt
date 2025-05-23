@@ -121,7 +121,7 @@ namespace eosio {
          call_data_header header{ .version   = 0,
                                   .func_name = function_name.value };
  
-         const std::vector<char> data{ pack(std::make_tuple(header, detail::deduced<Func_Ref>{std::forward<Args>(args)...})) };
+         const std::vector<char> data{ pack(std::forward_as_tuple(header, detail::deduced<Func_Ref>{std::forward<Args>(args)...})) };
 
          auto ret_val_size = internal_use_do_not_use::call(receiver.value, flags, data.data(), data.size());
 
