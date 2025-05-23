@@ -139,12 +139,12 @@ public:
       call_data_header unkwn_func_header{ .version = 0, .func_name = "unknwnfunc"_n.value };
       const std::vector<char> unkwn_func_data{ eosio::pack(unkwn_func_header) }; // unknwnfunc is not in "callee"_n contract
       auto status = eosio::call("callee"_n.value, 0, unkwn_func_data.data(), unkwn_func_data.size());
-      eosio::check(status == -3, "call did not return -3 for unknown function");
+      eosio::check(status == -10001, "call did not return -10001 for unknown function");
 
       // Verify version validation works
       call_data_header bad_version_header{ .version = 1, .func_name = "sum"_n.value };  // version 1 is not supported
       const std::vector<char> bad_version_data{ eosio::pack(bad_version_header) };
       status = eosio::call("callee"_n.value, 0, bad_version_data.data(), bad_version_data.size());
-      eosio::check(status == -2, "call did not return -2 for invalid version");
+      eosio::check(status == -10000, "call did not return -10000 for invalid version");
    }
 };
