@@ -67,7 +67,7 @@ namespace eosio {
 
    struct call_data_header {
       uint32_t version   = 0;
-      uint64_t func_name = 0;
+      uint64_t func_name = 0; // At WASM level, function name is an uint64_t. We do not use eosio::name here to make the decoding function name simpler in sync_call entry point function.
 
       EOSLIB_SERIALIZE(call_data_header, (version)(func_name))
    };
@@ -75,7 +75,7 @@ namespace eosio {
    /**
     * Wrapper for simplifying making a sync call
     *
-    * @brief Used to wrap an a particular sync call to simplify the process of other contracts making sync calls to the "wrapped" call.
+    * @brief Used to wrap a particular sync call to simplify the process of other contracts making sync calls to the "wrapped" call.
     * Example:
     * @code
     * // defined by contract writer of the sync call functions
