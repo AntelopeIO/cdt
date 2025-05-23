@@ -141,7 +141,7 @@ namespace eosio {
                return void_call{};
             } else {
                constexpr size_t max_stack_buffer_size = 512;
-               char* buffer = (char*)(max_stack_buffer_size < ret_val_size ? malloc(ret_val_size) : alloca(ret_val_size)); // intentionally no `free()` is called. the memory will be reset after execution
+               char* buffer = (char*)(max_stack_buffer_size < ret_val_size ? malloc(ret_val_size) : alloca(ret_val_size)); // intentionally no `free()` is called. the memory will be freed at the end of callers wasm execution. 
                internal_use_do_not_use::get_call_return_value(buffer, ret_val_size);
                auto ret_val = unpack<orig_ret_type>(buffer, ret_val_size);
 
