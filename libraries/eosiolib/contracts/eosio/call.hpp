@@ -35,8 +35,8 @@ namespace eosio {
     *  @note There are some methods from the @ref call that can be used directly from C++
     */
 
-   inline int64_t call(uint64_t receiver, uint64_t flags, const char* data, size_t data_size) {
-      return internal_use_do_not_use::call(receiver, flags, data, data_size);
+   inline int64_t call(eosio::name receiver, uint64_t flags, const char* data, size_t data_size) {
+      return internal_use_do_not_use::call(receiver.value, flags, data, data_size);
    }
 
    inline uint32_t get_call_return_value( void* mem, uint32_t len ) {

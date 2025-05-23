@@ -15,7 +15,7 @@ public:
    void hstretvaltst() {
       call_data_header header{ .version = 0, .func_name = "getten"_n.value };
       const std::vector<char> data{ eosio::pack(header) };
-      auto expected_size = eosio::call("callee"_n.value, 0, data.data(), data.size());
+      auto expected_size = eosio::call("callee"_n, 0, data.data(), data.size());
       eosio::check(expected_size >= 0, "call did not return a positive value");
 
       std::vector<char> return_value;
@@ -38,7 +38,7 @@ public:
       // `getback(uint32_t p)` returns p
       call_data_header header{ .version = 0, .func_name = "getback"_n.value };
       const std::vector<char> data{ eosio::pack(std::make_tuple(header, 5)) };
-      auto expected_size = eosio::call("callee"_n.value, 0, data.data(), data.size());
+      auto expected_size = eosio::call("callee"_n, 0, data.data(), data.size());
       eosio::check(expected_size >= 0, "call did not return a positive value");
 
       std::vector<char> return_value;
@@ -60,7 +60,7 @@ public:
    void hstmulprmtst() {
       call_data_header header{ .version = 0, .func_name = "sum"_n.value };
       const std::vector<char> data{ eosio::pack(std::make_tuple(header, 10, 20, 30)) };
-      auto expected_size = eosio::call("callee"_n.value, 0, data.data(), data.size());
+      auto expected_size = eosio::call("callee"_n, 0, data.data(), data.size());
       eosio::check(expected_size >= 0, "call did not return a positive value");
 
       std::vector<char> return_value;
@@ -81,7 +81,7 @@ public:
    void hstvodfuntst() {
       call_data_header header{ .version = 0, .func_name = "voidfunc"_n.value };
       const std::vector<char> data{ eosio::pack(header) };
-      auto expected_size = eosio::call("callee"_n.value, 0, data.data(), data.size());
+      auto expected_size = eosio::call("callee"_n, 0, data.data(), data.size());
       eosio::check(expected_size == 0, "call did not return 0"); // void function. return value size should be 0
    }
 
@@ -138,13 +138,13 @@ public:
       // Verify function name validation works
       call_data_header unkwn_func_header{ .version = 0, .func_name = "unknwnfunc"_n.value };
       const std::vector<char> unkwn_func_data{ eosio::pack(unkwn_func_header) }; // unknwnfunc is not in "callee"_n contract
-      auto status = eosio::call("callee"_n.value, 0, unkwn_func_data.data(), unkwn_func_data.size());
+      auto status = eosio::call("callee"_n, 0, unkwn_func_data.data(), unkwn_func_data.size());
       eosio::check(status == -10001, "call did not return -10001 for unknown function");
 
       // Verify version validation works
       call_data_header bad_version_header{ .version = 1, .func_name = "sum"_n.value };  // version 1 is not supported
       const std::vector<char> bad_version_data{ eosio::pack(bad_version_header) };
-      status = eosio::call("callee"_n.value, 0, bad_version_data.data(), bad_version_data.size());
+      status = eosio::call("callee"_n, 0, bad_version_data.data(), bad_version_data.size());
       eosio::check(status == -10000, "call did not return -10000 for invalid version");
    }
 };
