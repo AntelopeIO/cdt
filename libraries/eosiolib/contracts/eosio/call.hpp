@@ -52,11 +52,11 @@ namespace eosio {
    }
 
    // Indicate whether a sync call is read_write or read_only. Default is read_write
-   enum access_mode { read_write = 0, read_only = 1 };
+   enum class access_mode { read_write = 0, read_only = 1 };
 
    // Indicate the action to take if the receiver does not support sync calls.
-   // Default is abort
-   enum support_mode { abort = 0, no_op = 1 };
+   // Default is abort_op
+   enum class support_mode { abort_op = 0, no_op = 1 };
 
    // For a void function, when support_mode is set to no_op, the call_wrapper.
    // returns `std::optional<void_call>`. If the optional has no value, it indicates
@@ -87,7 +87,7 @@ namespace eosio {
     * get();
     * @endcode
     */
-   template <eosio::name::raw Func_Name, auto Func_Ref, access_mode Access_Mode=access_mode::read_write, support_mode Support_Mode = support_mode::abort>
+   template <eosio::name::raw Func_Name, auto Func_Ref, access_mode Access_Mode=access_mode::read_write, support_mode Support_Mode = support_mode::abort_op>
    struct call_wrapper {
       template <typename Receiver>
       constexpr call_wrapper(Receiver&& receiver)
@@ -100,7 +100,7 @@ namespace eosio {
       using orig_ret_type = typename detail::function_traits<decltype(Func_Ref)>::return_type;
 
       using return_type = std::conditional_t<
-         Support_Mode == support_mode::abort,   // if Support_Mode is abort
+         Support_Mode == support_mode::abort_op,// if Support_Mode is abort_op
          orig_ret_type,                         // use the original return type
          std::conditional_t<                    // else
             std::is_void<orig_ret_type>::value, // original return type is void
@@ -126,8 +126,8 @@ namespace eosio {
          auto ret_val_size = internal_use_do_not_use::call(receiver.value, flags, data.data(), data.size());
 
          if (ret_val_size < 0) {  // the receiver does not support sync calls
-            if constexpr (Support_Mode == support_mode::abort) {
-               check(false, "receiver does not support sync call but support_mode is set to abort");
+            if constexpr (Support_Mode == support_mode::abort_op) {
+               check(false, "receiver does not support sync call but support_mode is set to abort_op");
             } else {
                return std::nullopt;
             }
