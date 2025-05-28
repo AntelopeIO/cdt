@@ -15,7 +15,7 @@ using mvo = fc::mutable_variant_object;
 struct acct_and_code {
    account_name          acct;
    std::vector<uint8_t>  wasm;
-   char*                 abi;
+   char*                 abi = nullptr;
 };
 
 // The first account in the accounts vector is the action initiating the
