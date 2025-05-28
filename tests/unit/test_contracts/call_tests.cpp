@@ -11,9 +11,9 @@ public:
       std::vector<char> data{};
 
       // For now, because sync_call entry point has not been implemented yet and
-      // no_op_if_receiver_no_support_sync_call is set to true, call should return -1
+      // no_op_if_receiver_no_support_sync_call is set to true, call should return -2
       auto rc = eosio::call("calltests"_n, data, false /* read_only */, true /* no_op_if_receiver_no_support_sync_call */)();
-      eosio::check(rc == -1, "call did not return -1");
+      eosio::check(rc == -2, "call did not return -2");
 
       // call was not executed. return value size should be 0
       std::vector<char> value(10);
