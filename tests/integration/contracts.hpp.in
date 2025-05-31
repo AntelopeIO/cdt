@@ -48,5 +48,9 @@ namespace eosio::testing {
       static std::vector<char>    not_supported_abi() { return read_abi("${CMAKE_BINARY_DIR}/../unit/test_contracts/sync_call_not_supported.abi"); }
       static std::vector<uint8_t> single_func_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../unit/test_contracts/sync_call_single_func.wasm"); }
       static std::vector<char>    single_func_abi() { return read_abi("${CMAKE_BINARY_DIR}/../unit/test_contracts/sync_call_single_func.abi"); }
+      static std::vector<uint8_t> addr_book_callee_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../unit/test_contracts/sync_call_addr_book_callee.wasm"); }
+      static std::vector<char>    addr_book_callee_abi() { return read_abi("${CMAKE_BINARY_DIR}/../unit/test_contracts/sync_call_addr_book_callee.abi"); }
+      static std::vector<uint8_t> addr_book_caller_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../unit/test_contracts/sync_call_addr_book_caller.wasm"); }
+      static std::vector<char>    addr_book_caller_abi() { return read_abi("${CMAKE_BINARY_DIR}/../unit/test_contracts/sync_call_addr_book_caller.abi"); }
    };
 } //ns eosio::testing
