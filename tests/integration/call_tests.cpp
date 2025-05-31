@@ -76,6 +76,26 @@ BOOST_AUTO_TEST_CASE(multiple_params_test) { try {
    BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "wrpmulprmtst"_n, "caller"_n, {}));
 } FC_LOG_AND_RETHROW() }
 
+// Verify passing a struct parameter works correctly
+BOOST_AUTO_TEST_CASE(struct_param_test) { try {
+   call_tester t({
+      {"caller"_n, contracts::caller_wasm(), contracts::caller_abi().data()},
+      {"callee"_n, contracts::callee_wasm(), contracts::callee_abi().data()}
+   });
+
+   BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "structtest"_n, "caller"_n, {}));
+} FC_LOG_AND_RETHROW() }
+
+// Verify passing a mix of structs and integer works correctly
+BOOST_AUTO_TEST_CASE(mix_struct_int_params_test) { try {
+   call_tester t({
+      {"caller"_n, contracts::caller_wasm(), contracts::caller_abi().data()},
+      {"callee"_n, contracts::callee_wasm(), contracts::callee_abi().data()}
+   });
+
+   BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "structinttst"_n, "caller"_n, {}));
+} FC_LOG_AND_RETHROW() }
+
 // Verify a sync call to a void function works properly.
 BOOST_AUTO_TEST_CASE(void_func_test) { try {
    call_tester t({

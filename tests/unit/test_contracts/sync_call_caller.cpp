@@ -67,14 +67,39 @@ public:
       return_value.resize(expected_size);
       auto actual_size = eosio::get_call_return_value(return_value.data(), return_value.size());
       eosio::check(actual_size == expected_size, "actual_size not equal to expected_size");
-      eosio::check(eosio::unpack<uint32_t>(return_value) == 60u, "sum of 10, 20, an 30 not 60");  // sum returns the sum of the 3 arguments
+      eosio::check(eosio::unpack<uint32_t>(return_value) == 60u, "sum of 10, 20, and 30 not 60");  // sum returns the sum of the 3 arguments
    }
 
    // Using call_wrapper, testing multiple parameters passing
    [[eosio::action]]
    void wrpmulprmtst() {
       sync_call_callee::sum_func sum{ "callee"_n };
-      eosio::check(sum(10, 20, 30) == 60u, "sum of 10, 20, an 30 not 60");
+      eosio::check(sum(10, 20, 30) == 60u, "sum of 10, 20, and 30 not 60");
+   }
+
+   // Verify single struct parameter passing
+   [[eosio::action]]
+   void structtest() {
+      sync_call_callee::structonly_func func{ "callee"_n };
+      struct1_t input = { 10, 20 };
+      auto output = func(input); // structonly_func returns the input as is
+      eosio::check(output.a == input.a, "field a in output is not equal to a in input");
+      eosio::check(output.b == input.b, "field b in output is not equal to b in input");
+   }
+
+   // Verify mix of struct and integer parameters passing
+   [[eosio::action]]
+   void structinttst() {
+      sync_call_callee::structmix_func func{ "callee"_n };
+      struct1_t input1 = { 10, 20 };
+      struct2_t input2 = { 'a', true, 50, 100 };
+      int32_t m = 2;
+
+      // structmix_func multiply each field of input1 by m,
+      // add last two fields of input2, and return a struct1_t
+      auto output = func(input1, m, input2);
+      eosio::check(output.a == m * input1.a + input2.c, "field a of output is not correct");
+      eosio::check(output.b == m * input1.b + input2.d, "field b of output is not correct");
    }
 
    [[eosio::action]]
