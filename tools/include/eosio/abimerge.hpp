@@ -195,9 +195,9 @@ class ABIMerger {
       }
 
       ojson merge_calls(ojson b) {
-         ojson acts = ojson::array();
-         add_object_to_array(acts, abi, b, "calls", "name", call_is_same);
-         return acts;
+         ojson calls = ojson::array();
+         add_object_to_array(calls, abi, b, "calls", "name", call_is_same);
+         return calls;
       }
 
       ojson merge_tables(ojson b) {

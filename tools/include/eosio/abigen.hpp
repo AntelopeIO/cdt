@@ -588,10 +588,10 @@ namespace eosio { namespace cdt {
          return o;
       }
 
-      ojson call_to_json( const abi_call& a ) {
+      ojson call_to_json( const abi_call& c ) {
          ojson o;
-         o["name"] = a.name;
-         o["type"] = a.type;
+         o["name"] = c.name;
+         o["type"] = c.type;
          return o;
       }
 
