@@ -253,6 +253,21 @@ namespace eosio { namespace cdt {
       void add_struct( const clang::CXXMethodDecl* decl ) {
          abi_struct new_struct;
          new_struct.name = decl->getNameAsString();
+
+         if (decl->isEosioCall()) {
+            // Add call_data_header definition to structs set
+            abi_struct data_header;
+            data_header.name = "call_data_header";
+            if (_abi.structs.count(data_header) == 0) {
+               data_header.fields.push_back({"version", "uint32"});
+               data_header.fields.push_back({"func_name", "uint64"});
+               _abi.structs.insert(data_header);
+            }
+
+            // Add header field as the first field to the method struct
+            new_struct.fields.push_back({"header", "call_data_header"});
+         }
+
          for (auto param : decl->parameters() ) {
             auto param_type = param->getType().getNonReferenceType().getUnqualifiedType();
             new_struct.fields.push_back({param->getNameAsString(), get_type(param_type)});

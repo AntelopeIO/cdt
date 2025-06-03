@@ -4,14 +4,37 @@
     "types": [],
     "structs": [
         {
+            "name": "call_data_header",
+            "base": "",
+            "fields": [
+                {
+                    "name": "version",
+                    "type": "uint32"
+                },
+                {
+                    "name": "func_name",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
             "name": "noparam",
             "base": "",
-            "fields": []
+            "fields": [
+                {
+                    "name": "headrer",
+                    "type": "call_data_header"
+                }
+            ]
         },
         {
             "name": "sum",
             "base": "",
             "fields": [
+                {
+                    "name": "headrer",
+                    "type": "call_data_header"
+                },
                 {
                     "name": "a",
                     "type": "uint32"
@@ -29,12 +52,21 @@
         {
             "name": "voidfunc",
             "base": "",
-            "fields": []
+            "fields": [
+                {
+                    "name": "headrer",
+                    "type": "call_data_header"
+                }
+            ]
         },
         {
             "name": "withparam",
             "base": "",
             "fields": [
+                {
+                    "name": "headrer",
+                    "type": "call_data_header"
+                },
                 {
                     "name": "in",
                     "type": "uint32"
