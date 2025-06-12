@@ -100,7 +100,7 @@ namespace eosio {
          uint64_t flags = read_only ? 0x01 : 0x00; // last bit indicating read only
          auto retval =  internal_use_do_not_use::call(receiver.value, flags, data.data(), data.size());
 
-         if (retval == -1) {  // sync call is not supported by the receiver contract
+         if (retval == -2) {  // sync call is not supported by the receiver contract
             check(no_op_if_receiver_not_support_sync_call, "receiver does not support sync call but no_op_if_receiver_not_support_sync_call flag is not set");
          }
          return retval;

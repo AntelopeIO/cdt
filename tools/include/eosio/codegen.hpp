@@ -53,6 +53,7 @@ namespace eosio { namespace cdt {
          std::set<std::string> datastream_uses;
          std::set<std::string> actions;
          std::set<std::string> notify_handlers;
+         std::set<std::string> calls;
          ASTContext *ast_context;
          std::map<std::string, CXXMethodDecl*> cxx_methods;
          std::map<std::string, CXXRecordDecl*> cxx_records;
@@ -221,27 +222,84 @@ namespace eosio { namespace cdt {
             create_dispatch("eosio_wasm_notify", "__eosio_notify_", func, decl);
          }
 
+         // Generate sync call dispatcher
+         void create_call_dispatch(CXXMethodDecl* decl) {
+            const std::string attr = "eosio_wasm_call";
+            const std::string func_name = "__eosio_call_";
+            const std::string call_name = generation_utils::get_call_name(decl);
+            constexpr static uint32_t max_stack_size = 512;
+            codegen& cg = codegen::get();
+            std::string nm = decl->getNameAsString()+"_"+decl->getParent()->getNameAsString();
+            if (cg.is_eosio_contract(decl, cg.contract_name)) {
+               ss << "\n\n#include <eosio/datastream.hpp>\n";
+               ss << "#include <eosio/name.hpp>\n";
+               ss << "extern \"C\" {\n";
+               ss << "__attribute__((eosio_wasm_import))\n";
+               ss << "uint32_t get_call_data(void*, uint32_t);\n";
+               const auto& return_ty = decl->getReturnType().getAsString();
+               if (return_ty != "void") {
+                  ss << "__attribute__((eosio_wasm_import))\n";
+                  ss << "void set_call_return_value(void*, size_t);\n";
+               }
+               ss << "__attribute__((weak, " << attr << "(\"";
+               ss << call_name;
+               ss << ":";
+               ss << func_name << nm;
+               ss << "\"))) void " << func_name << nm << "(unsigned long long s, unsigned long long r, size_t sz) {\n"; // sync_call entry function calls this dispatcher with arguments `sender`, `receiver`, and `data_size`
+               ss << "void* buff = nullptr;\n";
+               ss << "if (sz > 0) {\n";
+               ss << "buff = sz >= " << max_stack_size << " ? malloc(sz) : alloca(sz);\n";
+               ss << "::get_call_data(buff, sz);\n";
+               ss << "}\n";
+               ss << "eosio::datastream<const char*> ds{(char*)buff, sz};\n";
+               int i=0;
+               for (auto param : decl->parameters()) {
+                  clang::LangOptions lang_opts;
+                  lang_opts.CPlusPlus = true;
+                  lang_opts.Bool = true;
+                  clang::PrintingPolicy policy(lang_opts);
+                  auto qt = param->getOriginalType().getNonReferenceType();
+                  qt.removeLocalConst();
+                  qt.removeLocalVolatile();
+                  qt.removeLocalRestrict();
+                  std::string tn = clang::TypeName::getFullyQualifiedName(qt, *(cg.ast_context), policy);
+                  ss << tn << " arg" << i << "; ds >> arg" << i << ";\n";
+                  i++;
+               }
+               const auto& call_function = [&]() {
+                  ss << decl->getParent()->getQualifiedNameAsString() << "{eosio::name{r},eosio::name{r},ds}." << decl->getNameAsString() << "(";
+                  for (int i=0; i < decl->parameters().size(); i++) {
+                     ss << "arg" << i;
+                     if (i < decl->parameters().size()-1)
+                        ss << ", ";
+                  }
+                  ss << ");\n";
+               };
+               if (return_ty != "void") {
+                  ss << "const auto& result = ";
+               }
+               call_function();
+               if (return_ty != "void") {
+                  ss << "const auto& packed_result = eosio::pack(result);\n";
+                  ss << "set_call_return_value((void*)packed_result.data(), packed_result.size());\n";
+               }
+               ss << "}}\n";
+            }
+         }
+
          virtual bool VisitCXXMethodDecl(CXXMethodDecl* decl) {
             std::string name = decl->getNameAsString();
-            static std::set<std::string> _action_set; //used for validations
-            static std::set<std::string> _notify_set; //used for validations
             if (decl->isEosioAction()) {
                name = generation_utils::get_action_name(decl);
                validate_name(name, [&](auto s) {
                   CDT_ERROR("codegen_error", decl->getLocation(), std::string("action name (")+s+") is not a valid eosio name");
                });
 
-               if (!_action_set.count(name))
-                  _action_set.insert(name);
-               else {
-                  auto itr = _action_set.find(name);
-                  CDT_CHECK_ERROR(*itr == name, "codegen_error", decl->getLocation(), "action declaration doesn't match previous declaration");
-               }
                std::string full_action_name = decl->getNameAsString() + ((decl->getParent()) ? decl->getParent()->getNameAsString() : "");
                if (cg.actions.count(full_action_name) == 0) {
                   create_action_dispatch(decl);
+                  cg.actions.insert(full_action_name); // insert the method action, so we don't create the dispatcher twice
                }
-               cg.actions.insert(full_action_name); // insert the method action, so we don't create the dispatcher twice
 
                if (decl->isEosioReadOnly()) {
                   read_only_actions.insert(decl);
@@ -259,18 +317,25 @@ namespace eosio { namespace cdt {
                   CDT_ERROR("codegen_error", decl->getLocation(), std::string("name (")+s+") is invalid");
                });
 
-               if (!_notify_set.count(name))
-                  _notify_set.insert(name);
-               else {
-                  auto itr = _notify_set.find(name);
-                  CDT_CHECK_ERROR(*itr == name, "codegen_error", decl->getLocation(), "action declaration doesn't match previous declaration");
-               }
-
                std::string full_notify_name = decl->getNameAsString() + ((decl->getParent()) ? decl->getParent()->getNameAsString() : "");
                if (cg.notify_handlers.count(full_notify_name) == 0) {
                   create_notify_dispatch(decl);
+                  cg.notify_handlers.insert(full_notify_name); // insert the method action, so we don't create the dispatcher twice
                }
-               cg.notify_handlers.insert(full_notify_name); // insert the method action, so we don't create the dispatcher twice
+            }
+
+            // We allow a method to be tagged as both `action` and `call`
+            if (decl->isEosioCall()) {
+               name = generation_utils::get_call_name(decl);
+               validate_name(name, [&](auto s) {
+                  CDT_ERROR("codegen_error", decl->getLocation(), std::string("call name (")+s+") is not a valid eosio name");
+               });
+
+               std::string full_call_name = decl->getNameAsString() + ((decl->getParent()) ? decl->getParent()->getNameAsString() : "");
+               if (cg.calls.count(full_call_name) == 0) {
+                  create_call_dispatch(decl);
+                  cg.calls.insert(full_call_name); // insert the sync call method name, so we don't create the dispatcher twice
+               }
             }
 
             return true;
@@ -465,7 +530,7 @@ namespace eosio { namespace cdt {
                for (auto nd : visitor->notify_decls)
                   visitor->create_notify_dispatch(nd);
 
-               if (cg.actions.size() < 1 && cg.notify_handlers.size() < 1) {
+               if (cg.actions.size() < 1 && cg.notify_handlers.size() < 1 && cg.calls.size() < 1) {
                   return;
                }
 
