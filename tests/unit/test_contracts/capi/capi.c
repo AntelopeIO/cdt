@@ -9,6 +9,7 @@ void test_print( void );
 void test_privileged( void );
 void test_system( void );
 void test_transaction( void );
+void test_call( void );
 
 void apply( uint64_t a, uint64_t b, uint64_t c ) {
    if(a != 0xed234054a367196eull) return; // random value that should not be used
@@ -21,4 +22,5 @@ void apply( uint64_t a, uint64_t b, uint64_t c ) {
    test_privileged();
    test_system();
    test_transaction();
+   test_call();
 }

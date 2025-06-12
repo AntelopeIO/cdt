@@ -39,5 +39,8 @@ namespace eosio::testing {
 
       static std::vector<uint8_t> test_multi_index_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../unit/test_contracts/test_multi_index.wasm"); }
       static std::vector<char>    test_multi_index_abi() { return read_abi("${CMAKE_BINARY_DIR}/../unit/test_contracts/test_multi_index.abi"); }
+      
+      static std::vector<uint8_t> call_test_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../unit/test_contracts/call_tests.wasm"); }
+      static std::vector<char>    call_test_abi() { return read_abi("${CMAKE_BINARY_DIR}/../unit/test_contracts/call_tests.abi"); }
    };
 } //ns eosio::testing
