@@ -163,7 +163,7 @@ struct bitset {
             bs.set(num_bits - i - 1); // high bitset indexes come first in the JSON representation
             break;
          default:
-            throw std::invalid_argument( "unexpected character in bitset string representation" );
+            eosio::check(false, "unexpected character in bitset string representation");
             break;
          }
       }
