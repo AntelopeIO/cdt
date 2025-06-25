@@ -1,6 +1,6 @@
 {
     "antelope-spring-dev":{
-       "target":"main",
+       "target":"release/2.0",
        "prerelease":false
     }
  }
