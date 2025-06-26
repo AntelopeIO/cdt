@@ -1,5 +1,6 @@
 #include <eosio/eosio.hpp>
 #include <eosio/transaction.hpp>
+#include <eosio/bitset.hpp>
 
 #include "transfer.hpp" 
 
@@ -59,6 +60,17 @@ class [[eosio::contract]] simple_tests : public contract {
          std::vector<char> data = pack(nm);
          t.actions.push_back(act);
          t.send(nm.value, get_self());
+      }
+
+      [[eosio::action]]
+      eosio::bitset testbs(eosio::bitset b) {
+         for (size_t i=0; i<b.size(); ++i) {
+            if (b[i])
+               b.clear(i);
+            else
+               b.set(i);
+         }
+         return b;
       }
 
       [[eosio::on_notify("eosio.token::transfer")]] 
