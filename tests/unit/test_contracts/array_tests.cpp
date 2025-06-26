@@ -65,8 +65,7 @@ class [[eosio::contract]] array_tests : public contract {
       }
    }
 
-   // test parameter  using std::array
-   // not supported so far
+   // test parameter using std::array
    [[eosio::action]]
    void testpa(std::array<int,4> input){
       std::array<int,4> arr = input;
@@ -76,12 +75,21 @@ class [[eosio::contract]] array_tests : public contract {
       eosio::cout << "\n";
    }
 
-   // test return using std::array, not supported so far
+   // test parameter and return value using std::array
    [[eosio::action]]
    // cleos -v push action eosio testre '[[1,2,3,4]]' -p eosio@active
    std::array<int,4> testre(std::array<int,4> input){
       std::array<int,4> arr = input;
       for(auto & v : arr) v += 1;
+      return arr;
+   }
+
+   // test return value using std::array
+   [[eosio::action]]
+   // cleos -v push action eosio testre2 '[[1,2,3,4]]' -p eosio@active
+   std::array<int,4> testre2(std::vector<int> input){
+      std::array<int,4> arr;
+      for(size_t i=0; i<4; ++i) arr[i] = input[i+1];
       return arr;
    }
 
