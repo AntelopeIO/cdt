@@ -94,5 +94,4 @@ BOOST_FIXTURE_TEST_CASE( std_vector_return_value, tester ) try {
 } FC_LOG_AND_RETHROW()
 
 
-
 BOOST_AUTO_TEST_SUITE_END()
