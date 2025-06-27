@@ -308,26 +308,17 @@ namespace eosio { namespace cdt {
 
          virtual bool VisitCXXMethodDecl(CXXMethodDecl* decl) {
             std::string name = decl->getNameAsString();
-            static std::set<std::string> _action_set; //used for validations
-            static std::set<std::string> _notify_set; //used for validations
-            static std::set<std::string> _call_set; //used for validations
             if (decl->isEosioAction()) {
                name = generation_utils::get_action_name(decl);
                validate_name(name, [&](auto s) {
                   CDT_ERROR("codegen_error", decl->getLocation(), std::string("action name (")+s+") is not a valid eosio name");
                });
 
-               if (!_action_set.count(name))
-                  _action_set.insert(name);
-               else {
-                  auto itr = _action_set.find(name);
-                  CDT_CHECK_ERROR(*itr == name, "codegen_error", decl->getLocation(), "action declaration doesn't match previous declaration");
-               }
                std::string full_action_name = decl->getNameAsString() + ((decl->getParent()) ? decl->getParent()->getNameAsString() : "");
                if (cg.actions.count(full_action_name) == 0) {
                   create_action_dispatch(decl);
+                  cg.actions.insert(full_action_name); // insert the method action, so we don't create the dispatcher twice
                }
-               cg.actions.insert(full_action_name); // insert the method action, so we don't create the dispatcher twice
 
                if (decl->isEosioReadOnly()) {
                   read_only_actions.insert(decl);
@@ -345,18 +336,11 @@ namespace eosio { namespace cdt {
                   CDT_ERROR("codegen_error", decl->getLocation(), std::string("name (")+s+") is invalid");
                });
 
-               if (!_notify_set.count(name))
-                  _notify_set.insert(name);
-               else {
-                  auto itr = _notify_set.find(name);
-                  CDT_CHECK_ERROR(*itr == name, "codegen_error", decl->getLocation(), "action declaration doesn't match previous declaration");
-               }
-
                std::string full_notify_name = decl->getNameAsString() + ((decl->getParent()) ? decl->getParent()->getNameAsString() : "");
                if (cg.notify_handlers.count(full_notify_name) == 0) {
                   create_notify_dispatch(decl);
+                  cg.notify_handlers.insert(full_notify_name); // insert the method action, so we don't create the dispatcher twice
                }
-               cg.notify_handlers.insert(full_notify_name); // insert the method action, so we don't create the dispatcher twice
             }
 
             // We allow a method to be tagged as both `action` and `call`
@@ -381,8 +365,8 @@ namespace eosio { namespace cdt {
                std::string full_call_name = decl->getNameAsString() + ((decl->getParent()) ? decl->getParent()->getNameAsString() : "");
                if (cg.calls.count(full_call_name) == 0) {
                   create_call_dispatch(decl);
+                  cg.calls.insert(full_call_name); // insert the sync call method name, so we don't create the dispatcher twice
                }
-               cg.calls.insert(full_call_name); // insert the method call, so we don't create the dispatcher twice
             }
 
             return true;
