@@ -234,8 +234,6 @@ namespace eosio { namespace cdt {
                ss << "\n\n#include <eosio/datastream.hpp>\n";
                ss << "#include <eosio/name.hpp>\n";
                ss << "extern \"C\" {\n";
-               ss << "__attribute__((eosio_wasm_import))\n";
-               ss << "uint32_t get_call_data(void*, uint32_t);\n";
                const auto& return_ty = decl->getReturnType().getAsString();
                if (return_ty != "void") {
                   ss << "__attribute__((eosio_wasm_import))\n";
@@ -245,13 +243,9 @@ namespace eosio { namespace cdt {
                ss << call_name;
                ss << ":";
                ss << func_name << nm;
-               ss << "\"))) void " << func_name << nm << "(unsigned long long s, unsigned long long r, size_t sz) {\n"; // sync_call entry function calls this dispatcher with arguments `sender`, `receiver`, and `data_size`
-               ss << "void* buff = nullptr;\n";
-               ss << "if (sz > 0) {\n";
-               ss << "buff = sz >= " << max_stack_size << " ? malloc(sz) : alloca(sz);\n";
-               ss << "::get_call_data(buff, sz);\n";
-               ss << "}\n";
-               ss << "eosio::datastream<const char*> ds{(char*)buff, sz};\n";
+               ss << "\"))) void " << func_name << nm << "(unsigned long long sender, unsigned long long receiver, size_t data_size, void* data) {\n";
+               ss << "eosio::datastream<const char*> ds{(char*)data, data_size};\n";
+               ss << "unsigned long long func_name; ds >> func_name;\n"; // skip called function name
                int i=0;
                for (auto param : decl->parameters()) {
                   clang::LangOptions lang_opts;
@@ -267,7 +261,7 @@ namespace eosio { namespace cdt {
                   i++;
                }
                const auto& call_function = [&]() {
-                  ss << decl->getParent()->getQualifiedNameAsString() << "{eosio::name{r},eosio::name{r},ds}." << decl->getNameAsString() << "(";
+                  ss << decl->getParent()->getQualifiedNameAsString() << "{eosio::name{receiver},eosio::name{receiver},ds}." << decl->getNameAsString() << "(";
                   for (int i=0; i < decl->parameters().size(); i++) {
                      ss << "arg" << i;
                      if (i < decl->parameters().size()-1)
@@ -285,6 +279,31 @@ namespace eosio { namespace cdt {
                }
                ss << "}}\n";
             }
+         }
+
+         // Generate get_sync_call_func_name which returns called function name
+         static void create_get_sync_call_func_name(std::stringstream& ss) {
+            ss << "\n\n#include <eosio/datastream.hpp>\n";
+            ss << "#include <eosio/name.hpp>\n";
+            ss << "extern \"C\" {\n";
+            ss << "__attribute__((weak)) unsigned long long  __eos_get_sync_call_func_name_(void* data) {\n";
+            ss << "eosio::datastream<const char*> ds{(char*)data, sizeof(unsigned long long)};\n";
+            ss << "unsigned long long func_name; ds >> func_name;\n";
+            ss << "return func_name;\n";
+            ss << "}}\n";
+         }
+
+         // Generate get_sync_call_data which returns call data
+         static void create_get_sync_call_data(std::stringstream& ss) {
+            ss << "\n\n#include <eosio/datastream.hpp>\n";
+            ss << "#include <eosio/name.hpp>\n";
+            ss << "extern \"C\" {\n";
+            ss << "__attribute__((eosio_wasm_import)) uint32_t get_call_data(void*, uint32_t);\n";
+            ss << "__attribute__((weak)) void* __eos_get_sync_call_data_(unsigned long size) {\n";
+            ss << "void* data = malloc(size);\n";
+            ss << "::get_call_data(data, size);\n";
+            ss << "return data;\n";
+            ss << "}}\n";
          }
 
          virtual bool VisitCXXMethodDecl(CXXMethodDecl* decl) {
@@ -331,6 +350,18 @@ namespace eosio { namespace cdt {
                   CDT_ERROR("codegen_error", decl->getLocation(), std::string("call name (")+s+") is not a valid eosio name");
                });
 
+               // Genereate create_get_sync_call_data and get_sync_call_func_name only once
+               if (_call_set.empty()) {
+                  create_get_sync_call_data(ss);
+                  create_get_sync_call_func_name(ss);
+               }
+
+               if (!_call_set.count(name))
+                  _call_set.insert(name);
+               else {
+                  auto itr = _call_set.find(name);
+                  CDT_CHECK_ERROR(*itr == name, "codegen_error", decl->getLocation(), "call declaration doesn't match previous declaration");
+               }
                std::string full_call_name = decl->getNameAsString() + ((decl->getParent()) ? decl->getParent()->getNameAsString() : "");
                if (cg.calls.count(full_call_name) == 0) {
                   create_call_dispatch(decl);

@@ -509,6 +509,7 @@ static void GetLdDefaults(std::vector<std::string>& ldopts) {
             ldopts.insert(ldopts.end(), { "-e", "apply" });
          ldopts.insert(ldopts.end(), { "--only-export", "apply:function" });
          ldopts.insert(ldopts.end(), { "--only-export", "*:memory" });
+         ldopts.insert(ldopts.end(), { "--only-export", "sync_call:function" });
       }
       ldopts.emplace_back("-lc++");
       ldopts.emplace_back("-lc");

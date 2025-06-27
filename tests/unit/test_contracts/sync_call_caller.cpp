@@ -1,0 +1,55 @@
+#include <eosio/eosio.hpp>
+#include <eosio/call.hpp>
+
+class [[eosio::contract]] sync_call_caller : public eosio::contract{
+public:
+   using contract::contract;
+
+   [[eosio::action]]
+   void retvaltest() {
+      auto expected_size = eosio::call("callee"_n, "getten"_n)();
+      eosio::check(expected_size >= 0, "call did not return a positive value");
+
+      std::vector<char> return_value;
+      return_value.resize(expected_size);
+      auto actual_size = eosio::get_call_return_value(return_value.data(), return_value.size());
+      eosio::check(actual_size == expected_size, "actual_size not equal to expected_size");
+      eosio::check(eosio::unpack<uint32_t>(return_value) == 10u, "return value not 10");  // getten always returns 10
+   }
+
+   [[eosio::action]]
+   void paramtest() {
+      // `getback(uint32_t p)` returns p
+      auto expected_size = eosio::call("callee"_n, std::make_tuple("getback"_n, 5))();
+      eosio::check(expected_size >= 0, "call did not return a positive value");
+
+      std::vector<char> return_value;
+      return_value.resize(expected_size);
+      auto actual_size = eosio::get_call_return_value(return_value.data(), return_value.size());
+      eosio::check(actual_size == expected_size, "actual_size not equal to expected_size");
+      eosio::check(eosio::unpack<uint32_t>(return_value) == 5u, "return value not 5");  // getback returns back the same value of parameter
+   }
+
+   [[eosio::action]]
+   void mulparamtest() {
+      auto expected_size = eosio::call("callee"_n, std::make_tuple("sum"_n, 10, 20, 30))();
+      eosio::check(expected_size >= 0, "call did not return a positive value");
+
+      std::vector<char> return_value;
+      return_value.resize(expected_size);
+      auto actual_size = eosio::get_call_return_value(return_value.data(), return_value.size());
+      eosio::check(actual_size == expected_size, "actual_size not equal to expected_size");
+      eosio::check(eosio::unpack<uint32_t>(return_value) == 60u, "return value not 60");  // sum returns the sum of the 3 arguments
+   }
+
+   [[eosio::action]]
+   void voidfunctest() {
+      auto expected_size = eosio::call("callee"_n, "voidfunc"_n)();
+      eosio::check(expected_size == 0, "call did not return 0"); // void function. return value size should be 0
+   }
+
+   [[eosio::action]]
+   void unknwnfuntst() {
+      eosio::call("callee"_n, "unknwnfunc"_n)(); // unknwnfunc will never be in "callee"_n contract
+   }
+};
