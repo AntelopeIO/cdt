@@ -1,0 +1,9 @@
+{
+   "tests" : [
+      {
+         "expected" : {
+            "abi-file" : "sync_call_test.abi"
+         }
+      }
+   ]
+}

@@ -948,9 +948,13 @@ static Options CreateOptions(bool add_defaults=true) {
 
 #endif
 
+   // 1.2 -- action results
+   // 1.3 -- sync calls, bitset type, action and sync call names in C++
+   //        identifier format
+
    /* TODO add some way of defaulting these to the current highest version */
    int abi_version_major = 1;
-   int abi_version_minor = 2;
+   int abi_version_minor = 3;
 
    if (!abi_version_opt.empty()) {
       abi_version_major = std::stoi(abi_version_opt);

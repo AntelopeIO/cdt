@@ -1,10 +1,10 @@
 {
     "tests" : [
        {
+          "compile_flags": ["--abi-version=1.2"],
           "expected" : {
              "abi-file" : "singleton_contract.abi"
           }
        }
     ]
  }
- 
