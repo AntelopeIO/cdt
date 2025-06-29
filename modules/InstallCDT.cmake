@@ -1,6 +1,6 @@
 add_custom_command( TARGET CDTClang POST_BUILD COMMAND mkdir -p ${CMAKE_BINARY_DIR}/bin )
 macro( cdt_clang_install file )
-   set(BINARY_DIR ${CMAKE_BINARY_DIR}/cdt-llvm/bin)
+   set(BINARY_DIR ${CMAKE_BINARY_DIR}/llvm/llvm/bin)
    add_custom_command( TARGET CDTClang POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${BINARY_DIR}/${file} ${CMAKE_BINARY_DIR}/bin/ )
    install(FILES ${BINARY_DIR}/${file}
       DESTINATION ${CDT_INSTALL_PREFIX}/bin
@@ -8,7 +8,7 @@ macro( cdt_clang_install file )
 endmacro( cdt_clang_install )
 
 macro( cdt_clang_install_and_symlink file symlink )
-   set(BINARY_DIR ${CMAKE_BINARY_DIR}/cdt-llvm/bin)
+   set(BINARY_DIR ${CMAKE_BINARY_DIR}/llvm/llvm/bin)
    add_custom_command( TARGET CDTClang POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${BINARY_DIR}/${file} ${CMAKE_BINARY_DIR}/bin/ )
    add_custom_command( TARGET CDTClang POST_BUILD COMMAND cd ${CMAKE_BINARY_DIR}/bin && ln -sf ${file} ${symlink} )
    install(FILES ${BINARY_DIR}/${file}
@@ -63,7 +63,7 @@ cdt_clang_install(llc)
 cdt_clang_install(lld)
 cdt_clang_install(ld.lld)
 cdt_clang_install(ld64.lld)
-cdt_clang_install(clang-9)
+cdt_clang_install(clang-16)
 cdt_clang_install(wasm-ld)
 
 cdt_tool_install_and_symlink(eosio-pp cdt-pp)

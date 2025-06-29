@@ -51,7 +51,7 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #=============================================================================
 
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.5)
 
 ########## Private ##########
 if(NOT DEFINED RE2C_PUBLIC_VAR_NS)
