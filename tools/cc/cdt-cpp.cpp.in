@@ -64,7 +64,7 @@ void generate(const std::vector<std::string>& base_options, std::string input, s
 
    abigen::get().set_contract_name(contract_name);
    abigen::get().set_resource_dirs(resource_paths);
-   abigen::get().set_abi_version(std::get<0>(abi_version), std::get<1>(abi_version));
+   //abigen::get().set_abi_version(std::get<0>(abi_version), std::get<1>(abi_version));
    abigen::get().set_suppress_ricardian_warning(suppress_ricardian_warning);
    codegen::get().set_contract_name(contract_name);
    codegen::get().set_warn_action_read_only(warn_action_read_only);
