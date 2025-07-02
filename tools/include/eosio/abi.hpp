@@ -86,7 +86,7 @@ struct version_t {
 
 /// From eosio libraries/chain/include/eosio/chain/abi_def.hpp
 struct abi {
-   version_t                              version{1,0};
+   version_t                              version{1,2}; // base version is 1.2, add features (bitset, sync calls) push to 1.3
    std::set<abi_struct>                   structs;
    std::set<abi_typedef>                  typedefs;
    std::set<abi_action>                   actions;

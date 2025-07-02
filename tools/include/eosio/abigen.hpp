@@ -39,10 +39,8 @@ using jsoncons::ojson;
 
 namespace eosio::cdt {
 
-   const version_t variants_min_version{1,1};
-   const version_t binary_extension_min_version{1,1};
-   const version_t action_results_min_version{1,2};
    const version_t bitset_min_version{1,3};
+   const version_t sync_calls_min_version{1,3};
 
    class abigen : public generation_utils {
       std::set<std::string> checked_actions;
@@ -491,8 +489,6 @@ namespace eosio::cdt {
                add_typedef(type);
             }
             else if (is_template_specialization(type, {"vector", "set", "deque", "list", "optional", "binary_extension", "ignore"})) {
-               if (is_template_specialization(type, {"binary_extension"}))
-                  _abi.version.set_min(binary_extension_min_version);
                add_type(std::get<clang::QualType>(get_template_argument(type)));
             }
             else if (is_template_specialization(type, {"map"}))
@@ -615,12 +611,7 @@ namespace eosio::cdt {
          ojson o;
          o["____comment"] = generate_json_comment();
 
-         if (!_abi.variants.empty())
-             _abi.version.set_min(variants_min_version);
-         if (!_abi.action_results.empty())
-            _abi.version.set_min(action_results_min_version);
-
-         o["version"]     = _abi.version.str();
+         o["version"]     = _abi.version_string();
 
          o["structs"]     = ojson::array();
          auto remove_suffix = [&]( std::string name ) {
@@ -750,20 +741,16 @@ namespace eosio::cdt {
             o["ricardian_clauses"].push_back(clause_to_json( rc ));
          }
 
-         if (!(_abi.version < variants_min_version)) {
-            o["variants"]   = ojson::array();
-            for ( auto v : _abi.variants ) {
-               o["variants"].push_back(variant_to_json( v ));
-            }
+         o["variants"]   = ojson::array();
+         for ( auto v : _abi.variants ) {
+            o["variants"].push_back(variant_to_json( v ));
          }
 
          o["abi_extensions"]     = ojson::array();
 
-         if (!(_abi.version < action_results_min_version)) {
-            o["action_results"]  = ojson::array();
-            for ( auto ar : _abi.action_results ) {
-               o["action_results"].push_back(action_result_to_json( ar ));
-            }
+         o["action_results"]  = ojson::array();
+         for ( auto ar : _abi.action_results ) {
+            o["action_results"].push_back(action_result_to_json( ar ));
          }
          return o;
       }
