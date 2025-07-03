@@ -64,7 +64,15 @@ void generate(const std::vector<std::string>& base_options, std::string input, s
 
    abigen::get().set_contract_name(contract_name);
    abigen::get().set_resource_dirs(resource_paths);
-   abigen::get().set_abi_version(std::get<0>(abi_version), std::get<1>(abi_version));
+
+   // We used to accept a command line option `--abi-version` which allowed a user to force an abi version
+   // to be generated.
+   // Since https://github.com/AntelopeIO/cdt/pull/360, this command line flag is ignored, and the abi
+   // version is generated according to the features used in the contract being compiled, starting from a
+   // base `1.2` version and up.
+   // ----------------------------------------------------------------------------------------------------
+   //      abigen::get().set_abi_version(std::get<0>(abi_version), std::get<1>(abi_version));
+
    abigen::get().set_suppress_ricardian_warning(suppress_ricardian_warning);
    codegen::get().set_contract_name(contract_name);
    codegen::get().set_warn_action_read_only(warn_action_read_only);

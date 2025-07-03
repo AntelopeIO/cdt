@@ -13,6 +13,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <unordered_map>
 #include <regex>
 #include <utility>
 #include <variant>
@@ -420,7 +421,7 @@ struct generation_utils {
    }
 
    std::string _translate_type( const std::string& t ) {
-      static std::map<std::string, std::string> translation_table =
+      static std::unordered_map<std::string, std::string> translation_table =
       {
          {"unsigned __int128", "uint128"},
          {"__int128", "int128"},
@@ -472,11 +473,10 @@ struct generation_utils {
          {"fixed_bytes_64", "checksum512"}
       };
 
-      auto ret = translation_table[t];
+      if (auto it = translation_table.find(t); it != translation_table.end())
+         return it->second;
 
-      if (ret == "")
-         return t;
-      return ret;
+      return t;
    }
 
    inline std::string replace_in_name( std::string name ) {
