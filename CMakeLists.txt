@@ -1,4 +1,6 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.21)
+project(cdt VERSION 4.2.0)
+
 
 # Sanity check our source directory to make sure that we are not trying to
 # generate an in-source build, and to make
@@ -11,10 +13,8 @@ This process created the file `CMakeCache.txt' and the directory `CMakeFiles'.
 Please delete them.")
 endif()
 
-project(cdt)
-
-set(VERSION_MAJOR 4)
-set(VERSION_MINOR 2)
+set(VERSION_MAJOR 5)
+set(VERSION_MINOR 0)
 set(VERSION_PATCH 0)
 set(VERSION_SUFFIX "dev")
 
@@ -45,6 +45,7 @@ endif()
 
 include(modules/ClangExternalProject.txt)
 include(modules/ToolsExternalProject.txt)
+include(cdt-llvm-extensions/LLVMPatch.txt)
 
 set(WASM_SDK_BUILD true)
 
@@ -89,7 +90,7 @@ configure_file(${CMAKE_SOURCE_DIR}/scripts/generate_rpm.sh ${CMAKE_BINARY_DIR}/p
 configure_file(${CMAKE_SOURCE_DIR}/scripts/generate_tarball.sh ${CMAKE_BINARY_DIR}/packages/generate_tarball.sh COPYONLY)
 
 # add licenses
-configure_file(${CMAKE_SOURCE_DIR}/cdt-llvm/LICENSE.TXT ${CMAKE_BINARY_DIR}/licenses/llvm.license COPYONLY)
+configure_file(${CMAKE_SOURCE_DIR}/llvm/LICENSE.TXT ${CMAKE_BINARY_DIR}/licenses/llvm.license COPYONLY)
 configure_file(${CMAKE_SOURCE_DIR}/libraries/boost/boost.license ${CMAKE_BINARY_DIR}/licenses/boost.license COPYONLY)
 configure_file(${CMAKE_SOURCE_DIR}/libraries/meta_refl/LICENSE ${CMAKE_BINARY_DIR}/licenses/meta_refl.license COPYONLY)
 configure_file(${CMAKE_SOURCE_DIR}/tools/external/wabt/LICENSE ${CMAKE_BINARY_DIR}/licenses/wabt.license COPYONLY)

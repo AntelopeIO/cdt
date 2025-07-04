@@ -143,7 +143,7 @@ namespace eosio::cdt {
          }
          abi_struct tup;
          tup.name = get_type(type);
-         for (int i = 0; i < tst->getNumArgs(); ++i) {
+         for (int i = 0; i < tst->template_arguments().size(); ++i) {
             clang::QualType ftype = std::get<clang::QualType>(get_template_argument(type, i));
             add_type(ftype);
             tup.fields.push_back( {"field_"+std::to_string(i),
@@ -268,7 +268,7 @@ namespace eosio::cdt {
          auto pt = llvm::dyn_cast<clang::ElaboratedType>(t.getTypePtr());
          auto tst = llvm::dyn_cast<clang::TemplateSpecializationType>((pt) ? pt->desugar().getTypePtr() : t.getTypePtr());
          var.name = get_type(t);
-         for (int i=0; i < tst->getNumArgs(); ++i) {
+         for (int i=0; i < tst->template_arguments().size(); ++i) {
             var.types.push_back(get_template_argument_as_string( t, i ));
             add_type(std::get<clang::QualType>(get_template_argument( t, i )));
          }
@@ -450,12 +450,12 @@ namespace eosio::cdt {
                   } else if (tname == "pair" ) {
                      add_explicit_nested_pair(type, depth, abidef, ret, tname, gottype);
                   } else if (tname == "tuple")  {
-                     int argcnt = tst->getNumArgs();
+                     int argcnt = tst->template_arguments().size();
                      add_explicit_nested_tuple(type, argcnt, depth, abidef, ret, tname, gottype);
                   } else if (tname == "array")  {
                      add_explicit_nested_array(type, depth, abidef, ret, tname, gottype);
                   } else if (tname == "variant") {
-                     int argcnt = tst->getNumArgs();
+                     int argcnt = tst->template_arguments().size();
                      add_explicit_nested_variant(type, argcnt, depth, abidef, ret, tname, gottype);
                   }
                }
@@ -933,7 +933,7 @@ namespace eosio::cdt {
       public:
          virtual std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI, StringRef file) {
             CI.getPreprocessor().addPPCallbacks(std::make_unique<eosio_ppcallbacks>(CI.getSourceManager(), file.str()));
-            return std::make_unique<eosio_abigen_consumer>(&CI, file);
+            return std::make_unique<eosio_abigen_consumer>(&CI, file.str());
          }
    };
 } // ns eosio::cdt

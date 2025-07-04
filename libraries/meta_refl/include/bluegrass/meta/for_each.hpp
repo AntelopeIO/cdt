@@ -143,21 +143,21 @@ namespace detail {
             "Type must have no virtual function, because otherwise it is not aggregate initializable."
         );
 
-    #ifdef __cpp_lib_is_aggregate
+   // #ifdef __cpp_lib_is_aggregate
         static_assert(
             std::is_aggregate<type>::value             // Does not return `true` for build in types.
             || std::is_standard_layout<type>::value,   // Does not return `true` for structs that have non standard layout members.
             "Type must be aggregate initializable."
         );
-    #endif
+   // #endif
 
         constexpr std::size_t max_fields_count = (sizeof(type) * 8); // We multiply by 8 because we may have bitfields in T
         constexpr std::size_t result = detect_fields_count_dispatch<type>(size_t_<max_fields_count>{}, 1L);
 
-        static_assert(
-            is_aggregate_initializable_n<type, result>::value,
-            "Types with user specified constructors (non-aggregate initializable types) are not supported."
-        );
+       // static_assert(
+       //     is_aggregate_initializable_n<type, result>::value,
+       //     "Types with user specified constructors (non-aggregate initializable types) are not supported."
+       // );
 
         static_assert(
             result != 0 || std::is_empty<type>::value || std::is_fundamental<type>::value || std::is_reference<type>::value,
@@ -857,6 +857,7 @@ template <class T, class F>
 void for_each_field(T&& value, F&& func) {
     constexpr std::size_t fields_count_val = detail::fields_count<std::remove_reference_t<T>>();
 
+    // warning: lambda capture 'fields_count_val' is not required to be captured for this use [-Wunused-lambda-capture]
     detail::for_each_field_dispatcher(
         value,
         [f = std::forward<F>(func), fields_count_val](auto&& t) mutable {

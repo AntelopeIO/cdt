@@ -21,17 +21,13 @@ static llvm::cl::OptionCategory EosioLdToolCategory("ld options");
 #endif
 
 /// begin ld options
-static cl::opt<bool> stack_canary_opt(
-   "stack-canary",
-   cl::desc("Stack canary for non stack first layouts"),
-   cl::cat(LD_CAT));
 static cl::opt<std::string> abi_version_opt(
     "abi-version",
     cl::desc("Which ABI version to generate"),
     cl::cat(LD_CAT));
-static cl::opt<std::string> only_export_opt(
-    "only-export",
-    cl::desc("Export only this symbol"),
+static cl::opt<std::string> export_opt(
+    "export",
+    cl::desc("Adds this symbol to export"),
     cl::cat(LD_CAT),
     cl::Hidden,
     cl::ZeroOrMore);
@@ -434,6 +430,8 @@ static void GetCompDefaults(std::vector<std::string>& copts) {
 #ifdef CPP_COMP
       copts.emplace_back("-fno-exceptions");
       copts.emplace_back("-fno-rtti");
+      // Warming: the '-fmodules-ts' flag is deprecated and it will be removed in Clang 17
+      // use '-std=c++20' or higher to use standard C++ modules instead [-Wdeprecated-module-ts]
       copts.emplace_back("-fmodules-ts");
       copts.emplace_back("-D_GNU_SOURCE=1");
 #endif
@@ -476,39 +474,39 @@ static void GetLdDefaults(std::vector<std::string>& ldopts) {
       if (fquery_opt || fquery_server_opt || fquery_client_opt) {
          ldopts.emplace_back("--export-table");
          ldopts.emplace_back("-other-model");
-         ldopts.insert(ldopts.end(), { "--only-export", "*:table" });
-         ldopts.insert(ldopts.end(), { "--only-export", "*:memory" });
+         ldopts.insert(ldopts.end(), { "--export=*:table" });
+         ldopts.insert(ldopts.end(), { "--export-memory" });
          if (fuse_main_opt) {
-            ldopts.insert(ldopts.end(), { "-e", "main" });
-            ldopts.insert(ldopts.end(), { "--only-export", "main:function" } );
+            ldopts.insert(ldopts.end(), { "--entry", "main" });
+            ldopts.insert(ldopts.end(), { "--export=main:function" } );
          }
          else {
-            ldopts.insert(ldopts.end(), { "-e", "initialize" } );
-            ldopts.insert(ldopts.end(), { "--only-export", "initialize:function" } );
-         }
-         if (fquery_server_opt)
-            ldopts.insert(ldopts.end(), { "-export", "run_query" });
-         else {
-            ldopts.insert(ldopts.end(), { "-export", "create_query_request" });
-            ldopts.insert(ldopts.end(), { "-export", "decode_query_response" });
-            ldopts.insert(ldopts.end(), { "-export", "describe_query_request" });
-            ldopts.insert(ldopts.end(), { "-export", "describe_query_response" });
+            ldopts.insert(ldopts.end(), { "--entry", "initialize" } );
+            ldopts.insert(ldopts.end(), { "--export=initialize:function" } );
          }
          if (fquery_server_opt)
-            ldopts.insert(ldopts.end(), { "--only-export", "run_query:function" });
+            ldopts.insert(ldopts.end(), { "--export=run_query" });
          else {
-            ldopts.insert(ldopts.end(), { "--only-export", "create_query_request:function" });
-            ldopts.insert(ldopts.end(), { "--only-export", "decode_query_response:function" });
-            ldopts.insert(ldopts.end(), { "--only-export", "describe_query_request:function" });
-            ldopts.insert(ldopts.end(), { "--only-export", "describe_query_response:function" });
+            ldopts.insert(ldopts.end(), { "--export=create_query_request" });
+            ldopts.insert(ldopts.end(), { "--export=decode_query_response" });
+            ldopts.insert(ldopts.end(), { "--export=describe_query_request" });
+            ldopts.insert(ldopts.end(), { "--export=describe_query_response" });
+         }
+         if (fquery_server_opt)
+            ldopts.insert(ldopts.end(), { "--export=run_query:function" });
+         else {
+            ldopts.insert(ldopts.end(), { "--export=create_query_request:function" });
+            ldopts.insert(ldopts.end(), { "--export=decode_query_response:function" });
+            ldopts.insert(ldopts.end(), { "--export=describe_query_request:function" });
+            ldopts.insert(ldopts.end(), { "--export=describe_query_response:function" });
          }
       } else {
          if (fuse_main_opt)
-            ldopts.insert(ldopts.end(), { "-e", "main" });
+            ldopts.insert(ldopts.end(), { "--entry", "main" });
          else
-            ldopts.insert(ldopts.end(), { "-e", "apply" });
-         ldopts.insert(ldopts.end(), { "--only-export", "apply:function" });
-         ldopts.insert(ldopts.end(), { "--only-export", "*:memory" });
+            ldopts.insert(ldopts.end(), { "--entry", "apply" });
+         ldopts.insert(ldopts.end(), { "--export=apply:function" });
+         ldopts.insert(ldopts.end(), { "--export-memory" });
       }
       ldopts.emplace_back("-lc++");
       ldopts.emplace_back("-lc");
@@ -524,9 +522,8 @@ static void GetLdDefaults(std::vector<std::string>& ldopts) {
       }
       if (fquery_opt || fquery_server_opt || fquery_client_opt)
          ldopts.emplace_back("-leosio_cmem");
-      if (!only_export_opt.empty()) {
-         ldopts.emplace_back("--only-export");
-         ldopts.emplace_back(only_export_opt);
+      if (!export_opt.empty()) {
+         ldopts.emplace_back("--export="+export_opt);
       }
 
       if (!mllvm_opt.empty()) {
@@ -536,21 +533,21 @@ static void GetLdDefaults(std::vector<std::string>& ldopts) {
 
    } else {
 #ifdef __APPLE__
-      ldopts.insert(ldopts.end(), {"-arch", "x86_64", "-macosx_version_min", "10.13", "-framework", "Foundation", "-framework", "System"});
+      ldopts.insert(ldopts.end(), {"-arch", "x86_64", "-macos_version_min", "10.13", "-framework", "Foundation", "-framework", "System"});
 
       llvm::SmallString<256> output;
       if(llvm::sys::fs::createTemporaryFile("cdtsdkroot", ".path", output))
          throw std::runtime_error("Failed to create tmp file");
       auto delete_output = llvm::make_scope_exit([&](){ llvm::sys::fs::remove(output); });
 
-      if(!eosio::cdt::environment::exec_subprogram("xcrun", {"--show-sdk-path"}, true, llvm::None, {output.str()}))
+      if(!eosio::cdt::environment::exec_subprogram("xcrun", {"--show-sdk-path"}, true, std::nullopt, {std::string(output.str())}))
          throw std::runtime_error("Failed to run xcrun --show-sdk-path");
 
       auto buf = llvm::MemoryBuffer::getFile(output);
       if(!buf)
          throw std::runtime_error("Failed to open tmp file");
 
-      std::string sdkpath = buf.get()->getBuffer();
+      std::string sdkpath = buf.get()->getBuffer().str();
       //remove newline
       sdkpath.resize(sdkpath.size()-1);
       ldopts.insert(ldopts.end(), {"-syslibroot", sdkpath});
@@ -809,11 +806,8 @@ static Options CreateOptions(bool add_defaults=true) {
 #endif
    if (!fnative_opt) {
 #ifdef ONLY_LD
-      if (stack_canary_opt) {
-         ldopts.emplace_back("--stack-canary");
-      }
       if (!fno_stack_first_opt) {
-         ldopts.emplace_back("-stack-first");
+         ldopts.emplace_back("--stack-first");
       }
       if (fno_lto_opt) {
          ldopts.emplace_back("--lto-O0");
