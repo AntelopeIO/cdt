@@ -3,6 +3,8 @@
 
 namespace eosio::testing {
    struct contracts {
+      static std::vector<uint8_t> array_tests_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../unit/test_contracts/array_tests.wasm"); }
+      static std::vector<char>    array_tests_abi() { return read_abi("${CMAKE_BINARY_DIR}/../unit/test_contracts/array_tests.abi"); }
       static std::vector<uint8_t> malloc_tests_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../unit/test_contracts/malloc_tests.wasm"); }
       static std::vector<char>    malloc_tests_abi() { return read_abi("${CMAKE_BINARY_DIR}/../unit/test_contracts/malloc_tests.abi"); }
       static std::vector<uint8_t> old_malloc_tests_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../unit/test_contracts/old_malloc_tests.wasm"); }
