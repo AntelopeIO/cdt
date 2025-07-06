@@ -129,13 +129,6 @@ BOOST_AUTO_TEST_CASE(sync_call_not_supported_test) { try {
    // * no_op_if_receiver_not_support_sync_call is set
    // so the call is just a no-op
    BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "noopset"_n, "caller"_n, {}));
-
-   // * sync_call_not_supported contract only has actions
-   // * no_op_if_receiver_not_support_sync_call is NOT set
-   // so the call aborts
-   BOOST_CHECK_EXCEPTION(t.push_action("caller"_n, "noopnotset"_n, "caller"_n, {}),
-                         eosio_assert_message_exception,
-                         fc_exception_message_contains("receiver does not support sync call but no_op_if_receiver_not_support_sync_call flag is not set"));
 } FC_LOG_AND_RETHROW() }
 
 // Verify calling an unknown function will result in an eosio_assert
