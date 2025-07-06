@@ -1,6 +1,6 @@
 {
     "antelope-spring-dev":{
-       "target":"new_entry_point_validation",
+       "target":"return_status",
        "prerelease":false
     }
  }
