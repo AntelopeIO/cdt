@@ -35,8 +35,8 @@ namespace eosio {
     *  @note There are some methods from the @ref call that can be used directly from C++
     */
 
-   inline int64_t call(uint64_t receiver, uint64_t flags, const char* data, size_t data_size) {
-      return internal_use_do_not_use::call(receiver, flags, data, data_size);
+   inline int64_t call(eosio::name receiver, uint64_t flags, const char* data, size_t data_size) {
+      return internal_use_do_not_use::call(receiver.value, flags, data, data_size);
    }
 
    inline uint32_t get_call_return_value( void* mem, uint32_t len ) {
@@ -52,11 +52,11 @@ namespace eosio {
    }
 
    // Indicate whether a sync call is read_write or read_only. Default is read_write
-   enum access_mode { read_write = 0, read_only = 1 };
+   enum class access_mode { read_write = 0, read_only = 1 };
 
    // Indicate the action to take if the receiver does not support sync calls.
-   // Default is abort
-   enum support_mode { abort = 0, no_op = 1 };
+   // Default is abort_op
+   enum class support_mode { abort_op = 0, no_op = 1 };
 
    // For a void function, when support_mode is set to no_op, the call_wrapper.
    // returns `std::optional<void_call>`. If the optional has no value, it indicates
@@ -67,7 +67,7 @@ namespace eosio {
 
    struct call_data_header {
       uint32_t version   = 0;
-      uint64_t func_name = 0;
+      uint64_t func_name = 0; // At WASM level, function name is an uint64_t. We do not use eosio::name here to make the decoding function name simpler in sync_call entry point function.
 
       EOSLIB_SERIALIZE(call_data_header, (version)(func_name))
    };
@@ -75,7 +75,7 @@ namespace eosio {
    /**
     * Wrapper for simplifying making a sync call
     *
-    * @brief Used to wrap an a particular sync call to simplify the process of other contracts making sync calls to the "wrapped" call.
+    * @brief Used to wrap a particular sync call to simplify the process of other contracts making sync calls to the "wrapped" call.
     * Example:
     * @code
     * // defined by contract writer of the sync call functions
@@ -87,7 +87,7 @@ namespace eosio {
     * get();
     * @endcode
     */
-   template <eosio::name::raw Func_Name, auto Func_Ref, access_mode Access_Mode=access_mode::read_write, support_mode Support_Mode = support_mode::abort>
+   template <eosio::name::raw Func_Name, auto Func_Ref, access_mode Access_Mode=access_mode::read_write, support_mode Support_Mode = support_mode::abort_op>
    struct call_wrapper {
       template <typename Receiver>
       constexpr call_wrapper(Receiver&& receiver)
@@ -100,7 +100,7 @@ namespace eosio {
       using orig_ret_type = typename detail::function_traits<decltype(Func_Ref)>::return_type;
 
       using return_type = std::conditional_t<
-         Support_Mode == support_mode::abort,   // if Support_Mode is abort
+         Support_Mode == support_mode::abort_op,// if Support_Mode is abort_op
          orig_ret_type,                         // use the original return type
          std::conditional_t<                    // else
             std::is_void<orig_ret_type>::value, // original return type is void
@@ -121,13 +121,13 @@ namespace eosio {
          call_data_header header{ .version   = 0,
                                   .func_name = function_name.value };
  
-         const std::vector<char> data{ pack(std::make_tuple(header, detail::deduced<Func_Ref>{std::forward<Args>(args)...})) };
+         const std::vector<char> data{ pack(std::forward_as_tuple(header, detail::deduced<Func_Ref>{std::forward<Args>(args)...})) };
 
          auto ret_val_size = internal_use_do_not_use::call(receiver.value, flags, data.data(), data.size());
 
          if (ret_val_size < 0) {  // the receiver does not support sync calls
-            if constexpr (Support_Mode == support_mode::abort) {
-               check(false, "receiver does not support sync call but support_mode is set to abort");
+            if constexpr (Support_Mode == support_mode::abort_op) {
+               check(false, "receiver does not support sync call but support_mode is set to abort_op");
             } else {
                return std::nullopt;
             }
@@ -141,9 +141,9 @@ namespace eosio {
                return void_call{};
             } else {
                constexpr size_t max_stack_buffer_size = 512;
-               char* buffer = (char*)(max_stack_buffer_size < ret_val_size ? malloc(ret_val_size) : alloca(ret_val_size)); // intentionally no `free()` is called. the memory will be reset after execution
+               char* buffer = (char*)(max_stack_buffer_size < ret_val_size ? malloc(ret_val_size) : alloca(ret_val_size)); // intentionally no `free()` is called. the memory will be freed at the end of callers wasm execution. 
                internal_use_do_not_use::get_call_return_value(buffer, ret_val_size);
-               auto ret_val = unpack<orig_ret_type>(buffer, ret_val_size);
+               orig_ret_type ret_val = unpack<orig_ret_type>(buffer, ret_val_size);
 
                if constexpr (Support_Mode == support_mode::no_op) {
                   return std::make_optional(ret_val);

@@ -332,8 +332,8 @@ namespace eosio { namespace cdt {
                std::string full_action_name = decl->getNameAsString() + ((decl->getParent()) ? decl->getParent()->getNameAsString() : "");
                if (cg.actions.count(full_action_name) == 0) {
                   create_action_dispatch(decl);
+                  cg.actions.insert(full_action_name); // insert the method action, so we don't create the dispatcher twice
                }
-               cg.actions.insert(full_action_name); // insert the method action, so we don't create the dispatcher twice
 
                if (decl->isEosioReadOnly()) {
                   read_only_actions.insert(decl);
@@ -361,8 +361,8 @@ namespace eosio { namespace cdt {
                std::string full_notify_name = decl->getNameAsString() + ((decl->getParent()) ? decl->getParent()->getNameAsString() : "");
                if (cg.notify_handlers.count(full_notify_name) == 0) {
                   create_notify_dispatch(decl);
+                  cg.notify_handlers.insert(full_notify_name); // insert the method action, so we don't create the dispatcher twice
                }
-               cg.notify_handlers.insert(full_notify_name); // insert the method action, so we don't create the dispatcher twice
             }
 
             // We allow a method to be tagged as both `action` and `call`
@@ -387,8 +387,8 @@ namespace eosio { namespace cdt {
                std::string full_call_name = decl->getNameAsString() + ((decl->getParent()) ? decl->getParent()->getNameAsString() : "");
                if (cg.calls.count(full_call_name) == 0) {
                   create_call_dispatch(decl);
+                  cg.calls.insert(full_call_name); // insert the sync call method name, so we don't create the dispatcher twice
                }
-               cg.calls.insert(full_call_name); // insert the method call, so we don't create the dispatcher twice
             }
 
             return true;

@@ -20,3 +20,14 @@ void sync_call_callee::voidfunc() {
 uint32_t sync_call_callee::sum(uint32_t a, uint32_t b, uint32_t c) {
    return a + b + c;
 }
+
+[[eosio::call]]
+struct1_t sync_call_callee::structonly(struct1_t s) {
+   return s;
+}
+
+[[eosio::call]]
+struct1_t sync_call_callee::structmix(struct1_t s1, int32_t m, struct2_t s2) {
+   return { .a = s1.a * m + s2.c, .b = s1.b * m + s2.d };
+}
+

@@ -15,7 +15,7 @@ using mvo = fc::mutable_variant_object;
 struct acct_and_code {
    account_name          acct;
    std::vector<uint8_t>  wasm;
-   char*                 abi;
+   char*                 abi = nullptr;
 };
 
 // The first account in the accounts vector is the action initiating the
@@ -74,6 +74,26 @@ BOOST_AUTO_TEST_CASE(multiple_params_test) { try {
 
    // Using call_wrapper
    BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "wrpmulprmtst"_n, "caller"_n, {}));
+} FC_LOG_AND_RETHROW() }
+
+// Verify passing a struct parameter works correctly
+BOOST_AUTO_TEST_CASE(struct_param_test) { try {
+   call_tester t({
+      {"caller"_n, contracts::caller_wasm(), contracts::caller_abi().data()},
+      {"callee"_n, contracts::callee_wasm(), contracts::callee_abi().data()}
+   });
+
+   BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "structtest"_n, "caller"_n, {}));
+} FC_LOG_AND_RETHROW() }
+
+// Verify passing a mix of structs and integer works correctly
+BOOST_AUTO_TEST_CASE(mix_struct_int_params_test) { try {
+   call_tester t({
+      {"caller"_n, contracts::caller_wasm(), contracts::caller_abi().data()},
+      {"callee"_n, contracts::callee_wasm(), contracts::callee_abi().data()}
+   });
+
+   BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "structinttst"_n, "caller"_n, {}));
 } FC_LOG_AND_RETHROW() }
 
 // Verify a sync call to a void function works properly.
