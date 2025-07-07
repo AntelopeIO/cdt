@@ -26,7 +26,7 @@ public:
    [[eosio::call]]
    void voidfunc();
 
-   [[eosio::action, eosio::call]]
+   [[eosio::call]]
    uint32_t sum(uint32_t a, uint32_t b, uint32_t c);
 
    // pass in a struct and return it

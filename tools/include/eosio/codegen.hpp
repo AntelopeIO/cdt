@@ -317,6 +317,11 @@ namespace eosio { namespace cdt {
             static std::set<std::string> _action_set; //used for validations
             static std::set<std::string> _notify_set; //used for validations
             static std::set<std::string> _call_set; //used for validations
+
+            if (decl->isEosioAction() && decl->isEosioCall()) {
+               CDT_ERROR("codegen_error", decl->getLocation(), "cannot be tagged as both action and call");
+            }
+
             if (decl->isEosioAction()) {
                name = generation_utils::get_action_name(decl);
                validate_name(name, [&](auto s) {
@@ -363,10 +368,7 @@ namespace eosio { namespace cdt {
                   create_notify_dispatch(decl);
                   cg.notify_handlers.insert(full_notify_name); // insert the method action, so we don't create the dispatcher twice
                }
-            }
-
-            // We allow a method to be tagged as both `action` and `call`
-            if (decl->isEosioCall()) {
+            } else if (decl->isEosioCall()) {
                name = generation_utils::get_call_name(decl);
                validate_name(name, [&](auto s) {
                   CDT_ERROR("codegen_error", decl->getLocation(), std::string("call name (")+s+") is not a valid eosio name");

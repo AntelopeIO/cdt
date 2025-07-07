@@ -126,27 +126,6 @@ BOOST_AUTO_TEST_CASE(void_func_test) { try {
    check(trx_trace);
 } FC_LOG_AND_RETHROW() }
 
-// Verify a function tagged as both `action` and `call` works
-BOOST_AUTO_TEST_CASE(mixed_action_call_tags_test) { try {
-   call_tester t({
-      {"caller"_n, contracts::caller_wasm(), contracts::caller_abi().data()},
-      {"callee"_n, contracts::callee_wasm(), contracts::callee_abi().data()}
-   });
-
-   // `sum` in `callee` contract is tagged as `action` and `call`
-
-   // Make sure we can make a sync call to `sum` (`mulparamtest` in `caller` does
-   // a sync call to `sum`)
-   BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "hstmulprmtst"_n, "caller"_n, {}));
-
-   // Make sure we can push an action using `sum`.
-   BOOST_REQUIRE_NO_THROW(t.push_action("callee"_n, "sum"_n, "callee"_n,
-                                        mvo()
-                                             ("a", 1)
-                                             ("b", 2)
-                                             ("c", 3)));
-} FC_LOG_AND_RETHROW() }
-
 // Verify the receiver contract with only one sync call function works
 // (for testing the sync_call entry point dispatcher)
 BOOST_AUTO_TEST_CASE(single_function_test) { try {

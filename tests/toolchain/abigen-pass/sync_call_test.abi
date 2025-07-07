@@ -74,22 +74,11 @@
             ]
         }
     ],
-    "actions": [
-        {
-            "name": "sum",
-            "type": "sum",
-            "ricardian_contract": ""
-        }
-    ],
+    "actions": [],
     "tables": [],
     "ricardian_clauses": [],
     "variants": [],
-    "action_results": [
-        {
-            "name": "sum",
-            "result_type": "uint32"
-        }
-    ],
+    "action_results": [],
     "calls": [
         {
             "name": "noparam",

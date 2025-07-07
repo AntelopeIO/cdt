@@ -20,7 +20,7 @@ public:
       int i = 10;
    }
    
-   [[eosio::action, eosio::call]]
+   [[eosio::call]]
    uint32_t sum(uint32_t a, uint32_t b, uint32_t c) {
       return a + b + c;
    }
