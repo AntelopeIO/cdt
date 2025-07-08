@@ -97,7 +97,7 @@ std::string name_to_string( uint64_t nm ) {
    return str;
 }
 
-static constexpr uint32_t max_identifier_length = 32;
+static constexpr uint32_t max_identifier_length = 128;
 
 // Validate the input `str` is a valid C/C++ identifier
 template <typename Lambda>

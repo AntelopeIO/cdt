@@ -9,7 +9,7 @@
 namespace eosio {
    struct identifier {
    public:
-      static constexpr uint32_t max_length = 32;
+      static constexpr uint32_t max_length = 128;
 
       enum class raw : uint64_t {};
 
