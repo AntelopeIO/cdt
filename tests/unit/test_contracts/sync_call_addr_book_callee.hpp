@@ -16,9 +16,9 @@ public:
    [[eosio::call]]
    person_info get(eosio::name user);
 
-   using upsert_read_only_func = eosio::call_wrapper<"upsert"_n, &sync_call_addr_book_callee::upsert, eosio::access_mode::read_only>;
-   using upsert_func = eosio::call_wrapper<"upsert"_n, &sync_call_addr_book_callee::upsert>;
-   using get_func = eosio::call_wrapper<"get"_n, &sync_call_addr_book_callee::get>;
+   using upsert_read_only_func = eosio::call_wrapper<"upsert"_i, &sync_call_addr_book_callee::upsert, eosio::access_mode::read_only>;
+   using upsert_func = eosio::call_wrapper<"upsert"_i, &sync_call_addr_book_callee::upsert>;
+   using get_func = eosio::call_wrapper<"get"_i, &sync_call_addr_book_callee::get>;
 
 private:
    struct [[eosio::table]] person {
