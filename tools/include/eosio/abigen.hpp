@@ -153,11 +153,11 @@ namespace eosio { namespace cdt {
          auto call_name = decl->getEosioCallAttr()->getName();
 
          if (call_name.empty()) {
-            validate_name( decl->getNameAsString(), [&](auto s) { CDT_ERROR("abigen_error", decl->getLocation(), s); } );
+            validate_identifier( decl->getNameAsString(), [&](auto s) { CDT_ERROR("abigen_error", decl->getLocation(), s); } );
             ret.name = decl->getNameAsString();
          }
          else {
-            validate_name( call_name.str(), [&](auto s) { CDT_ERROR("abigen_error", decl->getLocation(), s); } );
+            validate_identifier( call_name.str(), [&](auto s) { CDT_ERROR("abigen_error", decl->getLocation(), s); } );
             ret.name = call_name.str();
          }
          ret.type = decl->getNameAsString();

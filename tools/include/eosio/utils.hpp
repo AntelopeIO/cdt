@@ -97,6 +97,39 @@ std::string name_to_string( uint64_t nm ) {
    return str;
 }
 
+static constexpr uint32_t max_identifier_length = 32;
+
+// Validate the input `str` is a valid C/C++ identifier
+template <typename Lambda>
+void validate_identifier( const std::string& str, Lambda&& error_handler ) {
+   if (str.empty()) {
+      return error_handler("identifier is empty");
+   }
+
+   const auto len = str.length();
+   if ( len > max_identifier_length ) {
+      return error_handler(std::string("identifier {") + str + "} is more than " + std::to_string(max_identifier_length) + " characters long");
+   }
+
+   if (!(std::isalpha(str[0]) || str[0] == '_')) {
+      return error_handler(std::string("identifier {") + str + "} does not start with letter or underscore");
+   }
+
+   for (char ch : str.substr(1)) {
+      if (!(std::isalnum(static_cast<unsigned char>(ch)) || ch == '_')) {
+         return error_handler(std::string("identifier {") + str + "} has a character {" + ch +  "} which is not a number, letter, or _");
+      }
+   }
+}
+
+uint64_t identifier_to_id(std::string str) {
+   uint64_t hash = 5381;
+   for (char c : str) {
+      hash = ((hash << 5) + hash) + static_cast<uint8_t>(c); // hash * 33 + c
+   }
+   return hash;
+}
+
 struct environment {
    static llvm::ArrayRef<llvm::StringRef> get() {
       static std::vector<llvm::StringRef> env_table;

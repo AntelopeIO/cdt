@@ -9,6 +9,7 @@
 #include "../../core/eosio/serialize.hpp"
 #include "../../core/eosio/datastream.hpp"
 #include "../../core/eosio/name.hpp"
+#include "../../core/eosio/identifier.hpp"
 
 namespace eosio {
 
@@ -67,7 +68,7 @@ namespace eosio {
 
    struct call_data_header {
       uint32_t version   = 0;
-      uint64_t func_name = 0; // At WASM level, function name is an uint64_t. We do not use eosio::name here to make the decoding function name simpler in sync_call entry point function.
+      uint64_t func_name = 0; // At WASM level, function name is a short ID of uint64_t.
 
       EOSLIB_SERIALIZE(call_data_header, (version)(func_name))
    };
@@ -79,7 +80,7 @@ namespace eosio {
     * Example:
     * @code
     * // defined by contract writer of the sync call functions
-    * using get_func = call_wrapper<"get"_n, &callee::get, uint32_t>;
+    * using get_func = call_wrapper<"get"_i, &callee::get>;
     * // usage by different contract writer
     * get_func{"callee"_n}();
     * // or
@@ -87,14 +88,14 @@ namespace eosio {
     * get();
     * @endcode
     */
-   template <eosio::name::raw Func_Name, auto Func_Ref, access_mode Access_Mode=access_mode::read_write, support_mode Support_Mode = support_mode::abort_op>
+   template <eosio::identifier::raw Func_Name, auto Func_Ref, access_mode Access_Mode=access_mode::read_write, support_mode Support_Mode = support_mode::abort_op>
    struct call_wrapper {
       template <typename Receiver>
       constexpr call_wrapper(Receiver&& receiver)
          : receiver(std::forward<Receiver>(receiver))
       {}
 
-      static constexpr eosio::name function_name = eosio::name(Func_Name);
+      static constexpr eosio::identifier function_name = eosio::identifier(Func_Name);
       eosio::name receiver {};
 
       using orig_ret_type = typename detail::function_traits<decltype(Func_Ref)>::return_type;
@@ -119,7 +120,7 @@ namespace eosio {
          }
 
          call_data_header header{ .version   = 0,
-                                  .func_name = function_name.value };
+                                  .func_name = function_name.id };
  
          const std::vector<char> data{ pack(std::forward_as_tuple(header, detail::deduced<Func_Ref>{std::forward<Args>(args)...})) };
 
