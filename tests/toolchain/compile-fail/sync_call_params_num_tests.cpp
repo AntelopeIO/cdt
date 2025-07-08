@@ -15,7 +15,7 @@ public:
       return a + b + c;
    }
 
-   using sum_func = eosio::call_wrapper<"sum"_n, &sync_call_invalid_arg_nums::sum>;
+   using sum_func = eosio::call_wrapper<"sum"_i, &sync_call_invalid_arg_nums::sum>;
 
    // Fewer number of arguments
    [[eosio::action]]
