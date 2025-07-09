@@ -40,7 +40,17 @@ namespace eosio::testing {
       static std::vector<uint8_t> test_multi_index_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../unit/test_contracts/test_multi_index.wasm"); }
       static std::vector<char>    test_multi_index_abi() { return read_abi("${CMAKE_BINARY_DIR}/../unit/test_contracts/test_multi_index.abi"); }
       
-      static std::vector<uint8_t> call_test_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../unit/test_contracts/call_tests.wasm"); }
-      static std::vector<char>    call_test_abi() { return read_abi("${CMAKE_BINARY_DIR}/../unit/test_contracts/call_tests.abi"); }
+      static std::vector<uint8_t> caller_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../unit/test_contracts/sync_call_caller.wasm"); }
+      static std::vector<char>    caller_abi() { return read_abi("${CMAKE_BINARY_DIR}/../unit/test_contracts/sync_call_caller.abi"); }
+      static std::vector<uint8_t> callee_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../unit/test_contracts/sync_call_callee.wasm"); }
+      static std::vector<char>    callee_abi() { return read_abi("${CMAKE_BINARY_DIR}/../unit/test_contracts/sync_call_callee.abi"); }
+      static std::vector<uint8_t> not_supported_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../unit/test_contracts/sync_call_not_supported.wasm"); }
+      static std::vector<char>    not_supported_abi() { return read_abi("${CMAKE_BINARY_DIR}/../unit/test_contracts/sync_call_not_supported.abi"); }
+      static std::vector<uint8_t> single_func_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../unit/test_contracts/sync_call_single_func.wasm"); }
+      static std::vector<char>    single_func_abi() { return read_abi("${CMAKE_BINARY_DIR}/../unit/test_contracts/sync_call_single_func.abi"); }
+      static std::vector<uint8_t> addr_book_callee_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../unit/test_contracts/sync_call_addr_book_callee.wasm"); }
+      static std::vector<char>    addr_book_callee_abi() { return read_abi("${CMAKE_BINARY_DIR}/../unit/test_contracts/sync_call_addr_book_callee.abi"); }
+      static std::vector<uint8_t> addr_book_caller_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../unit/test_contracts/sync_call_addr_book_caller.wasm"); }
+      static std::vector<char>    addr_book_caller_abi() { return read_abi("${CMAKE_BINARY_DIR}/../unit/test_contracts/sync_call_addr_book_caller.abi"); }
    };
 } //ns eosio::testing

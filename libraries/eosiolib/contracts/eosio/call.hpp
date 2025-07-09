@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <type_traits>
 
+#include "detail.hpp"
 #include "../../core/eosio/serialize.hpp"
 #include "../../core/eosio/datastream.hpp"
 #include "../../core/eosio/name.hpp"
@@ -34,6 +35,10 @@ namespace eosio {
     *  @note There are some methods from the @ref call that can be used directly from C++
     */
 
+   inline int64_t call(eosio::name receiver, uint64_t flags, const char* data, size_t data_size) {
+      return internal_use_do_not_use::call(receiver.value, flags, data, data_size);
+   }
+
    inline uint32_t get_call_return_value( void* mem, uint32_t len ) {
      return internal_use_do_not_use::get_call_return_value(mem, len);
    }
@@ -46,65 +51,107 @@ namespace eosio {
      internal_use_do_not_use::set_call_return_value(mem, len);
    }
 
-   /**
-    *  This is the packed representation of a call
-    *
-    *  @ingroup call
-    */
-   struct call {
-      /**
-       *  Name of the account the call is intended for
-       */
-      const name               receiver{};
+   // Indicate whether a sync call is read_write or read_only. Default is read_write
+   enum class access_mode { read_write = 0, read_only = 1 };
 
-      /**
-       *  indicating if the call is read only or not
-       */
-      const bool               read_only = false;
+   // Indicate the action to take if the receiver does not support sync calls.
+   // Default is abort_op
+   enum class support_mode { abort_op = 0, no_op = 1 };
 
-      /**
-       *  if the receiver contract does not have sync_call entry point or its signature
-       *  is invalid, when no_op_if_receiver_not_support_sync_call is set to true,
-       *  the sync call is no op, otherwise the call is aborted and an exception is raised.
-       */
-      const bool               no_op_if_receiver_not_support_sync_call = false;
-
-      /**
-       *  Payload data
-       */
-      const std::vector<char>  data{};
-
-      /**
-       * Construct a new call object with receiver, name, and payload data
-       *
-       * @tparam T  - Type of call data, must be serializable by `pack(...)`
-       * @param receiver -  The name of the account this call is intended for
-       * @param flags - The flags
-       * @param payload - The call data that will be serialized via pack into data
-       */
-      template<typename T>
-      call( struct name receiver, T&& payload, bool read_only = false, bool no_op = false )
-      : receiver(receiver)
-      , read_only(read_only)
-      , no_op_if_receiver_not_support_sync_call(no_op)
-      , data(pack(std::forward<T>(payload))) {}
-
-      /// @cond INTERNAL
-      EOSLIB_SERIALIZE( call, (receiver)(read_only)(no_op_if_receiver_not_support_sync_call)(data) )
-      /// @endcond
-
-      /**
-       * Make a call using the functor operator
-       */
-      int64_t operator()() const {
-         uint64_t flags = read_only ? 0x01 : 0x00; // last bit indicating read only
-         auto retval =  internal_use_do_not_use::call(receiver.value, flags, data.data(), data.size());
-
-         if (retval == -2) {  // sync call is not supported by the receiver contract
-            check(no_op_if_receiver_not_support_sync_call, "receiver does not support sync call but no_op_if_receiver_not_support_sync_call flag is not set");
-         }
-         return retval;
-      }
+   // For a void function, when support_mode is set to no_op, the call_wrapper.
+   // returns `std::optional<void_call>`. If the optional has no value, it indicates
+   // the call was op-op; if the optional has a value of `void_call`, the call
+   // executed successfully.
+   struct void_call {
    };
 
+   struct call_data_header {
+      uint32_t version   = 0;
+      uint64_t func_name = 0; // At WASM level, function name is an uint64_t. We do not use eosio::name here to make the decoding function name simpler in sync_call entry point function.
+
+      EOSLIB_SERIALIZE(call_data_header, (version)(func_name))
+   };
+
+   /**
+    * Wrapper for simplifying making a sync call
+    *
+    * @brief Used to wrap a particular sync call to simplify the process of other contracts making sync calls to the "wrapped" call.
+    * Example:
+    * @code
+    * // defined by contract writer of the sync call functions
+    * using get_func = call_wrapper<"get"_n, &callee::get, uint32_t>;
+    * // usage by different contract writer
+    * get_func{"callee"_n}();
+    * // or
+    * get_func get{"callee"_n};
+    * get();
+    * @endcode
+    */
+   template <eosio::name::raw Func_Name, auto Func_Ref, access_mode Access_Mode=access_mode::read_write, support_mode Support_Mode = support_mode::abort_op>
+   struct call_wrapper {
+      template <typename Receiver>
+      constexpr call_wrapper(Receiver&& receiver)
+         : receiver(std::forward<Receiver>(receiver))
+      {}
+
+      static constexpr eosio::name function_name = eosio::name(Func_Name);
+      eosio::name receiver {};
+
+      using orig_ret_type = typename detail::function_traits<decltype(Func_Ref)>::return_type;
+
+      using return_type = std::conditional_t<
+         Support_Mode == support_mode::abort_op,// if Support_Mode is abort_op
+         orig_ret_type,                         // use the original return type
+         std::conditional_t<                    // else
+            std::is_void<orig_ret_type>::value, // original return type is void
+            std::optional<void_call>,           // use optional of empty struct
+            std::optional<orig_ret_type>        // use optional of original return type
+         >
+      >;
+
+      template <typename... Args>
+      return_type operator()(Args&&... args)const {
+         static_assert(detail::type_check<Func_Ref, Args...>());
+
+         uint64_t flags = 0x00;
+         if constexpr (Access_Mode == access_mode::read_only) {
+            flags = 0x01;
+         }
+
+         call_data_header header{ .version   = 0,
+                                  .func_name = function_name.value };
+ 
+         const std::vector<char> data{ pack(std::forward_as_tuple(header, detail::deduced<Func_Ref>{std::forward<Args>(args)...})) };
+
+         auto ret_val_size = internal_use_do_not_use::call(receiver.value, flags, data.data(), data.size());
+
+         if (ret_val_size < 0) {  // the receiver does not support sync calls
+            if constexpr (Support_Mode == support_mode::abort_op) {
+               check(false, "receiver does not support sync call but support_mode is set to abort_op");
+            } else {
+               return std::nullopt;
+            }
+         }
+
+         // The sync call has been executed by the receiver
+         if constexpr (std::is_void<return_type>::value) {
+            return;
+         } else {
+            if constexpr (Support_Mode == support_mode::no_op && std::is_void<orig_ret_type>::value) {
+               return void_call{};
+            } else {
+               constexpr size_t max_stack_buffer_size = 512;
+               char* buffer = (char*)(max_stack_buffer_size < ret_val_size ? malloc(ret_val_size) : alloca(ret_val_size)); // intentionally no `free()` is called. the memory will be freed at the end of callers wasm execution. 
+               internal_use_do_not_use::get_call_return_value(buffer, ret_val_size);
+               orig_ret_type ret_val = unpack<orig_ret_type>(buffer, ret_val_size);
+
+               if constexpr (Support_Mode == support_mode::no_op) {
+                  return std::make_optional(ret_val);
+               } else {
+                  return ret_val;
+               }
+            }
+         }
+      }
+   };
 } // namespace eosio

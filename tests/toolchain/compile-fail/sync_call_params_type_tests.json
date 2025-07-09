@@ -1,0 +1,11 @@
+{
+  "tests" : [
+    {        
+      "compile_flags": [],
+      "expected" : {
+        "exit-code": 255,
+        "stderr": "error: static_assert failed due to requirement 'detail::is_same"
+      }
+    }
+  ]
+}

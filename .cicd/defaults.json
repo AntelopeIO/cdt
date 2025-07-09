@@ -1,6 +1,6 @@
 {
     "antelope-spring-dev":{
-       "target":"sync_call",
+       "target":"return_status",
        "prerelease":false
     }
  }

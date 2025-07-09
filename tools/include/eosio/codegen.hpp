@@ -232,10 +232,8 @@ namespace eosio { namespace cdt {
             std::string nm = decl->getNameAsString()+"_"+decl->getParent()->getNameAsString();
             if (cg.is_eosio_contract(decl, cg.contract_name)) {
                ss << "\n\n#include <eosio/datastream.hpp>\n";
-               ss << "#include <eosio/name.hpp>\n";
+               ss << "#include <eosio/call.hpp>\n";
                ss << "extern \"C\" {\n";
-               ss << "__attribute__((eosio_wasm_import))\n";
-               ss << "uint32_t get_call_data(void*, uint32_t);\n";
                const auto& return_ty = decl->getReturnType().getAsString();
                if (return_ty != "void") {
                   ss << "__attribute__((eosio_wasm_import))\n";
@@ -245,13 +243,9 @@ namespace eosio { namespace cdt {
                ss << call_name;
                ss << ":";
                ss << func_name << nm;
-               ss << "\"))) void " << func_name << nm << "(unsigned long long s, unsigned long long r, size_t sz) {\n"; // sync_call entry function calls this dispatcher with arguments `sender`, `receiver`, and `data_size`
-               ss << "void* buff = nullptr;\n";
-               ss << "if (sz > 0) {\n";
-               ss << "buff = sz >= " << max_stack_size << " ? malloc(sz) : alloca(sz);\n";
-               ss << "::get_call_data(buff, sz);\n";
-               ss << "}\n";
-               ss << "eosio::datastream<const char*> ds{(char*)buff, sz};\n";
+               ss << "\"))) void " << func_name << nm << "(unsigned long long sender, unsigned long long receiver, size_t data_size, void* data) {\n";
+               ss << "eosio::datastream<const char*> ds{(char*)data, data_size};\n";
+               ss << "eosio::call_data_header header; ds >> header;\n";  // skip header
                int i=0;
                for (auto param : decl->parameters()) {
                   clang::LangOptions lang_opts;
@@ -267,7 +261,7 @@ namespace eosio { namespace cdt {
                   i++;
                }
                const auto& call_function = [&]() {
-                  ss << decl->getParent()->getQualifiedNameAsString() << "{eosio::name{r},eosio::name{r},ds}." << decl->getNameAsString() << "(";
+                  ss << decl->getParent()->getQualifiedNameAsString() << "{eosio::name{receiver},eosio::name{receiver},ds}." << decl->getNameAsString() << "(";
                   for (int i=0; i < decl->parameters().size(); i++) {
                      ss << "arg" << i;
                      if (i < decl->parameters().size()-1)
@@ -281,20 +275,60 @@ namespace eosio { namespace cdt {
                call_function();
                if (return_ty != "void") {
                   ss << "const auto& packed_result = eosio::pack(result);\n";
-                  ss << "set_call_return_value((void*)packed_result.data(), packed_result.size());\n";
+                  ss << "::set_call_return_value((void*)packed_result.data(), packed_result.size());\n";
                }
                ss << "}}\n";
             }
          }
 
+         // Generate get_sync_call_data_version which returns the version of call data.
+         // In version 0, call data is packed as header + arguments, where
+         // header is `struct header { uint32_t version; uint64_t func_name }`
+         static void create_get_sync_call_data_header(std::stringstream& ss) {
+            ss << "\n\n#include <eosio/datastream.hpp>\n";
+            ss << "#include <eosio/call.hpp>\n";
+            ss << "extern \"C\" {\n";
+            ss << "__attribute__((weak)) void* __eos_get_sync_call_data_header_(void* data) {\n";
+            ss << "size_t size = sizeof(eosio::call_data_header);\n";
+            ss << "eosio::datastream<const char*> ds{(char*)data, size};\n";
+            ss << "eosio::call_data_header header; ds >> header;\n";
+            ss << "void* ptr = malloc(size);\n";
+            ss << "memcpy(ptr, &header, size);\n";
+            ss << "return ptr;\n";
+            ss << "}}\n";
+         }
+
+         // Generate get_sync_call_data which returns call data which consists of
+         // header and arguments
+         static void create_get_sync_call_data(std::stringstream& ss) {
+            ss << "\n\n#include <eosio/datastream.hpp>\n";
+            ss << "#include <eosio/name.hpp>\n";
+            ss << "extern \"C\" {\n";
+            ss << "__attribute__((eosio_wasm_import)) uint32_t get_call_data(void*, uint32_t);\n";
+            ss << "__attribute__((weak)) void* __eos_get_sync_call_data_(unsigned long size) {\n";
+            ss << "void* data = malloc(size);\n";   // store data in linear memory
+            ss << "::get_call_data(data, size);\n";
+            ss << "return data;\n";
+            ss << "}}\n";
+         }
+
          virtual bool VisitCXXMethodDecl(CXXMethodDecl* decl) {
             std::string name = decl->getNameAsString();
+            static std::set<std::string> _action_set; //used for validations
+            static std::set<std::string> _notify_set; //used for validations
+            static std::set<std::string> _call_set; //used for validations
             if (decl->isEosioAction()) {
                name = generation_utils::get_action_name(decl);
                validate_name(name, [&](auto s) {
                   CDT_ERROR("codegen_error", decl->getLocation(), std::string("action name (")+s+") is not a valid eosio name");
                });
 
+               if (!_action_set.count(name))
+                  _action_set.insert(name);
+               else {
+                  auto itr = _action_set.find(name);
+                  CDT_CHECK_ERROR(*itr == name, "codegen_error", decl->getLocation(), "action declaration doesn't match previous declaration");
+               }
                std::string full_action_name = decl->getNameAsString() + ((decl->getParent()) ? decl->getParent()->getNameAsString() : "");
                if (cg.actions.count(full_action_name) == 0) {
                   create_action_dispatch(decl);
@@ -317,6 +351,13 @@ namespace eosio { namespace cdt {
                   CDT_ERROR("codegen_error", decl->getLocation(), std::string("name (")+s+") is invalid");
                });
 
+               if (!_notify_set.count(name))
+                  _notify_set.insert(name);
+               else {
+                  auto itr = _notify_set.find(name);
+                  CDT_CHECK_ERROR(*itr == name, "codegen_error", decl->getLocation(), "action declaration doesn't match previous declaration");
+               }
+
                std::string full_notify_name = decl->getNameAsString() + ((decl->getParent()) ? decl->getParent()->getNameAsString() : "");
                if (cg.notify_handlers.count(full_notify_name) == 0) {
                   create_notify_dispatch(decl);
@@ -331,6 +372,18 @@ namespace eosio { namespace cdt {
                   CDT_ERROR("codegen_error", decl->getLocation(), std::string("call name (")+s+") is not a valid eosio name");
                });
 
+               // Genereate create_get_sync_call_data and create_get_sync_call_data_header only once
+               if (_call_set.empty()) {
+                  create_get_sync_call_data(ss);
+                  create_get_sync_call_data_header(ss);
+               }
+
+               if (!_call_set.count(name))
+                  _call_set.insert(name);
+               else {
+                  auto itr = _call_set.find(name);
+                  CDT_CHECK_ERROR(*itr == name, "codegen_error", decl->getLocation(), "call declaration doesn't match previous declaration");
+               }
                std::string full_call_name = decl->getNameAsString() + ((decl->getParent()) ? decl->getParent()->getNameAsString() : "");
                if (cg.calls.count(full_call_name) == 0) {
                   create_call_dispatch(decl);
