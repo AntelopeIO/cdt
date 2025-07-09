@@ -1,6 +1,7 @@
 {
     "tests": [
         {
+            "compile_flags": ["--abi-version=1.2"],
             "expected": {
                 "abi-file": "aliased_type_variant_template_arg.abi"
             }

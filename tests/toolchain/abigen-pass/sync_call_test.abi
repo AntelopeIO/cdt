@@ -1,0 +1,114 @@
+{
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
+    "version": "eosio::abi/1.3",
+    "types": [],
+    "structs": [
+        {
+            "name": "call_data_header",
+            "base": "",
+            "fields": [
+                {
+                    "name": "version",
+                    "type": "uint32"
+                },
+                {
+                    "name": "func_name",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "noparam",
+            "base": "",
+            "fields": [
+                {
+                    "name": "header",
+                    "type": "call_data_header"
+                }
+            ]
+        },
+        {
+            "name": "sum",
+            "base": "",
+            "fields": [
+                {
+                    "name": "header",
+                    "type": "call_data_header"
+                },
+                {
+                    "name": "a",
+                    "type": "uint32"
+                },
+                {
+                    "name": "b",
+                    "type": "uint32"
+                },
+                {
+                    "name": "c",
+                    "type": "uint32"
+                }
+            ]
+        },
+        {
+            "name": "voidfunc",
+            "base": "",
+            "fields": [
+                {
+                    "name": "header",
+                    "type": "call_data_header"
+                }
+            ]
+        },
+        {
+            "name": "withparam",
+            "base": "",
+            "fields": [
+                {
+                    "name": "header",
+                    "type": "call_data_header"
+                },
+                {
+                    "name": "in",
+                    "type": "uint32"
+                }
+            ]
+        }
+    ],
+    "actions": [],
+    "tables": [],
+    "ricardian_clauses": [],
+    "variants": [],
+    "action_results": [],
+    "calls": [
+        {
+            "name": "noparam",
+            "type": "noparam"
+        },
+        {
+            "name": "sum",
+            "type": "sum"
+        },
+        {
+            "name": "voidfunc",
+            "type": "voidfunc"
+        },
+        {
+            "name": "withparam",
+            "type": "withparam"
+        }
+    ],
+    "call_results": [
+        {
+            "name": "noparam",
+            "result_type": "uint32"
+        },
+        {
+            "name": "sum",
+            "result_type": "uint32"
+        },
+        {
+            "name": "withparam",
+            "result_type": "uint32"
+        }
+    ]
+}

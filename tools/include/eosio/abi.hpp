@@ -30,6 +30,12 @@ struct abi_action {
    bool operator<(const abi_action& s) const { return name < s.name; }
 };
 
+struct abi_call {
+   std::string name;
+   std::string type;
+   bool operator<(const abi_call& s) const { return name < s.name; }
+};
+
 struct abi_table {
    std::string name;
    std::string type;
@@ -61,6 +67,17 @@ struct abi_action_result {
    bool operator<(const abi_action_result& ar) const { return name < ar.name; }
 };
 
+struct abi_call_result {
+   std::string name;
+   std::string type;
+   bool operator<(const abi_call_result& ar) const { return name < ar.name; }
+};
+
+// The version when sync call was first introduced.
+constexpr int abi_call_version_major = 1;
+constexpr int abi_call_version_minor = 3;
+constexpr int abi_call_version       = abi_call_version_major * 10 + abi_call_version_minor;
+
 /// From eosio libraries/chain/include/eosio/chain/abi_def.hpp
 struct abi {
    int version_major = 1;
@@ -69,11 +86,13 @@ struct abi {
    std::set<abi_struct>                   structs;
    std::set<abi_typedef>                  typedefs;
    std::set<abi_action>                   actions;
+   std::set<abi_call>                     calls;
    std::set<abi_table>                    tables;
    std::set<abi_variant>                  variants;
    std::vector<abi_ricardian_clause_pair> ricardian_clauses;
    std::vector<abi_error_message>         error_messages;
    std::set<abi_action_result>            action_results;
+   std::set<abi_call_result>              call_results;
 };
 
 inline void dump( const abi& abi ) {

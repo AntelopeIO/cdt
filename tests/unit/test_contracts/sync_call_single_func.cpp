@@ -6,7 +6,7 @@ class [[eosio::contract]] sync_call_single_func : public eosio::contract{
 public:
    using contract::contract;
 
-   [[eosio::action, eosio::call]]
+   [[eosio::call]]
    uint32_t getten() {
       return 10;
    }
