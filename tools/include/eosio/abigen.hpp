@@ -144,6 +144,7 @@ namespace eosio { namespace cdt {
             ret.name = call_name.str();
          }
          ret.type = decl->getName().str();
+         ret.id = identifier_to_id(ret.name);
          _abi.calls.insert(ret);
       }
 
@@ -161,6 +162,7 @@ namespace eosio { namespace cdt {
             ret.name = call_name.str();
          }
          ret.type = decl->getNameAsString();
+         ret.id = identifier_to_id(ret.name);
          _abi.calls.insert(ret);
          if (translate_type(decl->getReturnType()) != "void") {
             add_type(decl->getReturnType());
@@ -607,6 +609,7 @@ namespace eosio { namespace cdt {
          ojson o;
          o["name"] = c.name;
          o["type"] = c.type;
+         o["id"]   = c.id;
          return o;
       }
 

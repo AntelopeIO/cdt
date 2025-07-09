@@ -33,6 +33,7 @@ struct abi_action {
 struct abi_call {
    std::string name;
    std::string type;
+   uint64_t    id = 0;  // internal short ID of `name`
    bool operator<(const abi_call& s) const { return name < s.name; }
 };
 
