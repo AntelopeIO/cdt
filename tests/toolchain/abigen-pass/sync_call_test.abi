@@ -82,19 +82,23 @@
     "calls": [
         {
             "name": "noparam",
-            "type": "noparam"
+            "type": "noparam",
+            "id": 229476383600947
         },
         {
             "name": "sum",
-            "type": "sum"
+            "type": "sum",
+            "id": 193506202
         },
         {
             "name": "voidfunc",
-            "type": "voidfunc"
+            "type": "voidfunc",
+            "id": 7573061335575747
         },
         {
             "name": "withparam",
-            "type": "withparam"
+            "type": "withparam",
+            "id": 249912189145794130
         }
     ],
     "call_results": [
