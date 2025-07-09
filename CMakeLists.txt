@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.5...4.0)
 
 # Sanity check our source directory to make sure that we are not trying to
 # generate an in-source build, and to make
