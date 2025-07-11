@@ -9,7 +9,7 @@
 #include "../../core/eosio/serialize.hpp"
 #include "../../core/eosio/datastream.hpp"
 #include "../../core/eosio/name.hpp"
-#include "../../core/eosio/identifier.hpp"
+#include "../../core/eosio/hash_id.hpp"
 
 namespace eosio {
 
@@ -88,14 +88,14 @@ namespace eosio {
     * get();
     * @endcode
     */
-   template <eosio::identifier::raw Func_Name, auto Func_Ref, access_mode Access_Mode=access_mode::read_write, support_mode Support_Mode = support_mode::abort_op>
+   template <eosio::hash_id::raw Func_Name, auto Func_Ref, access_mode Access_Mode=access_mode::read_write, support_mode Support_Mode = support_mode::abort_op>
    struct call_wrapper {
       template <typename Receiver>
       constexpr call_wrapper(Receiver&& receiver)
          : receiver(std::forward<Receiver>(receiver))
       {}
 
-      static constexpr eosio::identifier function_name = eosio::identifier(Func_Name);
+      static constexpr eosio::hash_id function_name = eosio::hash_id(Func_Name);
       eosio::name receiver {};
 
       using orig_ret_type = typename detail::function_traits<decltype(Func_Ref)>::return_type;

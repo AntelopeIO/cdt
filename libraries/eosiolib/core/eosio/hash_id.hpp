@@ -7,18 +7,18 @@
 #include <string_view>
 
 namespace eosio {
-   struct identifier {
+   struct hash_id {
    public:
       static constexpr uint32_t max_length = 128;
 
       enum class raw : uint64_t {};
 
-      constexpr explicit identifier( identifier::raw r )
+      constexpr explicit hash_id( hash_id::raw r )
       :id(static_cast<uint64_t>(r)) {}
 
-      constexpr identifier() : id(0) {}
+      constexpr hash_id() : id(0) {}
 
-      constexpr explicit identifier( std::string_view s )
+      constexpr explicit hash_id( std::string_view s )
       : id(djbh_hash(s))
       {
          validate(s);
@@ -26,16 +26,16 @@ namespace eosio {
 
       constexpr void validate(std::string_view str) {
          if (str.empty()) {
-            eosio::check(false, "string cannot be empty to be an identifier");
+            eosio::check(false, "string cannot be empty to be an hash_id");
          }
 
          if (str.length() > max_length) {
-            eosio::check(false, "string is too long be a valid identifier. must be less than or equal to " + std::to_string(max_length));
+            eosio::check(false, "string is too long be a valid hash_id. must be less than or equal to " + std::to_string(max_length));
          }
 
          // cannot use std::isalpha in constexpr function
          if (! ((str[0] >= 'A' && str[0] <= 'Z') || (str[0] >= 'a' && str[0] <= 'z') || str[0] == '_') ) {
-            eosio::check(false, "string must start with a letter or _ to be a valid identifier.");
+            eosio::check(false, "string must start with a letter or _ to be a valid hash_id.");
          }
 
          for (char c : str.substr(1)) {
@@ -44,10 +44,6 @@ namespace eosio {
                eosio::check(false, "string contains a character " + std::string{c} + " that is not a letter, number, or _");
             }
          }
-      }
-
-      static uint64_t to_id(std::string_view s) {
-         return djbh_hash(s);
       }
 
       static constexpr uint64_t djbh_hash(std::string_view s) {
@@ -63,15 +59,15 @@ namespace eosio {
       uint64_t id = 0;
 
       CDT_REFLECT(id);
-      EOSLIB_SERIALIZE( identifier, (id) )
-   }; /// namespace identifier
+      EOSLIB_SERIALIZE( hash_id, (id) )
+   }; /// namespace hash_id
 } /// namespace eosio
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wgnu-string-literal-operator-template"
 template <typename T, T... Str>
-inline constexpr eosio::identifier operator""_i() {
-   constexpr auto x = eosio::identifier{std::string_view{eosio::detail::to_const_char_arr<Str...>::value, sizeof...(Str)}};
+inline constexpr eosio::hash_id operator""_i() {
+   constexpr auto x = eosio::hash_id{std::string_view{eosio::detail::to_const_char_arr<Str...>::value, sizeof...(Str)}};
    return x;
 }
 #pragma clang diagnostic pop
