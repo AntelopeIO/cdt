@@ -369,10 +369,25 @@ namespace eosio { namespace cdt {
                   cg.notify_handlers.insert(full_notify_name); // insert the method action, so we don't create the dispatcher twice
                }
             } else if (decl->isEosioCall()) {
+               static std::unordered_map<uint64_t, std::string> _call_id_map;
+
                name = generation_utils::get_call_name(decl);
-               validate_name(name, [&](auto s) {
-                  CDT_ERROR("codegen_error", decl->getLocation(), std::string("call name (")+s+") is not a valid eosio name");
+               validate_hash_id(name, [&](auto s) {
+                  CDT_ERROR("codegen_error", decl->getLocation(), std::string("call name (")+s+") is not a valid C++ identifier");
                });
+
+               // Make sure there are no conflicts of IDs
+               auto id = to_hash_id(name);
+               auto it = _call_id_map.find(id);
+               if (it != _call_id_map.end()) {
+                  if (name != it->second) {
+                     CDT_ERROR("codegen_error",
+                               decl->getLocation(),
+                               std::string("call name (") + name + ")'s ID " + std::to_string(id) +  "  conflicts with a previous call name: " + it->second + ". Please choose another name");
+                  }
+               } else {
+                  _call_id_map.insert({id, name});
+               }
 
                // Genereate create_get_sync_call_data and create_get_sync_call_data_header only once
                if (_call_set.empty()) {

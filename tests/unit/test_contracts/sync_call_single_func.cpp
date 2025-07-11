@@ -7,7 +7,7 @@ public:
    using contract::contract;
 
    [[eosio::call]]
-   uint32_t getten() {
+   uint32_t return_ten() {
       return 10;
    }
 
