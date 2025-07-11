@@ -372,12 +372,12 @@ namespace eosio { namespace cdt {
                static std::unordered_map<uint64_t, std::string> _call_id_map;
 
                name = generation_utils::get_call_name(decl);
-               validate_identifier(name, [&](auto s) {
+               validate_hash_id(name, [&](auto s) {
                   CDT_ERROR("codegen_error", decl->getLocation(), std::string("call name (")+s+") is not a valid C++ identifier");
                });
 
                // Make sure there are no conflicts of IDs
-               auto id = identifier_to_id(name);
+               auto id = to_hash_id(name);
                auto it = _call_id_map.find(id);
                if (it != _call_id_map.end()) {
                   if (name != it->second) {

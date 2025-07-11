@@ -144,7 +144,7 @@ namespace eosio { namespace cdt {
             ret.name = call_name.str();
          }
          ret.type = decl->getName().str();
-         ret.id = identifier_to_id(ret.name);
+         ret.id = to_hash_id(ret.name);
          _abi.calls.insert(ret);
       }
 
@@ -154,15 +154,15 @@ namespace eosio { namespace cdt {
          auto call_name = decl->getEosioCallAttr()->getName();
 
          if (call_name.empty()) {
-            validate_identifier( decl->getNameAsString(), [&](auto s) { CDT_ERROR("abigen_error", decl->getLocation(), s); } );
+            validate_hash_id( decl->getNameAsString(), [&](auto s) { CDT_ERROR("abigen_error", decl->getLocation(), s); } );
             ret.name = decl->getNameAsString();
          }
          else {
-            validate_identifier( call_name.str(), [&](auto s) { CDT_ERROR("abigen_error", decl->getLocation(), s); } );
+            validate_hash_id( call_name.str(), [&](auto s) { CDT_ERROR("abigen_error", decl->getLocation(), s); } );
             ret.name = call_name.str();
          }
          ret.type = decl->getNameAsString();
-         ret.id = identifier_to_id(ret.name);
+         ret.id = to_hash_id(ret.name);
          _abi.calls.insert(ret);
          if (translate_type(decl->getReturnType()) != "void") {
             add_type(decl->getReturnType());
