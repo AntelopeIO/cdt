@@ -69,16 +69,39 @@ struct abi_action_result {
    bool operator<(const abi_action_result& ar) const { return name < ar.name; }
 };
 
+<<<<<<< HEAD
 // The version when sync call was first introduced.
 constexpr int abi_call_version_major = 1;
 constexpr int abi_call_version_minor = 3;
 constexpr int abi_call_version       = abi_call_version_major * 10 + abi_call_version_minor;
+=======
+struct version_t {
+   uint8_t major = 0;
+   uint8_t minor = 0;
+
+   version_t(uint8_t major, uint8_t minor)
+      : major(major)
+      , minor(minor) {}
+
+   friend bool operator<(const version_t& a, const version_t& b) {
+      return std::tie(a.major, a.minor) < std::tie(b.major, b.minor);
+   }
+   friend bool operator==(const version_t& a, const version_t& b) {
+      return std::tie(a.major, a.minor) == std::tie(b.major, b.minor);
+   }
+
+   void set_min(version_t o) {
+      if (*this < o)
+         *this = o;
+   }
+
+   std::string str() const { return std::to_string(major) + "." + std::to_string(minor); }
+};
+>>>>>>> origin/main
 
 /// From eosio libraries/chain/include/eosio/chain/abi_def.hpp
 struct abi {
-   int version_major = 1;
-   int version_minor = 1;
-   std::string version_string()const { return std::string("eosio::abi/")+std::to_string(version_major)+"."+std::to_string(version_minor); }
+   version_t                              version{1,2}; // base version is 1.2, add features (bitset, sync calls) push to 1.3
    std::set<abi_struct>                   structs;
    std::set<abi_typedef>                  typedefs;
    std::set<abi_action>                   actions;
@@ -88,6 +111,8 @@ struct abi {
    std::vector<abi_ricardian_clause_pair> ricardian_clauses;
    std::vector<abi_error_message>         error_messages;
    std::set<abi_action_result>            action_results;
+
+   std::string version_string() const { return std::string("eosio::abi/")+version.str(); }
 };
 
 inline void dump( const abi& abi ) {

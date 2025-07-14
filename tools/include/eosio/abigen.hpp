@@ -26,6 +26,7 @@
 #include <sstream>
 #include <memory>
 #include <set>
+#include <tuple>
 #include <map>
 #include <array>
 #include <jsoncons/json.hpp>
@@ -36,7 +37,11 @@ using namespace eosio::cdt;
 using jsoncons::json;
 using jsoncons::ojson;
 
-namespace eosio { namespace cdt {
+namespace eosio::cdt {
+
+   const version_t bitset_min_version{1,3};
+   const version_t sync_calls_min_version{1,3};
+
    class abigen : public generation_utils {
       std::set<std::string> checked_actions;
       public:
@@ -48,8 +53,7 @@ namespace eosio { namespace cdt {
       }
 
       void set_abi_version(int major, int minor) {
-         _abi.version_major = major;
-         _abi.version_minor = minor;
+         _abi.version = version_t{static_cast<uint8_t>(major), static_cast<uint8_t>(minor)};
       }
 
       void add_typedef( const clang::QualType& t ) {
@@ -191,7 +195,6 @@ namespace eosio { namespace cdt {
       void add_pair(const clang::QualType& type) {
          for (int i = 0; i < 2; ++i) {
             clang::QualType ftype = std::get<clang::QualType>(get_template_argument(type, i));
-            std::string ty = translate_type(ftype);
             add_type(ftype);
          }
          abi_struct pair;
@@ -521,7 +524,8 @@ namespace eosio { namespace cdt {
             add_explicit_nested_type(t.getNonReferenceType());
             return;
          }
-         if (!is_builtin_type(translate_type(type))) {
+         auto type_str = translate_type(type);
+         if (!is_builtin_type(type_str)) {
             if (is_aliasing(type)) {
                add_typedef(type);
             }
@@ -543,6 +547,13 @@ namespace eosio { namespace cdt {
             }
             else if (type.getTypePtr()->isRecordType())
                add_struct(type.getTypePtr()->getAsCXXRecordDecl());
+         } else {
+            static std::unordered_map<std::string, version_t> versioned_types {
+               { "bitset", bitset_min_version }
+            };
+
+            if (auto it = versioned_types.find(type_str); it != versioned_types.end())
+               _abi.version.set_min(it->second);
          }
       }
 
@@ -649,7 +660,9 @@ namespace eosio { namespace cdt {
       ojson to_json() {
          ojson o;
          o["____comment"] = generate_json_comment();
+
          o["version"]     = _abi.version_string();
+
          o["structs"]     = ojson::array();
          auto remove_suffix = [&]( std::string name ) {
             int i = name.length()-1;
@@ -791,16 +804,17 @@ namespace eosio { namespace cdt {
          for ( auto rc : _abi.ricardian_clauses ) {
             o["ricardian_clauses"].push_back(clause_to_json( rc ));
          }
+
          o["variants"]   = ojson::array();
          for ( auto v : _abi.variants ) {
             o["variants"].push_back(variant_to_json( v ));
          }
+
          o["abi_extensions"]     = ojson::array();
-         if (_abi.version_major == 1 && _abi.version_minor >= 2) {
-            o["action_results"]  = ojson::array();
-            for ( auto ar : _abi.action_results ) {
-               o["action_results"].push_back(action_result_to_json( ar ));
-            }
+
+         o["action_results"]  = ojson::array();
+         for ( auto ar : _abi.action_results ) {
+            o["action_results"].push_back(action_result_to_json( ar ));
          }
          return o;
       }
@@ -996,4 +1010,4 @@ namespace eosio { namespace cdt {
             return std::make_unique<eosio_abigen_consumer>(&CI, file);
          }
    };
-}} // ns eosio::cdt
+} // ns eosio::cdt
