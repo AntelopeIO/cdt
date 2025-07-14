@@ -16,7 +16,7 @@ void sync_call_callee::void_func() {
    eosio::print("I am a void function");
 }
 
-[[eosio::call]]
+[[eosio::action, eosio::call]]
 uint32_t sync_call_callee::sum(uint32_t a, uint32_t b, uint32_t c) {
    return a + b + c;
 }

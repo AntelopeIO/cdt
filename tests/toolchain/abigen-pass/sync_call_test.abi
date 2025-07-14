@@ -4,37 +4,14 @@
     "types": [],
     "structs": [
         {
-            "name": "call_data_header",
-            "base": "",
-            "fields": [
-                {
-                    "name": "version",
-                    "type": "uint32"
-                },
-                {
-                    "name": "func_name",
-                    "type": "uint64"
-                }
-            ]
-        },
-        {
             "name": "noparam",
             "base": "",
-            "fields": [
-                {
-                    "name": "header",
-                    "type": "call_data_header"
-                }
-            ]
+            "fields": []
         },
         {
             "name": "sum",
             "base": "",
             "fields": [
-                {
-                    "name": "header",
-                    "type": "call_data_header"
-                },
                 {
                     "name": "a",
                     "type": "uint32"
@@ -52,21 +29,12 @@
         {
             "name": "voidfunc",
             "base": "",
-            "fields": [
-                {
-                    "name": "header",
-                    "type": "call_data_header"
-                }
-            ]
+            "fields": []
         },
         {
             "name": "withparam",
             "base": "",
             "fields": [
-                {
-                    "name": "header",
-                    "type": "call_data_header"
-                },
                 {
                     "name": "in",
                     "type": "uint32"
@@ -83,35 +51,25 @@
         {
             "name": "noparam",
             "type": "noparam",
-            "id": 229476383600947
+            "id": 229476383600947,
+            "result_type": "uint32"
         },
         {
             "name": "sum",
             "type": "sum",
-            "id": 193506202
+            "id": 193506202,
+            "result_type": "uint32"
         },
         {
             "name": "voidfunc",
             "type": "voidfunc",
-            "id": 7573061335575747
+            "id": 7573061335575747,
+            "result_type": ""
         },
         {
             "name": "withparam",
             "type": "withparam",
-            "id": 249912189145794130
-        }
-    ],
-    "call_results": [
-        {
-            "name": "noparam",
-            "result_type": "uint32"
-        },
-        {
-            "name": "sum",
-            "result_type": "uint32"
-        },
-        {
-            "name": "withparam",
+            "id": 249912189145794130,
             "result_type": "uint32"
         }
     ]
