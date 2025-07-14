@@ -163,11 +163,12 @@ namespace eosio { namespace cdt {
          }
          ret.type = decl->getNameAsString();
          ret.id = to_hash_id(ret.name);
-         _abi.calls.insert(ret);
-         if (translate_type(decl->getReturnType()) != "void") {
+         auto result_type = translate_type(decl->getReturnType());
+         if (result_type != "void") {
             add_type(decl->getReturnType());
-            _abi.call_results.insert({get_call_name(decl), translate_type(decl->getReturnType())});
+            ret.result_type = result_type;
          }
+         _abi.calls.insert(ret);
       }
 
       void add_tuple(const clang::QualType& type) {
@@ -255,20 +256,6 @@ namespace eosio { namespace cdt {
       void add_struct( const clang::CXXMethodDecl* decl ) {
          abi_struct new_struct;
          new_struct.name = decl->getNameAsString();
-
-         if (decl->isEosioCall()) {
-            // Add call_data_header definition to structs set
-            abi_struct data_header;
-            data_header.name = "call_data_header";
-            if (_abi.structs.count(data_header) == 0) {
-               data_header.fields.push_back({"version", "uint32"});
-               data_header.fields.push_back({"func_name", "uint64"});
-               _abi.structs.insert(data_header);
-            }
-
-            // Add header field as the first field to the method struct
-            new_struct.fields.push_back({"header", "call_data_header"});
-         }
 
          for (auto param : decl->parameters() ) {
             auto param_type = param->getType().getNonReferenceType().getUnqualifiedType();
@@ -610,6 +597,7 @@ namespace eosio { namespace cdt {
          o["name"] = c.name;
          o["type"] = c.type;
          o["id"]   = c.id;
+         o["result_type"]   = c.result_type;
          return o;
       }
 
@@ -631,13 +619,6 @@ namespace eosio { namespace cdt {
       }
 
       ojson action_result_to_json( const abi_action_result& result ) {
-         ojson o;
-         o["name"] = result.name;
-         o["result_type"] = result.type;
-         return o;
-      }
-
-      ojson call_result_to_json( const abi_call_result& result ) {
          ojson o;
          o["name"] = result.name;
          o["result_type"] = result.type;
@@ -743,10 +724,6 @@ namespace eosio { namespace cdt {
                if (as.name == _translate_type(ar.type))
                   return true;
             }
-            for( auto ar : _abi.call_results ) {
-               if (as.name == _translate_type(ar.type))
-                  return true;
-            }
             return false;
          };
 
@@ -782,9 +759,6 @@ namespace eosio { namespace cdt {
                if ( ar.type == td.new_type_name )
                   return true;
             }
-            for ( auto ar : _abi.call_results )
-               if ( ar.type == td.new_type_name )
-                  return true;
             return false;
          };
 
@@ -807,11 +781,6 @@ namespace eosio { namespace cdt {
             o["calls"] = ojson::array();
             for ( auto a : _abi.calls ) {
                o["calls"].push_back(call_to_json( a ));
-            }
-
-            o["call_results"] = ojson::array();
-            for ( auto ar : _abi.call_results ) {
-               o["call_results"].push_back(call_result_to_json( ar ));
             }
          }
          o["tables"]     = ojson::array();

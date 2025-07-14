@@ -34,6 +34,7 @@ struct abi_call {
    std::string name;
    std::string type;
    uint64_t    id = 0;  // internal short ID of `name`
+   std::string result_type;
    bool operator<(const abi_call& s) const { return name < s.name; }
 };
 
@@ -68,12 +69,6 @@ struct abi_action_result {
    bool operator<(const abi_action_result& ar) const { return name < ar.name; }
 };
 
-struct abi_call_result {
-   std::string name;
-   std::string type;
-   bool operator<(const abi_call_result& ar) const { return name < ar.name; }
-};
-
 // The version when sync call was first introduced.
 constexpr int abi_call_version_major = 1;
 constexpr int abi_call_version_minor = 3;
@@ -93,7 +88,6 @@ struct abi {
    std::vector<abi_ricardian_clause_pair> ricardian_clauses;
    std::vector<abi_error_message>         error_messages;
    std::set<abi_action_result>            action_results;
-   std::set<abi_call_result>              call_results;
 };
 
 inline void dump( const abi& abi ) {
