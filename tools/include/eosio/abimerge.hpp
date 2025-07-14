@@ -39,7 +39,6 @@ class ABIMerger {
          }
          if (std::stod(vers.substr(vers.size()-3))*10 >= abi_call_version) {
             ret["calls"]        = merge_calls(other);
-            ret["call_results"] = merge_call_results(other);
          }
          return ret;
       }
@@ -118,11 +117,6 @@ class ABIMerger {
       }
 
       static bool action_result_is_same(ojson a, ojson b) {
-         return a["name"] == b["name"] &&
-                a["result_type"] == b["result_type"];
-      }
-
-      static bool call_result_is_same(ojson a, ojson b) {
          return a["name"] == b["name"] &&
                 a["result_type"] == b["result_type"];
       }
@@ -215,12 +209,6 @@ class ABIMerger {
       ojson merge_action_results(ojson b) {
          ojson res = ojson::array();
          add_object_to_array(res, abi, b, "action_results", "name", action_result_is_same);
-         return res;
-      }
-
-      ojson merge_call_results(ojson b) {
-         ojson res = ojson::array();
-         add_object_to_array(res, abi, b, "call_results", "name", call_result_is_same);
          return res;
       }
 
