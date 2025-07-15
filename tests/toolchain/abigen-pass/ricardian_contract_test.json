@@ -1,7 +1,7 @@
 {
    "tests" : [
       {
-         "compile_flags" : ["--abi-version=1.2", "-R={cwd}"],
+         "compile_flags" : ["-R={cwd}"],
          "expected" : {
             "abi-file" : "ricardian_contract_test.abi"
          }

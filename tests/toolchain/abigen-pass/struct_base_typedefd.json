@@ -1,7 +1,7 @@
 {
     "tests": [
         {
-            "compile_flags": ["--abi-version=1.2"],
+            "compile_flags": [],
             "expected": {
                 "abi-file": "struct_base_typedefd.abi"
             }
