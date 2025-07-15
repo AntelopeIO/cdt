@@ -37,8 +37,9 @@ class ABIMerger {
          if (std::stod(vers.substr(vers.size()-3))*10 >= 12) {
             ret["action_results"] = merge_action_results(other);
          }
-         if (std::stod(vers.substr(vers.size()-3))*10 >= 13) {
-            ret["calls"]        = merge_calls(other);
+         auto it = abi.find("calls");
+         if (it != abi.object_range().end()) { // merge `calls` section only when it exists
+            ret["calls"] = merge_calls(other);
          }
          return ret;
       }
