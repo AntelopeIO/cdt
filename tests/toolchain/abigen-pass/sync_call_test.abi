@@ -1,0 +1,76 @@
+{
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
+    "version": "eosio::abi/1.3",
+    "types": [],
+    "structs": [
+        {
+            "name": "noparam",
+            "base": "",
+            "fields": []
+        },
+        {
+            "name": "sum",
+            "base": "",
+            "fields": [
+                {
+                    "name": "a",
+                    "type": "uint32"
+                },
+                {
+                    "name": "b",
+                    "type": "uint32"
+                },
+                {
+                    "name": "c",
+                    "type": "uint32"
+                }
+            ]
+        },
+        {
+            "name": "voidfunc",
+            "base": "",
+            "fields": []
+        },
+        {
+            "name": "withparam",
+            "base": "",
+            "fields": [
+                {
+                    "name": "in",
+                    "type": "uint32"
+                }
+            ]
+        }
+    ],
+    "actions": [],
+    "tables": [],
+    "ricardian_clauses": [],
+    "variants": [],
+    "action_results": [],
+    "calls": [
+        {
+            "name": "noparam",
+            "type": "noparam",
+            "id": 229476383600947,
+            "result_type": "uint32"
+        },
+        {
+            "name": "sum",
+            "type": "sum",
+            "id": 193506202,
+            "result_type": "uint32"
+        },
+        {
+            "name": "voidfunc",
+            "type": "voidfunc",
+            "id": 7573061335575747,
+            "result_type": ""
+        },
+        {
+            "name": "withparam",
+            "type": "withparam",
+            "id": 249912189145794130,
+            "result_type": "uint32"
+        }
+    ]
+}

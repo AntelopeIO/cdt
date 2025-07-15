@@ -1,6 +1,7 @@
 {
     "tests" : [
        {
+          "compile_flags": [],
           "expected" : {
              "abi-file" : "nested_container.abi"
           }

@@ -37,6 +37,10 @@ class ABIMerger {
          if (std::stod(vers.substr(vers.size()-3))*10 >= 12) {
             ret["action_results"] = merge_action_results(other);
          }
+         auto it = abi.find("calls");
+         if (it != abi.object_range().end()) { // merge `calls` section only when it exists
+            ret["calls"] = merge_calls(other);
+         }
          return ret;
       }
    private:
@@ -82,6 +86,10 @@ class ABIMerger {
                 a["type"] == b["type"];
       }
 
+      static bool call_is_same(ojson a, ojson b) {
+         return a["name"] == b["name"] &&
+                a["type"] == b["type"];
+      }
 
       static bool variant_is_same(ojson a, ojson b) {
          for (auto tya : a["types"].array_range()) {
@@ -179,6 +187,12 @@ class ABIMerger {
          ojson acts = ojson::array();
          add_object_to_array(acts, abi, b, "actions", "name", action_is_same);
          return acts;
+      }
+
+      ojson merge_calls(ojson b) {
+         ojson calls = ojson::array();
+         add_object_to_array(calls, abi, b, "calls", "name", call_is_same);
+         return calls;
       }
 
       ojson merge_tables(ojson b) {

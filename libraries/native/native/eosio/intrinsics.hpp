@@ -24,7 +24,7 @@ namespace eosio { namespace native {
          };
 
          template <intrinsic_name IN, typename... Args>
-         auto call(Args... args) -> decltype(std::get<IN>(intrinsics::get().funcs)(args...)) {
+         auto exec(Args... args) -> decltype(std::get<IN>(intrinsics::get().funcs)(args...)) {
             return std::get<IN>(intrinsics::get().funcs)(args...); 
          }
 

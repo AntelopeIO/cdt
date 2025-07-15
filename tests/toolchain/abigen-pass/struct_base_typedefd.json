@@ -1,6 +1,7 @@
 {
     "tests": [
         {
+            "compile_flags": [],
             "expected": {
                 "abi-file": "struct_base_typedefd.abi"
             }

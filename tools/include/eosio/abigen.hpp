@@ -135,6 +135,50 @@ namespace eosio::cdt {
          }
       }
 
+      void add_call( const clang::CXXRecordDecl* decl ) {
+         abi_call ret;
+         auto call_name = decl->getEosioCallAttr()->getName();
+
+         if (call_name.empty()) {
+            validate_name(decl->getName().str(), [&](auto s) { CDT_ERROR("abigen_error", decl->getLocation(), s); });
+            ret.name = decl->getName().str();
+         }
+         else {
+            validate_name( call_name.str(), [&](auto s) { CDT_ERROR("abigen_error", decl->getLocation(), s); });
+            ret.name = call_name.str();
+         }
+         ret.type = decl->getName().str();
+         ret.id = to_hash_id(ret.name);
+         _abi.calls.insert(ret);
+
+         _abi.version.set_min(sync_calls_min_version);
+      }
+
+      void add_call( const clang::CXXMethodDecl* decl ) {
+         abi_call ret;
+
+         auto call_name = decl->getEosioCallAttr()->getName();
+
+         if (call_name.empty()) {
+            validate_hash_id( decl->getNameAsString(), [&](auto s) { CDT_ERROR("abigen_error", decl->getLocation(), s); } );
+            ret.name = decl->getNameAsString();
+         }
+         else {
+            validate_hash_id( call_name.str(), [&](auto s) { CDT_ERROR("abigen_error", decl->getLocation(), s); } );
+            ret.name = call_name.str();
+         }
+         ret.type = decl->getNameAsString();
+         ret.id = to_hash_id(ret.name);
+         auto result_type = translate_type(decl->getReturnType());
+         if (result_type != "void") {
+            add_type(decl->getReturnType());
+            ret.result_type = result_type;
+         }
+         _abi.calls.insert(ret);
+
+         _abi.version.set_min(sync_calls_min_version);
+      }
+
       void add_tuple(const clang::QualType& type) {
          auto pt = llvm::dyn_cast<clang::ElaboratedType>(type.getTypePtr());
          auto tst = llvm::dyn_cast<clang::TemplateSpecializationType>((pt) ? pt->desugar().getTypePtr() : type.getTypePtr());
@@ -219,6 +263,7 @@ namespace eosio::cdt {
       void add_struct( const clang::CXXMethodDecl* decl ) {
          abi_struct new_struct;
          new_struct.name = decl->getNameAsString();
+
          for (auto param : decl->parameters() ) {
             auto param_type = param->getType().getNonReferenceType().getUnqualifiedType();
             new_struct.fields.push_back({param->getNameAsString(), get_type(param_type)});
@@ -562,6 +607,15 @@ namespace eosio::cdt {
          return o;
       }
 
+      ojson call_to_json( const abi_call& c ) {
+         ojson o;
+         o["name"] = c.name;
+         o["type"] = c.type;
+         o["id"]   = c.id;
+         o["result_type"]   = c.result_type;
+         return o;
+      }
+
       ojson clause_to_json( const abi_ricardian_clause_pair& clause ) {
          ojson o;
          o["id"] = clause.id;
@@ -604,7 +658,7 @@ namespace eosio::cdt {
             set_of_tables.insert(t);
          }
 
-         return _abi.structs.empty() && _abi.typedefs.empty() && _abi.actions.empty() && set_of_tables.empty() && _abi.ricardian_clauses.empty() && _abi.variants.empty();
+         return _abi.structs.empty() && _abi.typedefs.empty() && _abi.actions.empty() && _abi.calls.empty()  && set_of_tables.empty() && _abi.ricardian_clauses.empty() && _abi.variants.empty();
       }
 
       ojson to_json() {
@@ -671,6 +725,10 @@ namespace eosio::cdt {
                if (as.name == _translate_type(a.type))
                   return true;
             }
+            for ( auto a : _abi.calls ) {
+               if (as.name == _translate_type(a.type))
+                  return true;
+            }
             for( auto t : set_of_tables ) {
                if (as.name == _translate_type(t.type))
                   return true;
@@ -708,6 +766,9 @@ namespace eosio::cdt {
             for ( auto a : _abi.actions )
                if ( a.type == td.new_type_name )
                   return true;
+            for ( auto a : _abi.calls )
+               if ( a.type == td.new_type_name )
+                  return true;
             for ( auto _td : _abi.typedefs )
                if ( remove_suffix(_td.type) == td.new_type_name )
                   return true;
@@ -731,6 +792,12 @@ namespace eosio::cdt {
          o["actions"]     = ojson::array();
          for ( auto a : _abi.actions ) {
             o["actions"].push_back(action_to_json( a ));
+         }
+         if (!_abi.calls.empty()) {  // add calls section only when sync calls are used
+            o["calls"] = ojson::array();
+            for ( auto a : _abi.calls ) {
+               o["calls"].push_back(call_to_json( a ));
+            }
          }
          o["tables"]     = ojson::array();
          for ( auto t : set_of_tables ) {
@@ -792,6 +859,14 @@ namespace eosio::cdt {
                   ag.add_type( param->getType() );
                }
             }
+
+            if (decl->isEosioCall() && ag.is_eosio_contract(decl, ag.get_contract_name())) {
+               ag.add_struct(decl);
+               ag.add_call(decl);
+               for (auto param : decl->parameters()) {
+                  ag.add_type( param->getType() );
+               }
+            }
             return true;
          }
          virtual bool VisitCXXRecordDecl(clang::CXXRecordDecl* decl) {
@@ -800,10 +875,12 @@ namespace eosio::cdt {
                ag.add_contracts(ag.parse_contracts());
                has_added_clauses = true;
             }
-            if ((decl->isEosioAction() || decl->isEosioTable()) && ag.is_eosio_contract(decl, ag.get_contract_name())) {
+            if ((decl->isEosioAction() || decl->isEosioCall() || decl->isEosioTable()) && ag.is_eosio_contract(decl, ag.get_contract_name())) {
                ag.add_struct(decl);
                if (decl->isEosioAction())
                   ag.add_action(decl);
+               if (decl->isEosioCall())
+                  ag.add_call(decl);
                if (decl->isEosioTable())
                   ag.add_table(decl);
                for (auto field : decl->fields()) {
