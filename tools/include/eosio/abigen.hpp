@@ -150,6 +150,8 @@ namespace eosio::cdt {
          ret.type = decl->getName().str();
          ret.id = to_hash_id(ret.name);
          _abi.calls.insert(ret);
+
+         _abi.version.set_min(sync_calls_min_version);
       }
 
       void add_call( const clang::CXXMethodDecl* decl ) {
@@ -173,6 +175,8 @@ namespace eosio::cdt {
             ret.result_type = result_type;
          }
          _abi.calls.insert(ret);
+
+         _abi.version.set_min(sync_calls_min_version);
       }
 
       void add_tuple(const clang::QualType& type) {
@@ -789,8 +793,7 @@ namespace eosio::cdt {
          for ( auto a : _abi.actions ) {
             o["actions"].push_back(action_to_json( a ));
          }
-         if (_abi.version_major > abi_call_version_major ||
-             _abi.version_major == abi_call_version_major && _abi.version_minor >= abi_call_version_minor) { // sync call
+         if (!_abi.calls.empty()) {  // add calls section only when sync calls are used
             o["calls"] = ojson::array();
             for ( auto a : _abi.calls ) {
                o["calls"].push_back(call_to_json( a ));

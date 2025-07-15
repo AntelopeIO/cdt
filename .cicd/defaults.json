@@ -1,10 +1,6 @@
 {
     "antelope-spring-dev":{
-<<<<<<< HEAD
        "target":"sync_call",
-=======
-       "target":"release/2.0",
->>>>>>> origin/main
        "prerelease":false
     }
  }

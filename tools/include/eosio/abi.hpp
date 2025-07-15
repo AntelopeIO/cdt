@@ -69,12 +69,6 @@ struct abi_action_result {
    bool operator<(const abi_action_result& ar) const { return name < ar.name; }
 };
 
-<<<<<<< HEAD
-// The version when sync call was first introduced.
-constexpr int abi_call_version_major = 1;
-constexpr int abi_call_version_minor = 3;
-constexpr int abi_call_version       = abi_call_version_major * 10 + abi_call_version_minor;
-=======
 struct version_t {
    uint8_t major = 0;
    uint8_t minor = 0;
@@ -97,7 +91,6 @@ struct version_t {
 
    std::string str() const { return std::to_string(major) + "." + std::to_string(minor); }
 };
->>>>>>> origin/main
 
 /// From eosio libraries/chain/include/eosio/chain/abi_def.hpp
 struct abi {
