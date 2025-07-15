@@ -37,7 +37,7 @@ class ABIMerger {
          if (std::stod(vers.substr(vers.size()-3))*10 >= 12) {
             ret["action_results"] = merge_action_results(other);
          }
-         if (std::stod(vers.substr(vers.size()-3))*10 >= abi_call_version) {
+         if (std::stod(vers.substr(vers.size()-3))*10 >= 13) {
             ret["calls"]        = merge_calls(other);
          }
          return ret;
