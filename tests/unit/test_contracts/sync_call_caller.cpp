@@ -172,4 +172,11 @@ public:
       status = eosio::call("callee"_n, 0, bad_version_data.data(), bad_version_data.size());
       eosio::check(status == -10000, "call did not return -10000 for invalid version");
    }
+
+   // Call issynccall as a sync call and return its return value
+   [[eosio::action]]
+   bool makesynccall() {
+      sync_call_callee::issynccall_func is_sync_call_func{ "callee"_n };
+      return is_sync_call_func();
+   }
 };

@@ -140,12 +140,11 @@ BOOST_AUTO_TEST_CASE(mixed_action_call_tags_test) { try {
    BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "hstmulprmtst"_n, "caller"_n, {}));
 
    // Make sure we can push an action using `sum`.
-   //BOOST_REQUIRE_NO_THROW(t.push_action("callee"_n, "sum"_n, "callee"_n,
-   t.push_action("callee"_n, "sum"_n, "callee"_n,
+   BOOST_REQUIRE_NO_THROW(t.push_action("callee"_n, "sum"_n, "callee"_n,
                                         mvo()
                                              ("a", 1)
                                              ("b", 2)
-                                             ("c", 3)); //);
+                                             ("c", 3)));
 } FC_LOG_AND_RETHROW() }
 
 // Verify the receiver contract with only one sync call function works
@@ -232,6 +231,31 @@ BOOST_AUTO_TEST_CASE(addr_book_tests) { try {
 
    // Read the inserted entry. "get"_n action will check the return value from the sync call
    BOOST_REQUIRE_NO_THROW(t.push_action("caller"_n, "get"_n, "caller"_n, mvo() ("user", "alice")));
+} FC_LOG_AND_RETHROW() }
+
+// For a function tagged as both `action` and `call`, verify is_sync_call()
+// returns true if tagged as `call` and false if tagged as `action`.
+BOOST_AUTO_TEST_CASE(is_sync_call_test) { try {
+   call_tester t({
+      {"caller"_n, contracts::caller_wasm(), contracts::caller_abi().data()},
+      {"callee"_n, contracts::callee_wasm(), contracts::callee_abi().data()}
+   });
+
+   // issynccall() is tagged as both `action` and `call`, and returns
+   // is_sync_call(). makesynccall() calls issynccall() as a sync call
+   // and returns its result. So the current action return value must be
+   // true.
+   auto  trx_trace    = t.push_action("caller"_n, "makesynccall"_n, "caller"_n, {});
+   auto& action_trace = trx_trace->action_traces[0];
+   bool return_value = fc::raw::unpack<bool>(action_trace.return_value);
+   BOOST_REQUIRE(return_value == true);
+
+   // Call issynccall() directly as an action. Since issynccall()
+   // returns is_sync_call(), the current action return value must be false.
+   trx_trace           = t.push_action("callee"_n, "issynccall"_n, "callee"_n, {});
+   auto& action_trace1 = trx_trace->action_traces[0];
+   return_value = fc::raw::unpack<bool>(action_trace1.return_value);
+   BOOST_REQUIRE(return_value == false);
 } FC_LOG_AND_RETHROW() }
 
 BOOST_AUTO_TEST_SUITE_END()
