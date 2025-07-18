@@ -35,8 +35,9 @@ class contract {
        * @param self - The name of the account this contract is deployed on
        * @param first_receiver - The account the incoming action was first received at.
        * @param ds - The datastream used
+       * @param is_call - This contract is created for a sync call
        */
-      contract( name self, name first_receiver, datastream<const char*> ds ):_self(self),_first_receiver(first_receiver),_ds(ds) {}
+      contract( name self, name first_receiver, datastream<const char*> ds, bool is_call = false ):_self(self),_first_receiver(first_receiver),_ds(ds),_is_call(is_call) {}
 
       /**
        *
@@ -75,6 +76,13 @@ class contract {
        */
       inline const datastream<const char*>& get_datastream()const { return _ds; }
 
+      /**
+       * Whether this contract is created for a sync call
+       *
+       * @return bool - Whether this contract is created for a sync call
+       */
+      inline bool is_sync_call()const { return _is_call; }
+
    protected:
       /**
        * The name of the account this contract is deployed on.
@@ -90,5 +98,10 @@ class contract {
        * The datastream for this contract
        */
       datastream<const char*> _ds = datastream<const char*>(nullptr, 0);
+
+      /**
+       * The indication whether the contract is created for sync call or not
+       */
+      bool _is_call = false;
 };
 }

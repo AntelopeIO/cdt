@@ -8,7 +8,7 @@ struct person_info {
 
 class [[eosio::contract]] sync_call_addr_book_callee : public eosio::contract {
 public:
-   sync_call_addr_book_callee(eosio::name receiver, eosio::name code, eosio::datastream<const char*> ds): contract(receiver, code, ds) {}
+   sync_call_addr_book_callee(eosio::name receiver, eosio::name code, eosio::datastream<const char*> ds, bool is_call = false): contract(receiver, code, ds, is_call) {}
 
    [[eosio::call]]
    void upsert(eosio::name user, std::string first_name, std::string street);

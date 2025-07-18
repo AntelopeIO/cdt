@@ -261,7 +261,8 @@ namespace eosio { namespace cdt {
                   i++;
                }
                const auto& call_function = [&]() {
-                  ss << decl->getParent()->getQualifiedNameAsString() << "{eosio::name{receiver},eosio::name{receiver},ds}." << decl->getNameAsString() << "(";
+                  // `true` indicates a sync call
+                  ss << decl->getParent()->getQualifiedNameAsString() << "{eosio::name{receiver},eosio::name{receiver},ds,true}." << decl->getNameAsString() << "(";
                   for (int i=0; i < decl->parameters().size(); i++) {
                      ss << "arg" << i;
                      if (i < decl->parameters().size()-1)
