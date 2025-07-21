@@ -31,7 +31,8 @@ class contract {
    public:
       enum class exec_type_t : uint8_t {
          action,
-         call
+         call,
+         unknown
       };
 
       /**
@@ -86,8 +87,8 @@ class contract {
        * @return bool - Whether this contract is for a sync call
        */
       inline bool is_sync_call()const {
-         check(_exec_type.has_value(), "too early to call is_sync_call(). _exec_type has not been set yet");
-         return (*_exec_type == exec_type_t::call);
+         check(_exec_type != exec_type_t::unknown, "too early to call is_sync_call(). _exec_type has not been set yet");
+         return (_exec_type == exec_type_t::call);
       }
 
       /**
@@ -119,6 +120,6 @@ class contract {
       /**
        * The execution type: action or sync call
        */
-      std::optional<exec_type_t> _exec_type = std::nullopt; // use std::optional to prevent from being used before having value like in constructors
+      exec_type_t _exec_type = exec_type_t::unknown;
 };
 }
