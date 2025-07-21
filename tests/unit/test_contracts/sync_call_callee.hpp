@@ -38,6 +38,27 @@ public:
    [[eosio::call]]
    struct1_t pass_multi_structs(struct1_t s1, int32_t m, struct2_t s2);
 
+   // The following are used to test arguments checks involving bool type.
+   [[eosio::call]]
+   bool bool_ret_no_arg() { return true; };
+   using bool_ret_no_arg_func = eosio::call_wrapper<"bool_ret_no_arg"_i, &sync_call_callee::bool_ret_no_arg>;
+
+   [[eosio::call]]
+   bool bool_ret_bool_arg(bool b) { return b; };
+   using bool_ret_bool_arg_func = eosio::call_wrapper<"bool_ret_bool_arg"_i, &sync_call_callee::bool_ret_bool_arg>;
+
+   [[eosio::call]]
+   void void_ret_bool_arg(bool b) { };
+   using void_ret_bool_arg_func = eosio::call_wrapper<"void_ret_bool_arg"_i, &sync_call_callee::void_ret_bool_arg>;
+
+   [[eosio::call]]
+   void void_ret_boolint_args(bool b, int i) { };
+   using void_ret_boolint_args_func = eosio::call_wrapper<"void_ret_boolint_args"_i, &sync_call_callee::void_ret_boolint_args>;
+
+   [[eosio::call]]
+   void void_ret_intbool_args(int i, bool b) { };
+   using void_ret_intbool_args_func = eosio::call_wrapper<"void_ret_intbool_args"_i, &sync_call_callee::void_ret_intbool_args>;
+
    using return_ten_func = eosio::call_wrapper<"return_ten"_i, &sync_call_callee::return_ten>;
    using echo_input_func = eosio::call_wrapper<"echo_input"_i, &sync_call_callee::echo_input>;
    using void_func_func = eosio::call_wrapper<"void_func"_i, &sync_call_callee::void_func>;

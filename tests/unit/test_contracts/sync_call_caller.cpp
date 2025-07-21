@@ -172,4 +172,36 @@ public:
       status = eosio::call("callee"_n, 0, bad_version_data.data(), bad_version_data.size());
       eosio::check(status == -10000, "call did not return -10000 for invalid version");
    }
+
+   // The following tests verify type_check for arguments involving bool type.
+   // If cdt-cpp can compile the action, it indicates type_check works.
+   [[eosio::action]]
+   void boolargtest() {
+      sync_call_callee::bool_ret_no_arg_func{ "callee"_n }();
+   }
+
+   [[eosio::action]]
+   void boolargtest1() {
+      sync_call_callee::bool_ret_bool_arg_func{ "callee"_n }(true);
+   }
+
+   [[eosio::action]]
+   void boolargtest2() {
+      sync_call_callee::bool_ret_bool_arg_func{ "callee"_n }(1); // allow an integer to be passed
+   }
+
+   [[eosio::action]]
+   void boolargtest3() {
+      sync_call_callee::void_ret_bool_arg_func{ "callee"_n }(true);
+   }
+
+   [[eosio::action]]
+   void boolargtest4() {
+      sync_call_callee::void_ret_boolint_args_func{ "callee"_n }(true, 1);
+   }
+
+   [[eosio::action]]
+   void boolargtest5() {
+      sync_call_callee::void_ret_intbool_args_func{ "callee"_n }(1, true);
+   }
 };
