@@ -455,6 +455,11 @@ namespace eosio {
       template <typename T>
       struct is_same<T,bool> { static constexpr bool value = std::is_integral<T>::value; };
 
+      // Full specialization to resolve ambiguity introduced by partial specializations
+      // of is_same<bool,U> and is_same<T,bool>
+      template <>
+      struct is_same<bool, bool> { static constexpr bool value = true; };
+
       template <size_t N, size_t I, auto Arg, auto... Args>
       struct get_nth_impl { static constexpr auto value  = get_nth_impl<N,I+1,Args...>::value; };
 
