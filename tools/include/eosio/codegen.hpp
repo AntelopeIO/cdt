@@ -218,7 +218,8 @@ namespace eosio { namespace cdt {
                // it may not have `set_exec_type()`. We need to make sure the class derives
                // from `eosio::contract` before calling set_exec_type().
                if (base_is_eosio_contract_class(decl)) {
-                  ss << "obj.set_exec_type(eosio::contract::exec_type_t::action);\n";
+                  // static_cast is for cases when a contract derives from `eosio::contract` privately
+                  ss << "static_cast<eosio::contract&>obj.set_exec_type(eosio::contract::exec_type_t::action);\n";
                }
 
                const auto& call_action = [&]() {
@@ -302,7 +303,8 @@ namespace eosio { namespace cdt {
                // it may not have `set_exec_type()`. We need to make sure the class derives
                // from `eosio::contract` before calling set_exec_type().
                if (base_is_eosio_contract_class(decl)) {
-                  ss << "obj.set_exec_type(eosio::contract::exec_type_t::call);\n";
+                  // static_cast is for cases when a contract derives from `eosio::contract` privately
+                  ss << "static_cast<eosio::contract&>obj.set_exec_type(eosio::contract::exec_type_t::call);\n";
                }
 
                const auto& call_function = [&]() {
