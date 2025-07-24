@@ -146,11 +146,28 @@ namespace eosio { namespace cdt {
             return "";
          }
 
+         // Return `true` if the method `decl`'s base class if `eosio::contract`
+         bool base_is_eosio_contract_class(const clang::CXXMethodDecl* decl) {
+            auto cxx_decl = decl->getParent();
+            // on this point it could be just an attribute so let's check base classes
+            for (const auto& base : cxx_decl->bases()) {
+               if (const clang::Type *base_type = base.getType().getTypePtrOrNull()) {
+                  if (const auto* cur_cxx_decl = base_type->getAsCXXRecordDecl()) {
+                     if (cur_cxx_decl->getQualifiedNameAsString() == "eosio::contract") {
+                        return true;;
+                     }
+                  }
+               }
+            }
+            return false;
+         }
+
          template <typename F>
          void create_dispatch(const std::string& attr, const std::string& func_name, F&& get_str, CXXMethodDecl* decl) {
             constexpr static uint32_t max_stack_size = 512;
             codegen& cg = codegen::get();
             std::string nm = decl->getNameAsString()+"_"+decl->getParent()->getNameAsString();
+
             if (cg.is_eosio_contract(decl, cg.contract_name)) {
                ss << "\n\n#include <eosio/datastream.hpp>\n";
                ss << "#include <eosio/name.hpp>\n";
@@ -190,8 +207,22 @@ namespace eosio { namespace cdt {
                   ss << tn << " arg" << i << "; ds >> arg" << i << ";\n";
                   i++;
                }
+
+               // Create contract object
+               ss << decl->getParent()->getQualifiedNameAsString()
+                  << " obj {eosio::name{r},eosio::name{c},ds};\n";
+
+               // Call `set_exec_type()` only for contracts dervied from `eosio::contract`.
+               // A contract class can have only `eosio::contract` attribute
+               // but does not inherit from the `eosio::contract` class;
+               // it may not have `set_exec_type()`. We need to make sure the class derives
+               // from `eosio::contract` before calling set_exec_type().
+               if (base_is_eosio_contract_class(decl)) {
+                  ss << "obj.set_exec_type(eosio::contract::exec_type_t::action);\n";
+               }
+
                const auto& call_action = [&]() {
-                  ss << decl->getParent()->getQualifiedNameAsString() << "{eosio::name{r},eosio::name{c},ds}." << decl->getNameAsString() << "(";
+                  ss << "obj." << decl->getNameAsString() << "(";
                   for (int i=0; i < decl->parameters().size(); i++) {
                      ss << "arg" << i;
                      if (i < decl->parameters().size()-1)
@@ -260,8 +291,22 @@ namespace eosio { namespace cdt {
                   ss << tn << " arg" << i << "; ds >> arg" << i << ";\n";
                   i++;
                }
+
+               // Create contract object
+               ss << decl->getParent()->getQualifiedNameAsString()
+                  << " obj {eosio::name{receiver},eosio::name{receiver},ds};\n";
+
+               // Call `set_exec_type()` only for contracts dervied from `eosio::contract`.
+               // A contract class can have only `eosio::contract` attribute
+               // but does not inherit from the `eosio::contract` class;
+               // it may not have `set_exec_type()`. We need to make sure the class derives
+               // from `eosio::contract` before calling set_exec_type().
+               if (base_is_eosio_contract_class(decl)) {
+                  ss << "obj.set_exec_type(eosio::contract::exec_type_t::call);\n";
+               }
+
                const auto& call_function = [&]() {
-                  ss << decl->getParent()->getQualifiedNameAsString() << "{eosio::name{receiver},eosio::name{receiver},ds}." << decl->getNameAsString() << "(";
+                  ss << "obj." << decl->getNameAsString() << "(";
                   for (int i=0; i < decl->parameters().size(); i++) {
                      ss << "arg" << i;
                      if (i < decl->parameters().size()-1)

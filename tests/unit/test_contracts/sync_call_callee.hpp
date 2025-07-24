@@ -38,6 +38,11 @@ public:
    [[eosio::call]]
    struct1_t pass_multi_structs(struct1_t s1, int32_t m, struct2_t s2);
 
+   // return is_sync_call()
+   [[eosio::action, eosio::call]]
+   bool issynccall();
+   using issynccall_func = eosio::call_wrapper<"issynccall"_i, &sync_call_callee::issynccall>;
+
    using return_ten_func = eosio::call_wrapper<"return_ten"_i, &sync_call_callee::return_ten>;
    using echo_input_func = eosio::call_wrapper<"echo_input"_i, &sync_call_callee::echo_input>;
    using void_func_func = eosio::call_wrapper<"void_func"_i, &sync_call_callee::void_func>;
