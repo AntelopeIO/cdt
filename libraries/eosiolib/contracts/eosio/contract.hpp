@@ -29,6 +29,12 @@ namespace eosio {
  */
 class contract {
    public:
+      enum class exec_type_t : uint8_t {
+         action,
+         call,
+         unknown
+      };
+
       /**
        * Construct a new contract given the contract name
        *
@@ -75,7 +81,27 @@ class contract {
        */
       inline const datastream<const char*>& get_datastream()const { return _ds; }
 
+      /**
+       * Whether this contract is for a sync call
+       *
+       * @return bool - Whether this contract is for a sync call
+       */
+      inline bool is_sync_call()const {
+         check(_exec_type != exec_type_t::unknown, "too early to call is_sync_call(). _exec_type has not been set yet");
+         return (_exec_type == exec_type_t::call);
+      }
+
+      /**
+       * Set the exectution type.
+       *
+       * @param type - The exectution type to be set.
+       */
+      inline void set_exec_type(exec_type_t type) {
+         _exec_type = type;
+      }
+
    protected:
+
       /**
        * The name of the account this contract is deployed on.
        */
@@ -90,5 +116,10 @@ class contract {
        * The datastream for this contract
        */
       datastream<const char*> _ds = datastream<const char*>(nullptr, 0);
+
+      /**
+       * The execution type: action or sync call
+       */
+      exec_type_t _exec_type = exec_type_t::unknown;
 };
 }

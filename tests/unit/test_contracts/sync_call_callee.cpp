@@ -31,3 +31,6 @@ struct1_t sync_call_callee::pass_multi_structs(struct1_t s1, int32_t m, struct2_
    return { .a = s1.a * m + s2.c, .b = s1.b * m + s2.d };
 }
 
+bool sync_call_callee::issynccall() {
+   return is_sync_call();
+}

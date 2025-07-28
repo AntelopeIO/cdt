@@ -54,5 +54,7 @@ namespace eosio::testing {
       static std::vector<char>    addr_book_callee_abi() { return read_abi("${CMAKE_BINARY_DIR}/../unit/test_contracts/sync_call_addr_book_callee.abi"); }
       static std::vector<uint8_t> addr_book_caller_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../unit/test_contracts/sync_call_addr_book_caller.wasm"); }
       static std::vector<char>    addr_book_caller_abi() { return read_abi("${CMAKE_BINARY_DIR}/../unit/test_contracts/sync_call_addr_book_caller.abi"); }
+      static std::vector<uint8_t> cust_entry_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../unit/test_contracts/sync_call_cust_entry.wasm"); }
+      static std::vector<char>    cust_entry_abi() { return read_abi("${CMAKE_BINARY_DIR}/../unit/test_contracts/sync_call_cust_entry.abi"); }
    };
 } //ns eosio::testing
