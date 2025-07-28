@@ -258,4 +258,18 @@ BOOST_AUTO_TEST_CASE(is_sync_call_test) { try {
    BOOST_REQUIRE(return_value == false);
 } FC_LOG_AND_RETHROW() }
 
+// Verify customized sync call entry function, without sync call tag
+BOOST_AUTO_TEST_CASE(customized_call_entry_func_test1) { try {
+   call_tester t({{"receiver"_n, contracts::cust_entry_wasm(), contracts::cust_entry_abi().data()}});
+
+   BOOST_REQUIRE_NO_THROW(t.push_action("receiver"_n, "cusentrytst1"_n, "receiver"_n, {}));
+} FC_LOG_AND_RETHROW() }
+
+// Verify customized sync call entry function, with sync call tag
+BOOST_AUTO_TEST_CASE(customized_call_entry_func_test2) { try {
+   call_tester t({{"receiver"_n, contracts::cust_entry_wasm(), contracts::cust_entry_abi().data()}});
+
+   BOOST_REQUIRE_NO_THROW(t.push_action("receiver"_n, "cusentrytst2"_n, "receiver"_n, {}));
+} FC_LOG_AND_RETHROW() }
+
 BOOST_AUTO_TEST_SUITE_END()
