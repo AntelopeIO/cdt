@@ -34,6 +34,13 @@ struct event_header {
 };
 
 #if 1
+// --------------------------------------------------------------------------
+// Specializations for these template functions (for each event defined)
+// should be defined in the temporary file created in `codegen.hpp` during
+// the contract compilation.
+// `get_canonical_string()` should return a constant string generated at
+// compile time.
+// --------------------------------------------------------------------------
 template <class Event, std::enable_if_t<std::is_class_v<Event>, bool> = true>
 std::vector<uint64_t> get_event_tags(const Event& ev, void* checksum);
 
@@ -43,57 +50,14 @@ constexpr std::string get_canonical_string(const Event& ev);
 template <class Event, std::enable_if_t<std::is_class_v<Event>, bool> = true>
 checksum256 get_event_checksum(const Event& ev);
 
-#elif 0
-
-template <class Event, std::enable_if_t<std::is_class_v<Event>, bool> = true>
-std::vector<uint64_t> get_event_tags(const Event& ev, void* checksum) {
-   std::vector<uint64_t> tags;
-   tags.reserve(8);
-   tags.push_back(*static_cast<uint64_t*>(checksum));
-#if 0
-   bluegrass::meta::for_each_field(ev, [&](const auto& field, auto i) {
-      constexpr auto idx = decltype(i)::value;
-      constexpr bool indexed = Event::indexed[idx];
-      if constexpr (indexed) {
-
-      }
-   });
-#endif
-
-   return tags;
-}
-
-template <class Event, std::enable_if_t<std::is_class_v<Event>, bool> = true>
-std::string get_canonical_string(const Event& ev) {
-   std::string s;
-   s.reserve(256);
-#if 0
-   bluegrass::meta::for_each_field(ev, [&](const auto& field, auto i) {
-      constexpr auto idx = decltype(i)::value;
-      constexpr bool indexed = Event::indexed[idx];
-      constexpr bool notify  = Event::notify[idx];
-      if constexpr (indexed) {
-         if constexpr (notify)
-            s += "[[eosio::indexed, eosio::notify]]";
-         else
-            s += "[[eosio::indexed]]";
-      } else if constexpr (notify)
-         s += "[[eosio::notify]]";
-      s += bluegrass::meta::type_name<std::decay_t<decltype(field)>>();
-      s += " ";
-      s += Event::names[idx];
-      s += ";";
-   });
-#endif
-   return s;
-}
-
-template <class Event, std::enable_if_t<std::is_class_v<Event>, bool> = true>
-checksum256 get_event_checksum(const Event& ev) {
-   auto s = get_canonical_string(ev);
-   return sha256(s.data(), static_cast<uint32_t>(s.size()));
-}
 #else
+// -----------------------------------------------------------------------------
+// Another way of doing the above, assuming that traits for the attributes and
+// member names are generated during the contract compilation in  `codegen.hpp`.
+// However this would not allow the `canonical_string` to be known at
+// compile time, so we micht as well do the above.
+// -----------------------------------------------------------------------------
+
 // ----------------------------------- test ----------------------------------------------------------
 // llvm/clang inserts
 template <class T> struct eosio_traits {};
@@ -172,28 +136,3 @@ void emit_event(Event&& event) {
 }
 
 } // namespace eosio
-
-#if 0
-// ----------------------------------- test ----------------------------------------------------------
-using namespace eosio;
-
-struct [[eosio::event("transfer")]] transfer_event {
-   [[eosio::indexed, eosio::notify]] name        from;
-   [[eosio::indexed, eosio::notify]] name        to;
-                                     asset       quantity;
-   [[eosio::indexed]]                std::string memo;
-};
-
-// llvm/clang inserts
-template <class T> struct eosio_traits {};
-
-template <> struct eosio_traits<transfer_event> {
-   static constexpr std::array<bool, 4> indexed{true, true, false, true};
-   static constexpr std::array<bool, 4> notify{true, true, false, false};
-};
-
-void test() {
-   transfer_event ev{name("myfrom"), name("myto"), asset(1, symbol("sys", 6)), ""};
-   emit_event(ev);
-}
-#endif
