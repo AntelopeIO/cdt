@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <cstdint>
 #include <unordered_set>
 
 struct abi_typedef {
@@ -12,8 +13,10 @@ struct abi_typedef {
 };
 
 struct abi_field {
+   enum class attribute_t : uint8_t { indexed };
    std::string name;
    std::string type;
+   std::vector<attribute_t> attributes;
 };
 
 struct abi_struct {
@@ -28,6 +31,12 @@ struct abi_action {
    std::string type;
    std::string ricardian_contract;
    bool operator<(const abi_action& s) const { return name < s.name; }
+};
+
+struct abi_event {
+   std::string name;
+   std::string type;
+   bool operator<(const abi_event& s) const { return name < s.name; }
 };
 
 struct abi_call {

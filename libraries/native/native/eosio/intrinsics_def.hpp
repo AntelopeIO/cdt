@@ -6,6 +6,7 @@
 #include <eosio/crypto_ext.h>
 #include <eosio/crypto_bls_ext.h>
 #include <eosio/db.h>
+#include <eosio/event.h>
 #include <eosio/instant_finality.h>
 #include <eosio/call.h>
 #include <eosio/permission.h>
@@ -18,7 +19,7 @@
 #include <type_traits>
 #include <functional>
 
-namespace eosio { namespace native {
+namespace eosio::native {
    template <typename... Args, size_t... Is>
    auto get_args_full(std::index_sequence<Is...>) {
        std::tuple<std::decay_t<Args>...> tup;
@@ -185,7 +186,8 @@ intrinsic_macro(set_finalizers) \
 intrinsic_macro(call) \
 intrinsic_macro(get_call_return_value) \
 intrinsic_macro(get_call_data) \
-intrinsic_macro(set_call_return_value)
+intrinsic_macro(set_call_return_value) \
+intrinsic_macro(emit_event)
 
 #define CREATE_ENUM(name) \
    name,
@@ -206,4 +208,4 @@ intrinsic_macro(set_call_return_value)
    create_function<eosio::native::intrinsics::__ ## name ## _types::res_t, \
          eosio::native::intrinsics::__ ## name ## _types::deduced_full_ts>(eosio::native::intrinsics::__ ## name ## _types::is),
 
-}} //ns eosio::native
+} //ns eosio::native

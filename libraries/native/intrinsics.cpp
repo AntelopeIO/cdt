@@ -986,3 +986,8 @@ int32_t bls_fp_exp(const char* base, uint32_t base_len, const char* exp, uint32_
 {
     return  intrinsics::get().exec<intrinsics::bls_fp_exp>(base, base_len, exp, exp_len, res, res_len);
 }
+
+void emit_event(void* tags, uint32_t tags_num_bytes, void* data, uint32_t data_num_bytes)
+{
+   intrinsics::get().exec<intrinsics::emit_event>(tags, tags_num_bytes, data, data_num_bytes);
+}

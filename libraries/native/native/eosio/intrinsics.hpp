@@ -3,7 +3,7 @@
 
 #pragma once
 
-namespace eosio { namespace native {
+namespace eosio::native {
    
    class intrinsics {
       public:
@@ -41,4 +41,4 @@ namespace eosio { namespace native {
          }
    };
 
-}} //ns eosio::native
+} //ns eosio::native
