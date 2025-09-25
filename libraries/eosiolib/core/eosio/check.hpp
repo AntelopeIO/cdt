@@ -54,6 +54,36 @@ namespace eosio {
    }
 
    /**
+    *  Assert if the predicate fails and use callable to generate assertion message.
+    *
+    *  Allows for "lazily" generating an expensive message only when the predicate fails.
+    *
+    *  @ingroup system
+    *
+    *  Example:
+    *  @code
+    *  eosio::check(eosio::current_time_point() >= time, [&] {
+    *     std::string err_msg = "Upgrade failed: Account '";
+    *     err_msg += account.to_string();
+    *     err_msg += "' disabled until ";
+    *     err_msg += time.to_string();
+    *     return err_msg;
+    *  });
+    *  @endcode
+    */
+   template<
+      typename F,
+      typename = std::enable_if_t<
+         std::is_invocable_v<F> &&
+         std::is_convertible_v<std::invoke_result_t<F>, std::string_view>
+      >
+   >
+   inline void check(bool pred, F&& msg_generator) {
+      if (!pred)
+         check(pred, std::string_view(msg_generator()));
+   }
+
+   /**
     *  Assert if the predicate fails and use the supplied message.
     *
     *  @ingroup system
