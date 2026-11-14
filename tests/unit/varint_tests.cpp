@@ -3,7 +3,9 @@
  *  @copyright defined in eosio.cdt/LICENSE.txt
  */
 
+#include <initializer_list>
 #include <limits>
+#include <vector>
 
 #include <eosio/tester.hpp>
 #include <eosio/datastream.hpp>
@@ -121,6 +123,97 @@ EOSIO_TEST_BEGIN(unsigned_int_type_test)
    ds.seekp(0);
    ds >> ui;
    CHECK_EQUAL( cui, ui)
+EOSIO_TEST_END
+
+/// One `unsigned_int` decoded from the front of a byte string: its value and how many bytes it used.
+struct decoded_unsigned_int {
+   uint32_t value;
+   size_t   bytes_read;
+};
+
+/// Decodes one `unsigned_int` from the front of `bytes`.
+static decoded_unsigned_int decode_unsigned_int( std::initializer_list<uint8_t> bytes ) {
+   const std::vector<char> buffer( bytes.begin(), bytes.end() );
+   datastream<const char*> ds{ buffer.data(), buffer.size() };
+   unsigned_int ui{};
+   ds >> ui;
+   return { ui.value, ds.tellp() };
+}
+
+// Defined in `eosio.cdt/libraries/eosio/varint.hpp`: decoding reads every byte string the way the node does
+EOSIO_TEST_BEGIN(unsigned_int_decode_test)
+   static constexpr size_t max_encoded_size = 5;
+
+   // The shortest encoding at each width decodes to its value and is read to its end.
+   struct width_case {
+      uint32_t value;
+      size_t   bytes;
+   };
+   for( const width_case& c : { width_case{ 0, 1 }, width_case{ 0x7f, 1 }, width_case{ 0x80, 2 },
+                                width_case{ 0x3fff, 2 }, width_case{ 0x4000, 3 }, width_case{ 0x1fffff, 3 },
+                                width_case{ 0x200000, 4 }, width_case{ 0xfffffff, 4 }, width_case{ 0x10000000, 5 },
+                                width_case{ u32max, 5 } } ) {
+      char buffer[max_encoded_size] = {};
+      datastream<char*> out{ buffer, max_encoded_size };
+      out << unsigned_int{ c.value };
+      CHECK_EQUAL( out.tellp(), c.bytes )
+
+      datastream<const char*> in{ buffer, c.bytes };
+      unsigned_int ui{};
+      in >> ui;
+      CHECK_EQUAL( ui.value, c.value )
+      CHECK_EQUAL( in.remaining(), size_t{ 0 } )
+   }
+
+   // A longer encoding of the same value, up to five bytes, decodes to that value and is read to its end.
+   {
+      const auto d = decode_unsigned_int( { 0x80, 0x00 } );
+      CHECK_EQUAL( d.value, uint32_t{ 0 } )
+      CHECK_EQUAL( d.bytes_read, size_t{ 2 } )
+   }
+   {
+      const auto d = decode_unsigned_int( { 0xff, 0x80, 0x00 } );
+      CHECK_EQUAL( d.value, uint32_t{ 0x7f } )
+      CHECK_EQUAL( d.bytes_read, size_t{ 3 } )
+   }
+   {
+      const auto d = decode_unsigned_int( { 0x80, 0x80, 0x80, 0x80, 0x00 } );
+      CHECK_EQUAL( d.value, uint32_t{ 0 } )
+      CHECK_EQUAL( d.bytes_read, size_t{ 5 } )
+   }
+
+   // A value ends after its fifth byte whatever that byte's continuation bit says; the next byte is not part of it.
+   {
+      const auto d = decode_unsigned_int( { 0x80, 0x80, 0x80, 0x80, 0x80, 0x05 } );
+      CHECK_EQUAL( d.value, uint32_t{ 0 } )
+      CHECK_EQUAL( d.bytes_read, size_t{ 5 } )
+   }
+   {
+      const std::vector<char> buffer{ char( 0x81 ), char( 0x80 ), char( 0x80 ), char( 0x80 ), char( 0x81 ), 0x05 };
+      datastream<const char*> ds{ buffer.data(), buffer.size() };
+      unsigned_int first{}, second{};
+      ds >> first >> second;
+      CHECK_EQUAL( first.value, uint32_t{ 0x10000001 } )
+      CHECK_EQUAL( second.value, uint32_t{ 5 } )
+      CHECK_EQUAL( ds.remaining(), size_t{ 0 } )
+   }
+
+   // Bits of the fifth byte beyond the 32nd value bit are discarded.
+   {
+      const auto d = decode_unsigned_int( { 0xff, 0xff, 0xff, 0xff, 0x7f } );
+      CHECK_EQUAL( d.value, u32max )
+      CHECK_EQUAL( d.bytes_read, size_t{ 5 } )
+   }
+   {
+      const auto d = decode_unsigned_int( { 0x80, 0x80, 0x80, 0x80, 0x70 } );
+      CHECK_EQUAL( d.value, uint32_t{ 0 } )
+      CHECK_EQUAL( d.bytes_read, size_t{ 5 } )
+   }
+
+   // An encoding cut short fails the stream's bounds check.
+   CHECK_ASSERT( "get", ([]() { decode_unsigned_int( {} ); }) )
+   CHECK_ASSERT( "get", ([]() { decode_unsigned_int( { 0x80 } ); }) )
+   CHECK_ASSERT( "get", ([]() { decode_unsigned_int( { 0xff, 0xff, 0xff, 0xff } ); }) )
 EOSIO_TEST_END
 
 // Defined in `eosio.cdt/libraries/eosio/varint.hpp`
@@ -468,6 +561,7 @@ int main(int argc, char* argv[]) {
    silence_output(!verbose);
 
    EOSIO_TEST(unsigned_int_type_test)
+   EOSIO_TEST(unsigned_int_decode_test)
    EOSIO_TEST(signed_int_type_test);
    EOSIO_TEST(unsigned_int_constexpr_test);
    EOSIO_TEST(signed_int_constexpr_test);

@@ -216,6 +216,10 @@ namespace eosio {
        /**
         *  Deserialize an unsigned_int object
         *
+        *  Reads at most five bytes and keeps the low 32 bits, the same as `fc::raw::unpack` in the node. A
+        *  contract and the node therefore decode any byte string to the same value and consume the same number
+        *  of bytes.
+        *
         *  @param ds - The stream to read
         *  @param vi - The destination for deserialized value
         *  @tparam DataStream - Type of datastream
@@ -228,7 +232,7 @@ namespace eosio {
             ds.get(b);
             v |= uint32_t(uint8_t(b) & 0x7f) << by;
             by += 7;
-         } while( uint8_t(b) & 0x80 );
+         } while( uint8_t(b) & 0x80 && by < 32 );
          vi.value = static_cast<uint32_t>(v);
          return ds;
        }
