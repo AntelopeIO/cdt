@@ -5,6 +5,9 @@
 
 #include <eosio/tester.hpp>
 #include <eosio/crypto_ext.hpp>
+#include <eosio/crypto_bls_ext.hpp>
+
+#include <cstring>
 
 using namespace eosio::native;
 
@@ -82,6 +85,79 @@ EOSIO_TEST_BEGIN(bigint_test)
    CHECK_EQUAL( (eosio::bigint{chars_256}.size()), 256 );
 EOSIO_TEST_END
 
+// Runs bls_pop_verify and bls_signature_verify against stub host intrinsics and pins two things:
+// the native trampoline forwards 2 G1 points and 2 G2 points to bls_pairing, and a failed
+// pairing makes both helpers return false whatever the result buffer holds.
+EOSIO_TEST_BEGIN(bls_verify_pairing_contract_test)
+   // g2_fromMessage reaches these before the pairing; their output does not matter here.
+   intrinsics::set_intrinsic<intrinsics::bls_fp_mod>(
+      []( const char*, uint32_t, char*, uint32_t ) -> int32_t { return 0; } );
+   intrinsics::set_intrinsic<intrinsics::bls_g2_map>(
+      []( const char*, uint32_t, char*, uint32_t ) -> int32_t { return 0; } );
+   intrinsics::set_intrinsic<intrinsics::bls_g2_add>(
+      []( const char*, uint32_t, const char*, uint32_t, char*, uint32_t ) -> int32_t { return 0; } );
+
+   // Distinct fills so the stub can tell the operands apart by content, not only by length.
+   eosio::bls_g1 pubkey{};
+   eosio::bls_g2 proof{};
+   pubkey.fill( '\xa5' );
+   proof.fill( '\x5c' );
+
+   constexpr uint32_t g1_size = static_cast<uint32_t>( std::tuple_size<eosio::bls_g1>::value );
+   constexpr uint32_t g2_size = static_cast<uint32_t>( std::tuple_size<eosio::bls_g2>::value );
+   constexpr uint32_t expected_g1_len = 2 * g1_size;
+   constexpr uint32_t expected_g2_len = 2 * g2_size;
+
+   uint32_t g1_len = 0;
+   uint32_t g2_len = 0;
+   uint32_t pairs  = 0;
+   bool     g1_carries_pubkey = false;   // second G1 point is the public key
+   bool     g2_carries_proof  = false;   // first G2 point is the signature proof
+
+   // Success: the host writes GT_ONE and returns 0, so both helpers verify.
+   intrinsics::set_intrinsic<intrinsics::bls_pairing>(
+      [&]( const char* g1, uint32_t g1l, const char* g2, uint32_t g2l, uint32_t n, char* res, uint32_t res_len ) -> int32_t {
+         g1_len = g1l;
+         g2_len = g2l;
+         pairs  = n;
+         g1_carries_pubkey = g1 != nullptr && g1l == expected_g1_len
+                             && std::memcmp( g1 + g1_size, pubkey.data(), g1_size ) == 0;
+         g2_carries_proof  = g2 != nullptr && g2l == expected_g2_len
+                             && std::memcmp( g2, proof.data(), g2_size ) == 0;
+         if ( res != nullptr && res_len >= eosio::detail::GT_ONE.size() )
+            std::memcpy( res, eosio::detail::GT_ONE.data(), eosio::detail::GT_ONE.size() );
+         return 0;
+      } );
+
+   CHECK_EQUAL( eosio::bls_pop_verify( pubkey, proof ), true )
+   CHECK_EQUAL( pairs, 2u )
+   CHECK_EQUAL( g1_len, expected_g1_len )
+   CHECK_EQUAL( g2_len, expected_g2_len )
+   CHECK_EQUAL( g1_carries_pubkey, true )
+   CHECK_EQUAL( g2_carries_proof, true )
+
+   g1_len = g2_len = pairs = 0;
+   g1_carries_pubkey = g2_carries_proof = false;
+   CHECK_EQUAL( eosio::bls_signature_verify( pubkey, proof, "message" ), true )
+   CHECK_EQUAL( pairs, 2u )
+   CHECK_EQUAL( g1_len, expected_g1_len )
+   CHECK_EQUAL( g2_len, expected_g2_len )
+   CHECK_EQUAL( g1_carries_pubkey, true )
+   CHECK_EQUAL( g2_carries_proof, true )
+
+   // Failure: the host rejects an operand but still writes a result that would compare equal,
+   // so these pass only if the return code is read.
+   intrinsics::set_intrinsic<intrinsics::bls_pairing>(
+      []( const char*, uint32_t, const char*, uint32_t, uint32_t, char* res, uint32_t res_len ) -> int32_t {
+         if ( res != nullptr && res_len >= eosio::detail::GT_ONE.size() )
+            std::memcpy( res, eosio::detail::GT_ONE.data(), eosio::detail::GT_ONE.size() );
+         return -1;
+      } );
+
+   CHECK_EQUAL( eosio::bls_pop_verify( pubkey, proof ), false )
+   CHECK_EQUAL( eosio::bls_signature_verify( pubkey, proof, "message" ), false )
+EOSIO_TEST_END
+
 int main(int argc, char* argv[]) {
    bool verbose = false;
    if( argc >= 2 && std::strcmp( argv[1], "-v" ) == 0 ) {
@@ -93,6 +169,7 @@ int main(int argc, char* argv[]) {
    EOSIO_TEST(g1_point_test)
    EOSIO_TEST(g2_point_test)
    EOSIO_TEST(bigint_test)
+   EOSIO_TEST(bls_verify_pairing_contract_test)
 
    return has_failed();
 }

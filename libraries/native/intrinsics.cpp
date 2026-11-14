@@ -959,7 +959,7 @@ int32_t bls_g2_weighted_sum(const char* points, uint32_t points_len, const char*
 
 int32_t bls_pairing(const char* g1_points, uint32_t g1_points_len, const char* g2_points, uint32_t g2_points_len, uint32_t n, char* res, uint32_t res_len)
 {
-    return intrinsics::get().exec<intrinsics::bls_pairing>(g1_points, g1_points_len, g1_points, g1_points_len, n, res, res_len);
+    return intrinsics::get().exec<intrinsics::bls_pairing>(g1_points, g1_points_len, g2_points, g2_points_len, n, res, res_len);
 }
 
 int32_t bls_g1_map(const char* e, uint32_t e_len, char* res, uint32_t res_len)

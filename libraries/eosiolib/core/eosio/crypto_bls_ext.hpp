@@ -476,16 +476,19 @@ namespace detail {
         std::memcpy(g1_points[1].data(), pubkey.data(), pubkey.size());
         g2_fromMessage(pubkey, POP_CIPHERSUITE_ID, g2_points[1]);
 
-        bls_gt r;
-        bls_pairing(g1_points, g2_points, 2, r);
+        // bls_pairing returns without writing r when it rejects an operand.
+        bls_gt r{};
+        if (bls_pairing(g1_points, g2_points, 2, r) != 0) {
+            return false;
+        }
 
         return 0 == std::memcmp(r.data(), GT_ONE.data(), GT_ONE.size());
     }
 
     // pubkey and signature are assumed to be in RAW affine little-endian bytes
     inline bool bls_signature_verify(const bls_g1& pubkey, const bls_g2& signature_proof, const std::string& msg) {
-        bls_g1 g1_points[2];
-        bls_g2 g2_points[2];
+        bls_g1 g1_points[2] = {0};
+        bls_g2 g2_points[2] = {0};
 
         std::memcpy(g1_points[0].data(), detail::G1_ONE_NEG.data(), detail::G1_ONE_NEG.size());
         std::memcpy(g2_points[0].data(), signature_proof.data(), signature_proof.size());
@@ -493,8 +496,11 @@ namespace detail {
         std::memcpy(g1_points[1].data(), pubkey.data(), pubkey.size());
         detail::g2_fromMessage(msg, detail::CIPHERSUITE_ID, g2_points[1]);
 
-        bls_gt r;
-        bls_pairing(g1_points, g2_points, 2, r);
+        // bls_pairing returns without writing r when it rejects an operand.
+        bls_gt r{};
+        if (bls_pairing(g1_points, g2_points, 2, r) != 0) {
+            return false;
+        }
 
         return  0 == std::memcmp(r.data(), detail::GT_ONE.data(), detail::GT_ONE.size());
     }
